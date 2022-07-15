@@ -46,6 +46,8 @@
 
   #ARM architectural settings, fixed at build time
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x800000000
-  gArmTokenSpaceGuid.PcdSystemMemorySize|0x200000000 #8GB RAM space
+
+[PcdsDynamicDefault.common]
+  gArmTokenSpaceGuid.PcdSystemMemorySize|0x200000000 #8GB RAM space by default, will get overriden by FDT later
   
 !include M1Pkg/M1Pkg.dsc.inc

@@ -34,6 +34,9 @@
 [PcdsFixedAtBuild.common]
   #ARM architectural fixed build-time settings
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x800000000
+  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
+  #commented out for now since timer interrupts are FIQs (don't have an FIQ handler atm for UEFI)
+  #gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|17
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #gArmTokenSpaceGuid.PcdGicDistributorBase|
@@ -61,7 +64,276 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesCode|150
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesCode|1000
 !endif
+  #PCIe settings
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAriSupport|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMrIovSupport|FALSE
 
+  #OEM Sample FrontPage
+  gEfiMdeModulePkgTokenSpaceGuid.PcdBootManagerMenuFile|{ 0x8A, 0x70, 0x42, 0x40, 0x2D, 0x0F, 0x23, 0x48, 0xAC, 0x60, 0x0D, 0x77, 0xB3, 0x11, 0x18, 0x89 }
 
+  #EFI debug settings
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x800fee0f
+
+  #variable size
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x2000
+
+  gEfiMdePkgTokenSpaceGuid.PcdPlatformBootTimeOut|4
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMaxAuthVariableSize|0x2800
+  gEfiSecurityPkgTokenSpaceGuid.PcdUserPhysicalPresence|TRUE
+!endif
 
   
+[PcdsDynamicDefault.common]
+  #screen resolution settings
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|2560
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1600
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|2560
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1600
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|150
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|150
+
+
+## Libraries that will be linked into the project
+## Most of these are intrinsic to Mu, platform specific things will be noted
+## SurfaceDuoPkg/OnePlus6TPkg used as basis for included libraries
+
+[LibraryClasses.common]
+
+  #basic UEFI services
+  ArmLib    |ArmPkg/Library/ArmLib/ArmBaseLib.inf
+  ArmMmuLib |ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
+  ArmGenericTimerCounterLib  |ArmPkg/Library/ArmGenericTimerPhyCounterLib/ArmGenericTimerPhyCounterLib.inf
+  ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
+  ArmHvcLib  |ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
+  AppleArmGxfHvcLib  |M1Pkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
+  ArmGicArchLib  |ArmPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
+  TimerLib  |ArmPkg/Library/ArmArchTimerLib/ArmArchTimerLib.inf
+  BaseLib  |MdePkg/Library/BaseLib/BaseLib.inf
+  BaseMemoryLib  |MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+  BaseSynchronizationLib  |MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf
+  BootLogoLib  |MdeModulePkg/Library/BootLogoLib/BootLogoLib.inf
+  BmpSupportLib  |MdeModulePkg/Library/BaseBmpSupportLib/BaseBmpSupportLib.inf
+  CapsuleLib  |MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
+  CacheMaintenanceLib  |ArmPkg/Library/ArmCacheMaintenanceLib/ArmCacheMaintenanceLib.inf
+  CompilerIntrinsicsLib  |MdePkg/Library/CompilerIntrinsicsLib/ArmCompilerIntrinsicsLib.inf
+  CpuExceptionHandlerLib  |ArmPkg/Library/ArmExceptionLib/ArmExceptionLib.inf
+  CpuLib  |MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
+  DefaultExceptionHandlerLib|ArmPkg/Library/DefaultExceptionHandlerLib/DefaultExceptionHandlerLib.inf
+  DebugAgentLib  |MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
+  DevicePathLib  |MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
+  DebugLib  |MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
+  DebugPrintErrorLevelLib  |MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
+  DxeServicesLib  |MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
+  DxeServicesTableLib  |MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
+  FileExplorerLib  |MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
+  FdtLib  |EmbeddedPkg/Library/FdtLib/FdtLib.inf
+  FrameBufferBltLib  |MdeModulePkg/Library/FrameBufferBltLib/FrameBufferBltLib.inf
+  HobLib  |MdePkg/Library/DxeHobLib/DxeHobLib.inf
+  HiiLib  |MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
+  IoLib  |MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  LzmaDecompressLib  |MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
+  NetLib  |NetworkPkg/Library/DxeNetLib/DxeNetLib.inf
+  DpcLib  |NetworkPkg/Library/DxeDpcLib/DxeDpcLib.inf
+  UdpIoLib  |NetworkPkg/Library/DxeUdpIoLib/DxeUdpIoLib.inf
+  IpIoLib  |NetworkPkg/Library/DxeIpIoLib/DxeIpIoLib.inf
+  PcdLib  |MdePkg/Library/DxePcdLib/DxePcdLib.inf
+  PeCoffExtraActionLib  |MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
+  PeCoffLib  |MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
+  PeCoffGetEntryPointLib  |MdePkg/Library/BasePeCoffGetEntryPointLib/BasePeCoffGetEntryPointLib.inf
+  PerformanceLib  |MdePkg/Library/BasePerformanceLibNull/BasePerformanceLibNull.inf
+  PrePiLib  |EmbeddedPkg/Library/PrePiLib/PrePiLib.inf
+  PrePiHobListPointerLib  |ArmPlatformPkg/Library/PrePiHobListPointerLib/PrePiHobListPointerLib.inf
+  PrePiMemoryAllocationLib  |EmbeddedPkg/Library/PrePiMemoryAllocationLib/PrePiMemoryAllocationLib.inf
+  PrintLib  |MdePkg/Library/BasePrintLib/BasePrintLib.inf
+  ReportStatusCodeLib  |MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  OrderedCollectionLib  |MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
+  SafeIntLib  |MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
+  SortLib  |MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf
+  SynchronizationLib  |MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf
+  UefiLib  |MdePkg/Library/UefiLib/UefiLib.inf
+  UefiDecompressLib  |MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
+  UefiBootServicesTableLib  |MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
+  UefiRuntimeLib  |MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
+  UefiRuntimeServicesTableLib  |MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
+  UefiUsbLib  |MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
+  UefiDriverEntryPoint  |MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
+  UefiApplicationEntryPoint  |MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
+  UefiUsbLib  |MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
+  UefiBootManagerLib  |MdeModulePkg/Library/UefiBootManagerLib/UefiBootManagerLib.inf
+  UefiHiiServicesLib  |MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
+  TpmMeasurementLib  |MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
+  VarCheckLib  |MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf
+  VariablePolicyLib  |MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
+  VariablePolicyHelperLib  |MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
+  TimeBaseLib  |EmbeddedPkg/Library/TimeBaseLib/TimeBaseLib.inf
+
+
+#services required for UEFI secure boot
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  RngLib  |MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  IntrinsicLib  |CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+  OpensslLib  |CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
+  PlatformSecureLib  |SecurityPkg/Library/PlatformSecureLibNull/PlatformSecureLibNull.inf
+  AuthVariableLib  |SecurityPkg/Library/AuthVariableLib/AuthVariableLib.inf
+  SecureBootVariableLib  |SecurityPkg/Library/SecureBootVariableLib/SecureBootVariableLib.inf
+  SecureBootVariableProvisionLib  |SecurityPkg/Library/SecureBootVariableProvisionLib/SecureBootVariableProvisionLib.inf
+!else
+  AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
+!endif
+
+
+  BaseBinSecurityLib  |MdePkg/Library/BaseBinSecurityLibNull/BaseBinSecurityLibNull.inf
+  DxeMemoryProtectionHobLib  |MdeModulePkg/Library/MemoryProtectionHobLibNull/DxeMemoryProtectionHobLibNull.inf
+  PcdDatabaseLoaderLib  |MdeModulePkg/Library/PcdDatabaseLoaderLib/Dxe/PcdDatabaseLoaderLibDxe.inf
+  RealTimeClockLib  |EmbeddedPkg/Library/VirtualRealTimeClockLib/VirtualRealTimeClockLib.inf
+  ResetUtilityLib  |MdeModulePkg/Library/ResetUtilityLib/ResetUtilityLib.inf
+  SecurityLockAuditLib  |MdeModulePkg/Library/SecurityLockAuditLibNull/SecurityLockAuditLibNull.inf
+  #ResetSystemLib  |M1Pkg/Library/AppleArmPsciResetSystemLib/AppleArmPsciResetSystemLib.inf
+
+
+  #Platform specific drivers
+  #HwResetSystemLib|M1Pkg/Library/AppleArmPsciResetSystemLib/AppleArmPsciResetSystemLib.inf
+
+
+  MemoryTypeInfoSecVarCheckLib|MdeModulePkg/Library/MemoryTypeInfoSecVarCheckLib/MemoryTypeInfoSecVarCheckLib.inf
+  FltUsedLib|MdePkg/Library/FltUsedLib/FltUsedLib.inf
+  MemoryTypeInformationChangeLib|MdeModulePkg/Library/MemoryTypeInformationChangeLibNull/MemoryTypeInformationChangeLibNull.inf
+  DtPlatformDtbLoaderLib|EmbeddedPkg/Library/DxeDtPlatformDtbLoaderLibDefault/DxeDtPlatformDtbLoaderLibDefault.inf
+  VariableFlashInfoLib|MdeModulePkg/Library/BaseVariableFlashInfoLib/BaseVariableFlashInfoLib.inf
+  PlatformPKProtectionLib|SecurityPkg/Library/PlatformPKProtectionLibVarPolicy/PlatformPKProtectionLibVarPolicy.inf
+
+  BaseCryptLib  |CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+  CapsulePersistLib  |MdeModulePkg/Library/CapsulePersistLibNull/CapsulePersistLibNull.inf
+  DebugAgentTimerLib  |EmbeddedPkg/Library/DebugAgentTimerLibNull/DebugAgentTimerLibNull.inf
+
+  #DFCI libs
+  DfciDeviceIdSupportLib  |DfciPkg/Library/DfciDeviceIdSupportLibNull/DfciDeviceIdSupportLibNull.inf
+  DfciGroupLib  |DfciPkg/Library/DfciGroupLibNull/DfciGroups.inf
+  DfciRecoveryLib  DfciPkg/Library/DfciRecoveryLib/DfciRecoveryLib.inf
+  DfciSettingsLib  |DfciPkg/Library/DfciSettingsLib/DfciSettingsLib.inf
+  DfciUiSupportLib  |DfciPkg/Library/DfciUiSupportLibNull/DfciUiSupportLibNull.inf
+  DfciV1SupportLib  |DfciPkg/Library/DfciV1SupportLibNull/DfciV1SupportLibNull.inf
+  DfciXmlDeviceIdSchemaSupportLib  |DfciPkg/Library/DfciXmlDeviceIdSchemaSupportLib/DfciXmlDeviceIdSchemaSupportLib.inf
+  DfciXmlIdentitySchemaSupportLib  |DfciPkg/Library/DfciXmlIdentitySchemaSupportLib/DfciXmlIdentitySchemaSupportLib.inf
+  DfciXmlPermissionSchemaSupportLib  |DfciPkg/Library/DfciXmlPermissionSchemaSupportLib/DfciXmlPermissionSchemaSupportLib.inf
+  DfciXmlSettingSchemaSupportLib  |DfciPkg/Library/DfciXmlSettingSchemaSupportLib/DfciXmlSettingSchemaSupportLib.inf
+  DfciSettingChangedNotificationLib  |DfciPkg/Library/DfciSettingChangedNotificationLib/DfciSettingChangedNotificationLibNull.inf
+
+
+  FileHandleLib  |MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
+  FmpAuthenticationLib  |SecurityPkg/Library/FmpAuthenticationLibPkcs7/FmpAuthenticationLibPkcs7.inf
+  HttpLib  |NetworkPkg/Library/DxeHttpLib/DxeHttpLib.inf
+  JsonLiteParserLib  |MsCorePkg/Library/JsonLiteParser/JsonLiteParser.inf
+  MsPlatformDevicesLib  |M1Pkg/Library/MsPlatformDevicesLib/MsPlatformDevicesLib.inf
+  MsSecureBootModeSettingLib  |OemPkg/Library/MsSecureBootModeSettingLib/MsSecureBootModeSettingLib.inf
+  MuTelemetryHelperLib  |MsWheaPkg/Library/MuTelemetryHelperLib/MuTelemetryHelperLib.inf
+  NonDiscoverableDeviceRegistrationLib  |MdeModulePkg/Library/NonDiscoverableDeviceRegistrationLib/NonDiscoverableDeviceRegistrationLib.inf
+  OemHookStatusCodeLib  |MdeModulePkg/Library/OemHookStatusCodeLibNull/OemHookStatusCodeLibNull.inf
+  PasswordPolicyLib  |OemPkg/Library/PasswordPolicyLib/PasswordPolicyLib.inf
+  PlatformBootManagerLib  |MsCorePkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
+
+  #SecureBootKeyStoreLib  |M1Pkg/Library/SecureBootKeyStoreLib/SecureBootKeyStoreLib.inf
+
+  PlatformThemeLib  |MsGraphicsPkg/Library/SamplePlatformThemeLib/PlatformThemeLib.inf
+  ReportStatusCodeLib  |MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  ShellLib  |ShellPkg/Library/UefiShellLib/UefiShellLib.inf
+  UefiDevicePathLib  |MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
+  UefiScsiLib  |MdePkg/Library/UefiScsiLib/UefiScsiLib.inf
+  ZeroTouchSettingsLib  |ZeroTouchPkg/Library/ZeroTouchSettings/ZeroTouchSettings.inf
+  MuSecureBootKeySelectorLib  |MsCorePkg/Library/MuSecureBootKeySelectorLib/MuSecureBootKeySelectorLib.inf
+  UpdateFacsHardwareSignatureLib  |PcBdsPkg/Library/UpdateFacsHardwareSignatureLib/UpdateFacsHardwareSignatureLib.inf
+
+
+[LibraryClasses.common.SEC]
+
+  HobLib  |MdePkg/Library/PeiHobLib/PeiHobLib.inf
+  MemoryAllocationLib  |EmbeddedPkg/Library/PrePiMemoryAllocationLib/PrePiMemoryAllocationLib.inf
+  PrePiMemoryAllocationLib  |EmbeddedPkg/Library/PrePiMemoryAllocationLib/PrePiMemoryAllocationLib.inf
+  PrePiHobListPointerLib  |ArmPlatformPkg/Library/PrePiHobListPointerLib/PrePiHobListPointerLib.inf
+  PcdLib  |MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  BaseMemoryLib  |MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+
+[LibraryClasses.common.DXE_CORE]
+  HobLib  |MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf
+  MemoryAllocationLib  |MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationLib.inf
+  DxeCoreEntryPoint  |MdePkg/Library/DxeCoreEntryPoint/DxeCoreEntryPoint.inf
+  ReportStatusCodeLib  |MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  ExtractGuidedSectionLib  |MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+  UefiDecompressLib  |MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
+  PerformanceLib  |MdeModulePkg/Library/DxeCorePerformanceLib/DxeCorePerformanceLib.inf
+  DxeServicesLib  |MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
+  MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
+  MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+
+[LibraryClasses.common.DXE_DRIVER]
+  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  SecurityManagementLib|MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf
+  PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
+  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
+  UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
+  ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+!endif
+  MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
+  MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+
+[LibraryClasses.common.UEFI_APPLICATION]
+  UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiTianoCustomDecompressLib.inf
+  PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
+  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
+  ShellLib|ShellPkg/Library/UefiShellLib/UefiShellLib.inf
+  FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
+  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+  MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
+  MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+!endif
+
+[LibraryClasses.common.UEFI_DRIVER]
+  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiTianoCustomDecompressLib.inf
+  ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+  PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
+  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  UefiScsiLib|MdePkg/Library/UefiScsiLib/UefiScsiLib.inf
+  ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+  MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
+  MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+!endif
+
+[LibraryClasses.common.DXE_RUNTIME_DRIVER]
+  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
+  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
+  ArmSmcLib|ArmPkg/Library/ArmSmcLib/ArmSmcLib.inf
+  ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+
+  # System Reset
+  HwResetSystemLib|ArmPkg/Library/ArmSmcPsciResetSystemLib/ArmSmcPsciResetSystemLib.inf
+
+  VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/RuntimeCryptLib.inf
+!endif
+  MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
+  MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+
+
+#TODO: this entire section
+[Components.common]

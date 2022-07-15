@@ -1,0 +1,23 @@
+#/** @file
+#  Based off ArmHvcLib.inf, original copyright notice below.
+# 
+#  Copyright (c) 2012-2013, ARM Ltd. All rights reserved.<BR>
+#  Copyright (c) 2014, Linaro Ltd. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AppleArmGxfHvcLib
+  FILE_GUID                      = 6cd4f68c-7944-4e99-a032-d71f9c1d94ce
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AppleArmGxfHvcLib
+
+[Sources.AARCH64]
+  AArch64/AppleArmGxfHvcLib.S
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ArmPkg/ArmPkg.dec
