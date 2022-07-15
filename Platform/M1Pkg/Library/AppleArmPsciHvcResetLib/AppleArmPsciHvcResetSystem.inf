@@ -1,0 +1,32 @@
+#/** @file
+#  ResetSystemLib implementation using PSCI calls
+#  Based on ArmSmcPsciResetSystemLib.inf, original copyright notice below
+#  
+#  
+#  Copyright (c) 2017, Linaro Ltd. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010019
+  BASE_NAME                      = AppleArmPsciHvcResetSystemLib
+  FILE_GUID                      = 0a9c093b-eb09-42c1-b52e-c833120cfbce
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = HwResetSystemLib # MS_CHANGE - Use HwResetSystemLib instead of ResetSystemLib for Hyper-V AARCH64 support
+
+[Sources]
+  AppleArmPsciHvcResetSystemLib.c
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+
+[LibraryClasses]
+  ArmHvcLib
+  BaseLib
+  DebugLib
