@@ -29,14 +29,17 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|TRUE
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportUpdateCapsuleReset|TRUE
 
+  
+
   gEmbeddedTokenSpaceGuid.PcdPrePiProduceMemoryTypeInformationHob|TRUE
 
 [PcdsFixedAtBuild.common]
   #ARM architectural fixed build-time settings
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x800000000
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
-  #commented out for now since timer interrupts are FIQs (don't have an FIQ handler atm for UEFI)
-  #gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|17
+  gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x8FF000000 #fair warning this location is *totally random*
+  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|17
+  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #gArmTokenSpaceGuid.PcdGicDistributorBase|
@@ -55,6 +58,12 @@
   gEfiMdePkgTokenSpaceGuid.PcdMaximumLinkedListLength|1000000
   gEfiMdePkgTokenSpaceGuid.PcdDefaultTerminalType|4 #use TTYTERM mode as the default
 
+  #MdeModulePkg ACPI default settings
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId|"APPLE"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x494645454c505041
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision|0x00008103
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision|0x00000001
+
 !if $(SECURE_BOOT_ENABLE) == TRUE
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesData|600
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesCode|400
@@ -64,6 +73,12 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesCode|150
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesCode|1000
 !endif
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesData|800
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode|10
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData|0
+  #gEmbeddedTokenSpaceGuid.PcdPrePiStackBase|0x9ffB00000
+  gEmbeddedTokenSpaceGuid.PcdPrePiStackSize|0x00020000      # 128K stack
+  
   #PCIe settings
   gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdAriSupport|FALSE
@@ -109,6 +124,7 @@
   ArmGenericTimerCounterLib  |ArmPkg/Library/ArmGenericTimerPhyCounterLib/ArmGenericTimerPhyCounterLib.inf
   ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
   ArmHvcLib  |ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
+  ArmSmcLib  |ArmPkg/Library/ArmSmcLibNull/ArmSmcLibNull.inf
   AppleArmGxfHvcLib  |M1Pkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
   ArmGicArchLib  |ArmPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
   TimerLib  |ArmPkg/Library/ArmArchTimerLib/ArmArchTimerLib.inf
@@ -170,7 +186,7 @@
   VariablePolicyLib  |MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
   VariablePolicyHelperLib  |MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
   TimeBaseLib  |EmbeddedPkg/Library/TimeBaseLib/TimeBaseLib.inf
-
+  
 
 #services required for UEFI secure boot
 !if $(SECURE_BOOT_ENABLE) == TRUE
@@ -192,11 +208,11 @@
   RealTimeClockLib  |EmbeddedPkg/Library/VirtualRealTimeClockLib/VirtualRealTimeClockLib.inf
   ResetUtilityLib  |MdeModulePkg/Library/ResetUtilityLib/ResetUtilityLib.inf
   SecurityLockAuditLib  |MdeModulePkg/Library/SecurityLockAuditLibNull/SecurityLockAuditLibNull.inf
-  #ResetSystemLib  |M1Pkg/Library/AppleArmPsciResetSystemLib/AppleArmPsciResetSystemLib.inf
+  ResetSystemLib  |M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystemLib.inf
 
 
   #Platform specific drivers
-  #HwResetSystemLib|M1Pkg/Library/AppleArmPsciResetSystemLib/AppleArmPsciResetSystemLib.inf
+  HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystemLib.inf
 
 
   MemoryTypeInfoSecVarCheckLib|MdeModulePkg/Library/MemoryTypeInfoSecVarCheckLib/MemoryTypeInfoSecVarCheckLib.inf
@@ -285,14 +301,14 @@
   MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
-  UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiTianoCustomDecompressLib.inf
-  PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
-  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
-  HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
-  ShellLib|ShellPkg/Library/UefiShellLib/UefiShellLib.inf
-  FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
-  ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
-  ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+  UefiDecompressLib  |MdePkg/Library/BaseUefiDecompressLib/BaseUefiTianoCustomDecompressLib.inf
+  PerformanceLib  |MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
+  MemoryAllocationLib  |MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  HiiLib  |MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
+  ShellLib  |ShellPkg/Library/UefiShellLib/UefiShellLib.inf
+  FileHandleLib  |MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
+  ReportStatusCodeLib  |MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
+  ExtractGuidedSectionLib  |MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
   MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
   MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
 
@@ -308,8 +324,8 @@
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   UefiScsiLib|MdePkg/Library/UefiScsiLib/UefiScsiLib.inf
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
-  MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
-  MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+  MsUiThemeLib  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
+  MsPlatformEarlyGraphicsLib  |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
@@ -320,11 +336,12 @@
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
-  ArmSmcLib|ArmPkg/Library/ArmSmcLib/ArmSmcLib.inf
+  ArmHvcLib|ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
+  AppleArmGxfHvcLib|M1Pkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
 
   # System Reset
-  HwResetSystemLib|ArmPkg/Library/ArmSmcPsciResetSystemLib/ArmSmcPsciResetSystemLib.inf
+  HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystemLib.inf
 
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
 
@@ -335,5 +352,110 @@
   MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
 
 
-#TODO: this entire section
+
+#Most parts borrowed or used from other platforms
 [Components.common]
+
+  #SEC phase
+  M1Pkg/PrePi/PrePi.inf
+
+
+
+  #DXE phase
+  MdeModulePkg/Core/Dxe/DxeMain.inf {
+    <LibraryClasses>
+    NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
+    NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
+    NULL|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
+  }
+
+
+  #PCD database
+  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf {
+    <LibraryClasses>
+    PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  }
+
+  #ARM architectural services
+
+  ArmPkg/Drivers/CpuDxe/CpuDxe.inf
+  #TODO: Timers are FIQs, *not* IRQs, fixup FIQ handling, ditto for IPIs on AICv2
+  ArmPkg/Drivers/TimerDxe/TimerDxe.inf
+  ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
+  MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
+  EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+  EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
+
+  # EFI Runtime Services (we can put PSCI here too if need be)
+  MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
+  MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
+  EmbeddedPkg/EmbeddedMonotonicCounter/EmbeddedMonotonicCounter.inf
+
+
+  # Security Stub
+  MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf {
+    <LibraryClasses>
+!if $(SECURE_BOOT_ENABLE) == TRUE
+      NULL|SecurityPkg/Library/DxeImageVerificationLib/DxeImageVerificationLib.inf
+!endif
+  }
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
+  SurfaceDuoPkg/Driver/SecureBootProvisioningDxe/SecureBootProvisioningDxe.inf
+!endif
+
+  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
+
+
+  # Disk IO
+  #M1Pkg TODO: ANS2/SART drivers (to enable booting off internal storage)
+  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
+  MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
+  FatPkg/EnhancedFatDxe/Fat.inf
+  MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
+  MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
+
+  # USB 2.0/3.0 support (this should be OOB working since Apple uses a Synopsys controller)
+  # required for booting off USB mass storage devices
+  MdeModulePkg/Bus/Usb/UsbMouseAbsolutePointerDxe/UsbMouseAbsolutePointerDxe.inf
+  MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
+  MdeModulePkg/Bus/Usb/UsbBusDxe.inf
+  MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
+  MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
+  MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
+  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
+
+  # DT
+  EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+
+  EmbeddedPkg/Drivers/VirtualKeyboardDxe/VirtualKeyboardDxe.inf
+
+  # BDS
+  MdeModulePkg/Universal/PrintDxe/PrintDxe.inf
+  MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
+  MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
+  MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
+  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
+  MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
+  MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
+  MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
+  MdeModulePkg/Universal/DriverHealthManagerDxe/DriverHealthManagerDxe.inf
+  MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
+
+
+  #ACPI (note: only the essentials for now, ASL tables in progress)
+  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+  MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
+
+  #SMBIOS information
+  #M1Pkg/Drivers/SmBiosDxe/SmBiosDxe.inf
+
+  #Miscellaneous
+  MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe.inf
+  MdeModulePkg/Universal/StatusCodeHandler/RuntimeDxe/StatusCodeHandlerRuntimeDxe.inf
+  EmbeddedPkg/SimpleTextInOutSerial/SimpleTextInOutSerial.inf
+  MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
+

@@ -12,12 +12,12 @@ GXF - Guarded Execution Feature, essentially a set of lateral exception levels t
 This is an implementation of Project Mu for Apple silicon platforms (at the moment for M1/M1v2/M2). This is intended to be a firmware that can bootstrap common operating systems that require UEFI and/or ACPI support (Windows being an example). This iteration is based off the WOA Project's SurfaceDuoPkg firmware (https://github.com/WOA-Project/SurfaceDuoPkg) as well as the reference
 
 Regarding interrupt controllers, this implementation can be built with optional support for the platform's AIC if you intend to run this in EL2.
-(Note that PSCI will need to be handled in GL2, implying GXF must be enabled)
+(Note that PSCI will need to be handled in GL2, implying GXF must be enabled, *or* it must be an EFI runtime service.)
 
 
 ### License
 
-Unless stated otherwise, code in this project is licensed under the BSD 2 clause license
+Unless stated otherwise, code in this project is licensed under the BSD 2 clause license.
 
 ### Credits/Acknowledgements
 

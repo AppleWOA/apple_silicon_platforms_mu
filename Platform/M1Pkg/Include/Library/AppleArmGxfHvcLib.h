@@ -27,7 +27,7 @@ typedef struct {
 
 
 /**
-  Trigger a GXF hypercall
+  Trigger a GXF hypercall.
 
   GXF hypercalls for the most part generally follow the same rules as standard ARM HVC calls.
 

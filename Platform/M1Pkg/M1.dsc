@@ -46,8 +46,7 @@
 
   #ARM architectural settings, fixed at build time
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x800000000
-
-[PcdsDynamicDefault.common]
-  gArmTokenSpaceGuid.PcdSystemMemorySize|0x200000000 #8GB RAM space by default, will get overriden by FDT later
+  gArmTokenSpaceGuid.PcdSystemMemorySize|0x200000000 #8GB RAM space by default, TODO: add build time settings for how much RAM the Mac has
   
 !include M1Pkg/M1Pkg.dsc.inc
+!include M1Pkg/FrontpageDsc.inc

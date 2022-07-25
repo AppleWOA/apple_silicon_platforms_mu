@@ -1,5 +1,5 @@
 /**
- * @file AppleArmPsciResetSystemLib.c
+ * @file AppleArmPsciHvcResetSystemLib.c
    Support PSCI reset system functionality on Apple platforms
 
    Note: based on ArmPkg/Library/ArmPsciResetSystemLib

@@ -1,0 +1,26 @@
+# Apple UART Serial Port Library INF Description File
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  FILE_GUID      = e27f53d5-a3a2-4db2-aaea-44045fc70f11
+  BASE_NAME      = AppleUartSerialPortLib
+  MODULE_TYPE    = BASE
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS  = SerialPortLib
+
+[Sources.common]
+  AppleUartSerialPortLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ArmPkg/ArmPkg.dec
+
+[LibraryClasses]
+  ArmLib
+  PcdLib
+  IoLib
+  HobLib
+  CompilerIntrinsicsLib
+
+
