@@ -96,12 +96,16 @@
 
   gEfiMdePkgTokenSpaceGuid.PcdPlatformBootTimeOut|4
 
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate|115200
+
 !if $(SECURE_BOOT_ENABLE) == TRUE
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxAuthVariableSize|0x2800
   gEfiSecurityPkgTokenSpaceGuid.PcdUserPhysicalPresence|TRUE
 !endif
 
-  
+  gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
+
+
 [PcdsDynamicDefault.common]
   #screen resolution settings
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|2560
@@ -201,6 +205,8 @@
   AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
 !endif
 
+  MemoryInitPeiLib|M1Pkg/Library/MemoryInitPeiLib/PeiMemoryAllocationLib.inf
+  PlatformPeiLib|M1Pkg/Library/PlatformPeiLib/PlatformPeiLib.inf
 
   BaseBinSecurityLib  |MdePkg/Library/BaseBinSecurityLibNull/BaseBinSecurityLibNull.inf
   DxeMemoryProtectionHobLib  |MdeModulePkg/Library/MemoryProtectionHobLibNull/DxeMemoryProtectionHobLibNull.inf
@@ -357,7 +363,10 @@
 [Components.common]
 
   #SEC phase
-  M1Pkg/PrePi/PrePi.inf
+  M1Pkg/PrePi/PrePi.inf {
+    <LibraryClasses>
+    SerialPortLib|M1Pkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
+  }
 
 
 
@@ -409,13 +418,14 @@
 
 
   # Disk IO
-  #M1Pkg TODO: ANS2/SART drivers (to enable booting off internal storage)
+  #M1Pkg TODO: ANS2/SART drivers 
   MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
   MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
   MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
   FatPkg/EnhancedFatDxe/Fat.inf
   MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
   MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
+  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
 
   # USB 2.0/3.0 support (this should be OOB working since Apple uses a Synopsys controller)
   # required for booting off USB mass storage devices

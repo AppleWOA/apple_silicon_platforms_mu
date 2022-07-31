@@ -11,6 +11,8 @@
  * 
  * @version 1.0
  * 
+ * Copyright (c) Arminder Singh.
+ * 
  * SPDX-License-Identifier: BSD-2-Clause-Patent
  */
 
