@@ -22,6 +22,8 @@ Unless stated otherwise, code in this project is licensed under the BSD 2 clause
 ### Credits/Acknowledgements
 
 The Asahi Linux project - https://alx.sh
+    Hector Martin (marcan) - https://twitter.com/marcan42
+    Sven Peter - https://twitter.com/svenpeter42
 
 The WOA Project (LumiaWOA/DuoWOA) - https://github.com/WOA-Project/
 
@@ -31,4 +33,7 @@ Microsoft - Project Mu Reference Platforms Github Repo - https://github.com/micr
 
 Junyu Long - OnePlus 6T Mu Firmware - https://github.com/longjunyu2/mu_platforms_oneplus6t
 
-gus33000 - https://twitter.com/gus33000
+Gustave Monce (gus33000) - https://twitter.com/gus33000
+
+imbushuo - https://twitter.com/imbushuo
+

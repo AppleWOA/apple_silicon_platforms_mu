@@ -78,6 +78,7 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData|0
   #gEmbeddedTokenSpaceGuid.PcdPrePiStackBase|0x9ffB00000
   gEmbeddedTokenSpaceGuid.PcdPrePiStackSize|0x00020000      # 128K stack
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|36
   
   #PCIe settings
   gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|FALSE
