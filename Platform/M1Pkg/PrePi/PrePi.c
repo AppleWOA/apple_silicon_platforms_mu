@@ -3,7 +3,10 @@
  * 
  * Main implementation of SEC phase
  * 
- * PEI is not necessary in this implementation, so build up HOBs and jump right to DXE
+ * PEI is not necessary in this implementation, so build up HOBs and jump right to DXE.
+ * 
+ * TODO: Adapt code to dynamically change PcdSystemMemorySize to use the values from FDT instead of
+ * hardcoding values.
  * 
  * SPDX-License-Identifier: BSD-2-Clause-Patent
  * 
@@ -79,7 +82,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN VOI
             (DEBUG_ERROR | DEBUG_INFO,
             "Issue reboot command through m1n1 hypervisor shell or send VDM command to reboot\n")
             );
-            CpuDeadLoop();
+        CpuDeadLoop();
     }
 
     //set up stack and CPU HOBs
@@ -93,7 +96,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN VOI
     Status = PlatformPeim();
     ASSERT_EFI_ERROR(Status);
 
-      // SEC phase needs to run library constructors by hand.
+    // SEC phase needs to run library constructors by hand.
     ProcessLibraryConstructorList();
 
     // Assume the FV that contains the PI (our code) also contains a compressed
@@ -102,6 +105,10 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN VOI
     ASSERT_EFI_ERROR(Status);
 
     // Load the DXE Core and transfer control to it
+    DEBUG(
+        (DEBUG_INFO,
+        "Loading DXE Core now\n")
+        );
     Status = LoadDxeCoreFromFv(NULL, 0);
     ASSERT_EFI_ERROR(Status);
     
