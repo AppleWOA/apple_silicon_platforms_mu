@@ -42,8 +42,8 @@
   gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
-  #gArmTokenSpaceGuid.PcdGicDistributorBase|
-  #gArmTokenSpaceGuid.PcdGicRedistributorsBase|
+  gArmTokenSpaceGuid.PcdGicDistributorBase|0x7d0000000
+  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x7e0000000
 !else
   gM1PkgTokenSpaceGuid.PcdAicV1InterruptControllerBase|0x23b100000
 
@@ -76,7 +76,6 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesData|800
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode|10
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData|0
-  #gEmbeddedTokenSpaceGuid.PcdPrePiStackBase|0x9ffB00000
   gEmbeddedTokenSpaceGuid.PcdPrePiStackSize|0x00020000      # 128K stack
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|36
   
