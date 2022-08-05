@@ -19,7 +19,7 @@
   gM1PkgTokenSpaceGuid.PcdFrameBufferAddress|0x9e20dc000|UINT64|0x00004400
   gM1PkgTokenSpaceGuid.PcdFrameBufferWidth|2560|UINT32|0x00004401
   gM1PkgTokenSpaceGuid.PcdFrameBufferHeight|1600|UINT32|0x00004402
-  gM1PkgTokenSpaceGuid.PcdFrameBufferPixelBpp|32|UINT32|0x00004403
+  gM1PkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30|UINT32|0x00004403
 
   # RAM reservation (128 MB reserved for EFI FD image)
   gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000|UINT32|0x00004404
