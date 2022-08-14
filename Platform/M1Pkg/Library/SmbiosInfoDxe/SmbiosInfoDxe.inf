@@ -1,0 +1,43 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SmBiosTableDxe
+  FILE_GUID                      = 58018fb9-0e53-429a-add1-87fed52c8559
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = SmBiosTableDxeInitialize
+
+[Sources.common]
+  SmBiosInfoDxe.c
+
+[FixedPcd]
+  gM1PkgTokenSpaceGuid.PcdCoreCount
+  gArmTokenSpaceGuid.PcdSystemMemoryBase
+  gArmTokenSpaceGuid.PcdSystemMemorySize
+  
+[Packages]
+  ArmPkg/ArmPkg.dec
+  ArmPlatformPkg/ArmPlatformPkg.dec
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  M1Pkg/M1Pkg.dec
+
+[LibraryClasses]
+  BaseLib
+  ReportStatusCodeLib
+  UefiLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  BaseMemoryLib
+  DebugLib
+  CompilerIntrinsicsLib
+
+[Protocols]
+  gEfiSmbiosProtocolGuid
+  gEfiChipInfoProtocolGuid
+  
+[Depex]
+  gEfiSmbiosProtocolGuid
+
+[BuildOptions.AARCH64]
+  GCC:*_*_*_CC_FLAGS = -Wno-missing-brace -Wno-error
