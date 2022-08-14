@@ -112,7 +112,7 @@
   # Device specific actions in support of PlatformBootManagerLib.
   # Sort of a wrapper for MsPlatformDevicesLib, which needs to be written for each platform.
   #
-  DeviceBootManagerLib|M1Pkg/Library/DeviceBootManagerLib/DeviceBootManagerLib.inf
+  DeviceBootManagerLib|PcBdsPkg/Library/DeviceBootManagerLib/DeviceBootManagerLib.inf
   #
   # LIbrary to display the On screen notifications for the platform
   #
