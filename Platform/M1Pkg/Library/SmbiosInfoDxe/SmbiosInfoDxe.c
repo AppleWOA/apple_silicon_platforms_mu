@@ -701,10 +701,11 @@ VOID SysInfoUpdateSmbiosType1(IN UINT64 FdtPtr)
 /***********************************************************************
         SMBIOS data update  TYPE2  Board Information
 ************************************************************************/
-VOID BoardInfoUpdateSmbiosType2(VOID)
+VOID BoardInfoUpdateSmbiosType2(IN UINT64 FdtPtr)
 {
   CHAR8  serialNo[13];
   UINT32 serial;
+  UINT64 *FdtPointer = (UINT64 *)FdtPtr;
 
   // Update serial number from FDT
   // TODO: add FDT commands
