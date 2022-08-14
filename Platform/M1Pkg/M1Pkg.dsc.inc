@@ -38,13 +38,16 @@
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x800000000
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x8FF000000 #fair warning this location is *totally random*
-  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|17
-  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18
+  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|17 #FIQ timer INTID (needed because Apple timers fire FIQs)
+  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18 #IRQ timer INTID
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
-  gArmTokenSpaceGuid.PcdGicDistributorBase|0x7d0000000
-  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x7e0000000
+  #On all M1 models, these addresses are completely unmapped and point to nowhere
+  #m1n1 will trap accesses to these addresses, which will emulate the vGIC dist/redist
+  gArmTokenSpaceGuid.PcdGicDistributorBase|0xf00000000
+  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xf10000000
 !else
+  #this is MMIO space where the AIC lives
   gM1PkgTokenSpaceGuid.PcdAicV1InterruptControllerBase|0x23b100000
 
 !endif
@@ -182,7 +185,6 @@
   UefiUsbLib  |MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
   UefiDriverEntryPoint  |MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
   UefiApplicationEntryPoint  |MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
-  UefiUsbLib  |MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
   UefiBootManagerLib  |MdeModulePkg/Library/UefiBootManagerLib/UefiBootManagerLib.inf
   UefiHiiServicesLib  |MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
   TpmMeasurementLib  |MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
@@ -205,7 +207,7 @@
   AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
 !endif
 
-  MemoryInitPeiLib|M1Pkg/Library/MemoryInitPeiLib/PeiMemoryAllocationLib.inf
+  MemoryInitPeiLib|M1Pkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
   PlatformPeiLib|M1Pkg/Library/PlatformPeiLib/PlatformPeiLib.inf
 
   BaseBinSecurityLib  |MdePkg/Library/BaseBinSecurityLibNull/BaseBinSecurityLibNull.inf
@@ -214,11 +216,11 @@
   RealTimeClockLib  |EmbeddedPkg/Library/VirtualRealTimeClockLib/VirtualRealTimeClockLib.inf
   ResetUtilityLib  |MdeModulePkg/Library/ResetUtilityLib/ResetUtilityLib.inf
   SecurityLockAuditLib  |MdeModulePkg/Library/SecurityLockAuditLibNull/SecurityLockAuditLibNull.inf
-  ResetSystemLib  |M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystemLib.inf
+  ResetSystemLib  |M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
 
   #Platform specific drivers
-  HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystemLib.inf
+  HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
 
   MemoryTypeInfoSecVarCheckLib|MdeModulePkg/Library/MemoryTypeInfoSecVarCheckLib/MemoryTypeInfoSecVarCheckLib.inf
@@ -235,7 +237,7 @@
   #DFCI libs
   DfciDeviceIdSupportLib  |DfciPkg/Library/DfciDeviceIdSupportLibNull/DfciDeviceIdSupportLibNull.inf
   DfciGroupLib  |DfciPkg/Library/DfciGroupLibNull/DfciGroups.inf
-  DfciRecoveryLib  DfciPkg/Library/DfciRecoveryLib/DfciRecoveryLib.inf
+  DfciRecoveryLib |DfciPkg/Library/DfciRecoveryLib/DfciRecoveryLib.inf
   DfciSettingsLib  |DfciPkg/Library/DfciSettingsLib/DfciSettingsLib.inf
   DfciUiSupportLib  |DfciPkg/Library/DfciUiSupportLibNull/DfciUiSupportLibNull.inf
   DfciV1SupportLib  |DfciPkg/Library/DfciV1SupportLibNull/DfciV1SupportLibNull.inf
@@ -343,11 +345,11 @@
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
   ArmHvcLib|ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
-  AppleArmGxfHvcLib|M1Pkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib
+  AppleArmGxfHvcLib|M1Pkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
 
   # System Reset
-  HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystemLib.inf
+  HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
 
@@ -431,7 +433,7 @@
   # required for booting off USB mass storage devices
   MdeModulePkg/Bus/Usb/UsbMouseAbsolutePointerDxe/UsbMouseAbsolutePointerDxe.inf
   MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
-  MdeModulePkg/Bus/Usb/UsbBusDxe.inf
+  MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
   MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
   MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
   MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
@@ -461,7 +463,7 @@
   MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
 
   #SMBIOS information
-  #M1Pkg/Drivers/SmBiosDxe/SmBiosDxe.inf
+  M1Pkg/Drivers/SmBiosPlatformDxe/SmBiosPlatformDxe.inf
 
   #Miscellaneous
   MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe.inf
