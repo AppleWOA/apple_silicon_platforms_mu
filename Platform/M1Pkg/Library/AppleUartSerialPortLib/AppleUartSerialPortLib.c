@@ -11,7 +11,7 @@
  * 
  * @version 1.0
  * 
- * Copyright (c) Arminder Singh.
+ * Copyright (c) amarioguy (Arminder Singh) 2022.
  * 
  * SPDX-License-Identifier: BSD-2-Clause-Patent
  */

@@ -26,6 +26,7 @@
   EmbeddedPkg/EmbeddedPkg.dec
   ArmPkg/ArmPkg.dec
   ArmPlatformPkg/ArmPlatformPkg.dec
+  M1Pkg/M1Pkg.dec
 
 [LibraryClasses]
   DebugLib
@@ -43,7 +44,7 @@
   gArmTokenSpaceGuid.PcdFdBaseAddress
   gArmTokenSpaceGuid.PcdFdSize
 
-  gArmPlatformTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
+  gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
 
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiACPIReclaimMemory
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiACPIMemoryNVS
