@@ -74,15 +74,14 @@ static ARM_MEMORY_REGION_DESCRIPTOR_EX gDeviceMemoryDescriptorEx[] = {
     {"PCIe Range 2",      0x6c0000000, SIZE_1GB, AddDev, MMAP_IO, UNCACHEABLE, MmIO, NS_DEVICE},
 
     /* System DRAM */
-    /* TZ0/1/3 will be set to AddMem/Reserved for now, other carveouts will be NoHob */ 
-    {"m1n1 Reserved",     0x800000000, 0x1ec0000, AddMem, MEM_RES, SYS_MEM_CAP, Reserv, WRITE_BACK_XN},
-    {"RAM Partition",     0x801ec0000, 0x2E140000, AddMem, SYS_MEM, SYS_MEM_CAP, Conv, WRITE_BACK_XN},
+    /* TZ0/1/3 is unmapped for now, ditto with the top of system DRAM */ 
+    {"m1n1 Reserved",     0x800000000, 0x1EC0000, NoHob, MEM_RES, SYS_MEM_CAP, Reserv, WRITE_BACK_XN},
+    {"RAM Partition",     0x801EC0000, 0x2E140000, AddMem, SYS_MEM, SYS_MEM_CAP, Conv, WRITE_BACK_XN},
     {"UEFI FD image",     0x830000000, 0x400000,   AddMem, SYS_MEM, SYS_MEM_CAP, BsData, WRITE_BACK_XN},
     {"RAM Partition (8GB)",0x830400000, 0x1AEC0C000, AddMem, SYS_MEM, SYS_MEM_CAP, Conv, WRITE_BACK_XN},
-    {"TZ1 Region",        0x9df00c000, 0x8000,    AddMem, MEM_RES, UNCACHEABLE, Reserv, WRITE_BACK_XN},
-    {"TZ0 Region",        0x9df014000, 0x1DC8000, AddMem, MEM_RES, UNCACHEABLE, Reserv, WRITE_BACK_XN},
-    {"TZ3 Region",        0x9e6e24000, 0x19000000, AddMem, MEM_RES, UNCACHEABLE, Reserv, WRITE_BACK_XN},
-    {"Framebuffer",       0x9E20DC000, 0x2D5C000, AddMem, MEM_RES, SYS_MEM_CAP, Reserv, WRITE_THROUGH_XN},
+    // {"TZ1 Region",        0x9df00c000, 0x8000,    AddMem, MEM_RES, UNCACHEABLE, Reserv, WRITE_BACK_XN},
+    // {"TZ0 Region",        0x9df014000, 0x1DC8000, AddMem, MEM_RES, UNCACHEABLE, Reserv, WRITE_BACK_XN},
+    // {"TZ3 Region",        0x9e6e24000, 0x19000000, AddMem, MEM_RES, UNCACHEABLE, Reserv, WRITE_BACK_XN},
 
     /* Terminator for MMU */
     {"Terminator", 0, 0, 0, 0, 0, 0, 0}};
