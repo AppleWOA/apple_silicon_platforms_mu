@@ -147,7 +147,6 @@ READ_LOCK_STATUS   = TRUE
   #
   INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
   INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
-  INF Platform/Ampere/JadePkg/Drivers/PciPlatformDxe/PciPlatformDxe.inf
 
   #NVMe Support
   #TODO: ANS2/SART driver
