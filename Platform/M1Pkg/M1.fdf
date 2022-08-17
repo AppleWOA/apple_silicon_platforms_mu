@@ -34,7 +34,7 @@ ErasePolarity = 1
 
 
 BlockSize     = 0x1000
-NumBlocks     = 0x200
+NumBlocks     = 0x400
 
 ################################################################################
 #
@@ -122,7 +122,6 @@ READ_LOCK_STATUS   = TRUE
   INF EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
 
   INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
-  INF MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
 !if $(SECURE_BOOT_ENABLE) == TRUE
   INF SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
@@ -134,7 +133,7 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
   INF MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
   INF MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
-!if $(AIC_BUILD) == false
+!if $(AIC_BUILD) == FALSE
   INF ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
   INF ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !else 
@@ -145,13 +144,14 @@ READ_LOCK_STATUS   = TRUE
   #
   # PCIe Support
   #
-  INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
-  INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  #Commented out for now due to lack of processor-specific host bridge library
+  #INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
+  #INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
 
   #NVMe Support
   #TODO: ANS2/SART driver
   #INF M1Pkg/Drivers/AppleANS2Dxe/AppleANS2Dxe.inf
-  INF MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
+  #INF MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
 
   #
   # Virtual Keyboard
@@ -164,11 +164,11 @@ READ_LOCK_STATUS   = TRUE
   #
   # Usb Support
   #
-  INF  MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
-  INF MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
-  INF  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
+  #INF  MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
+  #INF MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
+  #INF  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
-  INF MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
+  INF MdeModulePkg/Bus/Usb/UsbMouseAbsolutePointerDxe/UsbMouseAbsolutePointerDxe.inf
   #
   # USB Host Support
   #
@@ -181,11 +181,13 @@ READ_LOCK_STATUS   = TRUE
   #
   # Some miscellaneous Mu modules
   #
-  INF  AdvLoggerPkg/AdvancedFileLogger/AdvancedFileLogger.inf
   INF  MsCorePkg/Universal/StatusCodeHandler/Serial/Dxe/SerialStatusCodeHandlerDxe.inf
+!if $(SECURE_BOOT_ENABLE) == TRUE
   INF  MsCorePkg/MuCryptoDxe/MuCryptoDxe.inf
-  INF  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
   INF  CryptoPkg/Driver/CryptoDxe.inf
+!endif
+  INF  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
+
   #
   # FAT filesystem + GPT/MBR partitioning
   #
@@ -208,7 +210,7 @@ READ_LOCK_STATUS   = TRUE
   #
   # SMBIOS Support
   #
-  INF M1Pkg/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
+  INF M1Pkg/Library/SmbiosInfoDxe/SmbiosInfoDxe.inf
   INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
 
   #
@@ -228,7 +230,6 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
   INF MdeModulePkg/Universal/DriverHealthManagerDxe/DriverHealthManagerDxe.inf
   INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
-  INF MdeModulePkg/Application/UiApp/UiApp.inf
 
   # DT
   INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
