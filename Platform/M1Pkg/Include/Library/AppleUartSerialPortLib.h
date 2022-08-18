@@ -65,6 +65,8 @@
 #define UART_FSTATUS_TX_CNT 0xF0 // bitmask 0b11110000
 #define UART_FSTATUS_RX_CNT 0xF // bitmask 0b00001111
 
-UINT32 AppleSerialPortCalculateBaudRateConfig();
+UINT32 AppleSerialPortCalculateBaudRateConfig(VOID);
+
+UINTN SerialPortFlush(VOID);
 
 #endif //APPLE_UART_SERIAL_PORT_H_
