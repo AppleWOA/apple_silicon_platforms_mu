@@ -11,6 +11,8 @@ GXF - Guarded Execution Feature, essentially a set of lateral exception levels t
 
 I probably do not know what I'm doing 100%. It goes without saying, but *please* do not run this EFI implementation in any serious production environment. I assume no responsibility or liability for usage of the software and/or any issues that arise because of it.
 
+This implementation at the moment is wildly incomplete, and many things are due to be filled out/worked on over time.
+
 ### Description
 
 This is an implementation of Project Mu for Apple silicon platforms (at the moment for M1/M1v2/M2). This is intended to be a firmware that can bootstrap common operating systems that require UEFI and/or ACPI support (Windows being an example). This iteration is based off the WOA Project's SurfaceDuoPkg firmware (https://github.com/WOA-Project/SurfaceDuoPkg) as well as the reference ArmPkg/ArmPlatformPkg implementation.
