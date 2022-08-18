@@ -6,7 +6,7 @@
   PACKAGE_GUID                   = 63e7fa40-f83b-4a0e-bf4f-42916909f033
   PACKAGE_VERSION                = 1.0
 
-[Includes]
+[Includes.common]
   Include
 
 [Guids.common]
@@ -30,8 +30,12 @@
   #Number of Cores (this is static per SoC)
   gM1PkgTokenSpaceGuid.PcdCoreCount|8|UINT32|0x00004406
 
+  gM1PkgTokenSpaceGuid.PcdAicV1InterruptControllerBase|0|UINT64|0x00004407
+
   #File name GUID for frontpage app
-  gM1PkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }|VOID*|0x00004407
+  gM1PkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }|VOID*|0x00004408
 [PcdsPatchableInModule.common]
   #saved FDT pointer from loader boot
-  gM1PkgTokenSpaceGuid.PcdFdtPointer|0|UINT64|0x00004408
+  gM1PkgTokenSpaceGuid.PcdFdtPointer|0|UINT64|0x00004409
+
+  
