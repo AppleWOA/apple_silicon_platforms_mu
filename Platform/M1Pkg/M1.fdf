@@ -137,7 +137,7 @@ READ_LOCK_STATUS   = TRUE
   INF ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
   INF ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !else 
-  INF M1Pkg/Drivers/AppleAicV1Dxe/AppleAicV1Dxe.inf
+  INF M1Pkg/Drivers/AppleAicDxe/AppleAicDxe.inf
 !endif
   INF MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
 
