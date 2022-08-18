@@ -15,6 +15,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   ArmPkg/ArmPkg.dec
+  M1Pkg/M1Pkg.dec
 
 [LibraryClasses]
   ArmLib

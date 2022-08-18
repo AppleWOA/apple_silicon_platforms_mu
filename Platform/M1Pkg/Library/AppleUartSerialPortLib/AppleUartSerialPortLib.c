@@ -127,7 +127,7 @@ UINT32 AppleSerialPortCalculateBaudRateConfig(VOID)
     return (((UART_CLOCK / BaudRate + 7) / 16) - 1);
 }
 
-UINTN EFIAPI SerialPortFlush(VOID)
+UINTN SerialPortFlush(VOID)
 {
     while(!(MmioRead32(AppleUARTBaseAddress + UART_TRANSFER_STATUS) & UART_TRANSFER_STATUS_TXE))
     {
