@@ -7,12 +7,15 @@
   ENTRY_POINT                    = SmBiosTableDxeInitialize
 
 [Sources.common]
-  SmBiosInfoDxe.c
+  SmbiosInfoDxe.c
+
+[PatchPcd]
+  gArmTokenSpaceGuid.PcdSystemMemorySize
+  gM1PkgTokenSpaceGuid.PcdFdtPointer
 
 [FixedPcd]
   gM1PkgTokenSpaceGuid.PcdCoreCount
   gArmTokenSpaceGuid.PcdSystemMemoryBase
-  gArmTokenSpaceGuid.PcdSystemMemorySize
   
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -34,7 +37,6 @@
 
 [Protocols]
   gEfiSmbiosProtocolGuid
-  gEfiChipInfoProtocolGuid
   
 [Depex]
   gEfiSmbiosProtocolGuid

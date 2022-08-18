@@ -799,9 +799,9 @@ VOID MemDevInfoUpdateSmbiosType17(VOID)
 VOID MemArrMapInfoUpdateSmbiosType19(VOID)
 {
   mMemArrMapInfoType19.StartingAddress =
-      FixedPcdGet32(PcdSystemMemoryBase) / 1024;
+      FixedPcdGet64(PcdSystemMemoryBase) / 1024;
   mMemArrMapInfoType19.EndingAddress =
-      (FixedPcdGet32(PcdSystemMemorySize) + FixedPcdGet32(PcdSystemMemoryBase) -
+      (PatchPcdGet64(PcdSystemMemorySize) + FixedPcdGet64(PcdSystemMemoryBase) -
        1) /
       1024;
 
