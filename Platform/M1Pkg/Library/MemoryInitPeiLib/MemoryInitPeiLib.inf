@@ -32,7 +32,6 @@
   DebugLib
   HobLib
   ArmMmuLib
-  ArmPlatformLib
 
 [Guids]
   gEfiMemoryTypeInformationGuid
@@ -55,9 +54,9 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesData
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData
-
-[Pcd]
   gArmTokenSpaceGuid.PcdSystemMemoryBase
+
+[PatchPcd]
   gArmTokenSpaceGuid.PcdSystemMemorySize
 
 [Depex]

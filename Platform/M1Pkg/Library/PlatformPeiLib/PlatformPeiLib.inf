@@ -29,7 +29,6 @@
 [LibraryClasses]
   DebugLib
   HobLib
-  ArmPlatformLib
 
 [Ppis]
   gEfiPeiMasterBootModePpiGuid                  # PPI ALWAYS_PRODUCED
