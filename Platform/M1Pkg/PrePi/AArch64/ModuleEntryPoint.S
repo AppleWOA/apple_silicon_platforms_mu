@@ -91,11 +91,13 @@ _SetupOverflowStack:
 _GetBaseUefiMemory:
   // Calculate the Base of the UEFI Memory
   sub   x11, x1, x4
+  // backup EFI memory base pointer
+  mov x22, x11
 
 _GetStackBase:
   // Stack for the primary core = SecPhaseStack (base address in x12)
   //TODO - make the PCD value work properly, for now hardcode this value.
-  MOV32 (x2, 0x10000)
+  MOV32 (x2, 0x20000)
   sub   x12, x1, x2
 
 _StackSetup:
@@ -125,7 +127,7 @@ _PrepareArgumentsAndJump:
   mov x0, x12 //Stack Base
   mov x1, x2  //Stack Size
   mov x2, x20 //DeviceTree pointer
-  mov x3, x11 //UEFI memory base
+  mov x3, x22 //UEFI memory base
 
   bl CEntryPoint
 
