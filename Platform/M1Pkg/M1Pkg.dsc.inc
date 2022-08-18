@@ -18,8 +18,9 @@
 
 
 [BuildOptions.common]
-  # use Clang to compile
+  # use Clang to compile, try to use GCC5 otherwise
   *_CLANG38_AARCH64_CC_FLAGS = -Wno-unused-const-variable -Wno-sometimes-uninitialized -D CLANG
+  *_GCC5_AARCH64_CC_FLAGS = -Wno-unused-const-variable -Wno-sometimes-uninitialized -D GCC
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS  
 
 [PcdsFeatureFlag.common]
@@ -42,7 +43,7 @@
   gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18 #IRQ timer INTID
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
-  #On all M1 models, these addresses are completely unmapped and point to nowhere
+  #On all M1 and M2 models, these addresses are completely unmapped and point to nowhere
   #m1n1 will trap accesses to these addresses, which will emulate the vGIC dist/redist
   gArmTokenSpaceGuid.PcdGicDistributorBase|0xf00000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xf10000000
@@ -129,7 +130,12 @@
   ArmLib    |ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmMmuLib |ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
   ArmGenericTimerCounterLib  |ArmPkg/Library/ArmGenericTimerPhyCounterLib/ArmGenericTimerPhyCounterLib.inf
+  ArmDisassemblerLib|ArmPkg/Library/ArmDisassemblerLib/ArmDisassemblerLib.inf
+!if $(AIC_BUILD) == FALSE
   ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
+!else
+  AppleAicLib  |M1Pkg/Drivers/AppleAicDxe/AppleAicLib.inf
+!endif
   ArmHvcLib  |ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
   ArmSmcLib  |ArmPkg/Library/ArmSmcLibNull/ArmSmcLibNull.inf
   AppleArmGxfHvcLib  |M1Pkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
@@ -152,6 +158,7 @@
   DebugPrintErrorLevelLib  |MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   DxeServicesLib  |MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
   DxeServicesTableLib  |MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
+  ExtractGuidedSectionLib  |EmbeddedPkg/Library/PrePiExtractGuidedSectionLib/PrePiExtractGuidedSectionLib.inf
   FileExplorerLib  |MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
   FdtLib  |EmbeddedPkg/Library/FdtLib/FdtLib.inf
   FrameBufferBltLib  |MdeModulePkg/Library/FrameBufferBltLib/FrameBufferBltLib.inf
@@ -172,6 +179,7 @@
   PrePiHobListPointerLib  |ArmPlatformPkg/Library/PrePiHobListPointerLib/PrePiHobListPointerLib.inf
   PrePiMemoryAllocationLib  |EmbeddedPkg/Library/PrePiMemoryAllocationLib/PrePiMemoryAllocationLib.inf
   PrintLib  |MdePkg/Library/BasePrintLib/BasePrintLib.inf
+  RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
   ReportStatusCodeLib  |MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
   OrderedCollectionLib  |MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
   SafeIntLib  |MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
@@ -192,17 +200,15 @@
   VariablePolicyLib  |MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
   VariablePolicyHelperLib  |MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
   TimeBaseLib  |EmbeddedPkg/Library/TimeBaseLib/TimeBaseLib.inf
-  
-
-#services required for UEFI secure boot
-!if $(SECURE_BOOT_ENABLE) == TRUE
+  SecureBootVariableLib  |SecurityPkg/Library/SecureBootVariableLib/SecureBootVariableLib.inf
+  SecureBootVariableProvisionLib  |SecurityPkg/Library/SecureBootVariableProvisionLib/SecureBootVariableProvisionLib.inf
   RngLib  |MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
   IntrinsicLib  |CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
   OpensslLib  |CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
   PlatformSecureLib  |SecurityPkg/Library/PlatformSecureLibNull/PlatformSecureLibNull.inf
+#services required for UEFI secure boot
+!if $(SECURE_BOOT_ENABLE) == TRUE
   AuthVariableLib  |SecurityPkg/Library/AuthVariableLib/AuthVariableLib.inf
-  SecureBootVariableLib  |SecurityPkg/Library/SecureBootVariableLib/SecureBootVariableLib.inf
-  SecureBootVariableProvisionLib  |SecurityPkg/Library/SecureBootVariableProvisionLib/SecureBootVariableProvisionLib.inf
 !else
   AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
 !endif
@@ -218,7 +224,8 @@
   SecurityLockAuditLib  |MdeModulePkg/Library/SecurityLockAuditLibNull/SecurityLockAuditLibNull.inf
   ResetSystemLib  |M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
-
+  SerialPortLib|M1Pkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
+  CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
   #Platform specific drivers
   HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
@@ -231,6 +238,7 @@
   PlatformPKProtectionLib|SecurityPkg/Library/PlatformPKProtectionLibVarPolicy/PlatformPKProtectionLibVarPolicy.inf
 
   BaseCryptLib  |CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+  Hash2CryptoLib  |SecurityPkg/Library/BaseHash2CryptoLibNull/BaseHash2CryptoLibNull.inf
   CapsulePersistLib  |MdeModulePkg/Library/CapsulePersistLibNull/CapsulePersistLibNull.inf
   DebugAgentTimerLib  |EmbeddedPkg/Library/DebugAgentTimerLibNull/DebugAgentTimerLibNull.inf
 
@@ -260,7 +268,11 @@
   PasswordPolicyLib  |OemPkg/Library/PasswordPolicyLib/PasswordPolicyLib.inf
   PlatformBootManagerLib  |MsCorePkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
 
-  #SecureBootKeyStoreLib  |M1Pkg/Library/SecureBootKeyStoreLib/SecureBootKeyStoreLib.inf
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  SecureBootKeyStoreLib  |M1Pkg/Library/SecureBootKeyStoreLib/SecureBootKeyStoreLib.inf
+!else
+  SecureBootKeyStoreLib  |MsCorePkg/Library/SecureBootKeyStoreLibNull/SecureBootKeyStoreLibNull.inf
+!endif
 
   PlatformThemeLib  |MsGraphicsPkg/Library/SamplePlatformThemeLib/PlatformThemeLib.inf
   ReportStatusCodeLib  |MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
@@ -274,7 +286,7 @@
 
 [LibraryClasses.common.SEC]
 
-  HobLib  |MdePkg/Library/PeiHobLib/PeiHobLib.inf
+  HobLib  |EmbeddedPkg/Library/PrePiHobLib/PrePiHobLib.inf
   MemoryAllocationLib  |EmbeddedPkg/Library/PrePiMemoryAllocationLib/PrePiMemoryAllocationLib.inf
   PrePiMemoryAllocationLib  |EmbeddedPkg/Library/PrePiMemoryAllocationLib/PrePiMemoryAllocationLib.inf
   PrePiHobListPointerLib  |ArmPlatformPkg/Library/PrePiHobListPointerLib/PrePiHobListPointerLib.inf
@@ -292,6 +304,9 @@
   DxeServicesLib  |MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
   MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
   MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+  PciSegmentLib|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf
+  PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
 
 [LibraryClasses.common.DXE_DRIVER]
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
@@ -301,6 +316,9 @@
   HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+  PciSegmentLib|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf
+  PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
@@ -319,6 +337,9 @@
   ExtractGuidedSectionLib  |MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
   MsUiThemeLib                  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
   MsPlatformEarlyGraphicsLib    |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+  PciSegmentLib|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf
+  PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
@@ -334,6 +355,9 @@
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
   MsUiThemeLib  |MsGraphicsPkg/Library/MsUiThemeLib/Dxe/MsUiThemeLib.inf
   MsPlatformEarlyGraphicsLib  |MsGraphicsPkg/Library/MsEarlyGraphicsLibNull/Dxe/MsEarlyGraphicsLibNull.inf
+  PciSegmentLib|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf
+  PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
@@ -392,7 +416,11 @@
   ArmPkg/Drivers/CpuDxe/CpuDxe.inf
   #TODO: Timers are FIQs, *not* IRQs, fixup FIQ handling, ditto for IPIs on AICv2
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
+!if $(AIC_BUILD) == FALSE
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
+!else
+  M1Pkg/Drivers/AppleAicDxe/AppleAicDxe.inf
+!endif
   MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
@@ -402,6 +430,12 @@
   MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
   EmbeddedPkg/EmbeddedMonotonicCounter/EmbeddedMonotonicCounter.inf
 
+  # Fake Variable Services
+  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
+
+  MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
+  MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
+  MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
 
   # Security Stub
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf {
@@ -413,21 +447,26 @@
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
-  SurfaceDuoPkg/Driver/SecureBootProvisioningDxe/SecureBootProvisioningDxe.inf
+  #M1Pkg/Driver/SecureBootProvisioningDxe/SecureBootProvisioningDxe.inf
 !endif
 
   MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
 
+  # PCIe
+  #MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
+  #MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+
 
   # Disk IO
   #M1Pkg TODO: ANS2/SART drivers 
+  MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
   MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
   MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
   MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
   FatPkg/EnhancedFatDxe/Fat.inf
   MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
   MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
-  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
+  #MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
 
   # USB 2.0/3.0 support (this should be OOB working since Apple uses a Synopsys controller)
   # required for booting off USB mass storage devices
@@ -435,9 +474,9 @@
   MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
   MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
   MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
-  MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
-  MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
-  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
+  #MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
+  #MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
+  #MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
 
   # DT
   EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
@@ -445,6 +484,7 @@
   EmbeddedPkg/Drivers/VirtualKeyboardDxe/VirtualKeyboardDxe.inf
 
   # BDS
+  MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
   MdeModulePkg/Universal/PrintDxe/PrintDxe.inf
   MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
   MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
@@ -463,11 +503,17 @@
   MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
 
   #SMBIOS information
-  M1Pkg/Drivers/SmBiosPlatformDxe/SmBiosPlatformDxe.inf
+  M1Pkg/Library/SmbiosInfoDxe/SmbiosInfoDxe.inf
 
   #Miscellaneous
   MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe.inf
   MdeModulePkg/Universal/StatusCodeHandler/RuntimeDxe/StatusCodeHandlerRuntimeDxe.inf
+  MsCorePkg/Universal/StatusCodeHandler/Serial/Dxe/SerialStatusCodeHandlerDxe.inf
   EmbeddedPkg/SimpleTextInOutSerial/SimpleTextInOutSerial.inf
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  MsCorePkg/MuCryptoDxe/MuCryptoDxe.inf
+  CryptoPkg/Driver/CryptoDxe.inf
+!endif
+  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
 
