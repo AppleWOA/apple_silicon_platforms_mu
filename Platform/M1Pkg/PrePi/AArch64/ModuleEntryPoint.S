@@ -39,7 +39,7 @@ _memcpy_loop:
   ldp	   x2, x3, [x4], #16
   stp	   x2, x3, [x6], #16
   subs   x5, x5, #16
-  b.ne   _CopyLoop
+  b.ne   _memcpy_loop
 
 _ModuleEntrySetupStack:
 
@@ -94,7 +94,8 @@ _GetBaseUefiMemory:
 
 _GetStackBase:
   // Stack for the primary core = SecPhaseStack (base address in x12)
-  MOV32 (x2, FixedPcdGet32(PcdSecPhaseStackSize))
+  //TODO - make the PCD value work properly, for now hardcode this value.
+  MOV32 (x2, 0x10000)
   sub   x12, x1, x2
 
 _StackSetup:

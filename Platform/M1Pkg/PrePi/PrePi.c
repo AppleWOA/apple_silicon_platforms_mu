@@ -33,7 +33,11 @@
 #include <Library/PrePiLib.h>
 #include <Library/SerialPortLib.h>
 
-VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN VOID *UefiMemoryBase)
+UINT32 InitializeUART(VOID);
+
+VOID EFIAPI ProcessLibraryConstructorList(VOID);
+
+VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UINT64 UefiMemoryBase)
 {
     EFI_HOB_HANDOFF_INFO_TABLE  *HobList;
     EFI_STATUS Status;
@@ -43,16 +47,24 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN VOI
 
     DEBUG(
       (EFI_D_INFO | EFI_D_LOAD,
-       "UEFI Memory Base = 0x%p, Size = 0x%llx, Stack Base = 0x%p, Stack "
+       "UEFI Memory Base = 0x%llx, Size = 0x%llx, Stack Base = 0x%p, Stack "
        "Size = 0x%llx\n",
        UefiMemoryBase, UefiMemoryLength, StackBase, StackSize));
+    
+    DEBUG(
+        (DEBUG_INFO,
+        "Flattened Device Tree Pointer: 0x%p\n",
+        DeviceTreePtr));
+    
+    PatchPcdSet64(PcdFdtPointer, (UINT64)DeviceTreePtr);
+
 
     DEBUG((DEBUG_INFO, "Setting up DXE Hand-Off Blocks.\n"));
 
     HobList = HobConstructor(
-        UefiMemoryBase,
+        (VOID *)UefiMemoryBase,
         UefiMemoryLength,
-        UefiMemoryBase,
+        (VOID *)UefiMemoryBase,
         StackBase
     );
 
@@ -116,7 +128,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN VOI
     CpuDeadLoop();
 }
 
-VOID CEntryPoint(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN VOID *UefiMemoryBase)
+VOID CEntryPoint(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UINT64 UefiMemoryBase)
 {
     Main(StackBase, StackSize, DeviceTreePtr, UefiMemoryBase);
 }
@@ -125,7 +137,10 @@ VOID CEntryPoint(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr,
 UINT32 InitializeUART(VOID)
 {
     SerialPortInitialize();
-    DEBUG((DEBUG_INFO, "M1 Project Mu Firmware (arm64e), version 1.0-alpha\n"));
+    DEBUG(
+        (DEBUG_INFO, 
+        "M1 Project Mu Firmware (arm64e), version 1.0-alpha\n")
+        );
     DEBUG((DEBUG_INFO, "If you can see this message, this means the UART works!!!\n"));
     return EFI_SUCCESS;
 }
