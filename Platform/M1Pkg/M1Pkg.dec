@@ -24,8 +24,8 @@
   # RAM reservation (128 MB reserved for EFI FD image)
   gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000|UINT32|0x00004404
 
-  # Stack stuff (64k stack by default)
-  gM1PkgTokenSpaceGuid.PcdSecPhaseStackSize|0x10000|UINT32|0x00004405
+  # Stack stuff (128k stack by default)
+  gM1PkgTokenSpaceGuid.PcdSecPhaseStackSize|0x20000|UINT32|0x00004405
 
   #Number of Cores (this is static per SoC)
   gM1PkgTokenSpaceGuid.PcdCoreCount|8|UINT32|0x00004406
