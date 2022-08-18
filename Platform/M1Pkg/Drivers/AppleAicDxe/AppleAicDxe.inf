@@ -1,0 +1,59 @@
+
+# AIC DXE driver - AppleAicDxe
+# Based off ArmGicDxe, original copyright notice below
+# Copyright (c) 2022, amarioguy (Arminder Singh)
+#/** @file
+#
+#  Copyright (c) 2008 - 2010, Apple Inc. All rights reserved.<BR>
+#  Copyright (c) 2012 - 2017, ARM Ltd. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AppleAicDxe
+  FILE_GUID                      = 8ef405fd-6b51-438f-93d4-255bf796babc
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+
+  ENTRY_POINT                    = InterruptDxeInitialize
+
+[Sources.common]
+  AppleAicDxe.h
+  AppleAicDxe.c
+  AppleAicCommonDxe.c
+
+  AicV1/AppleAicV1Dxe.c
+  AicV2/AppleAicV2Dxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  ArmPkg/ArmPkg.dec
+  M1Pkg/M1Pkg.dec
+
+[LibraryClasses]
+  ArmGicLib
+  BaseLib
+  UefiLib
+  UefiBootServicesTableLib
+  DebugLib
+  PrintLib
+  MemoryAllocationLib
+  UefiDriverEntryPoint
+  IoLib
+  PcdLib
+  UefiLib
+
+[Protocols]
+  gHardwareInterruptProtocolGuid  ## PRODUCES
+  gHardwareInterrupt2ProtocolGuid ## PRODUCES
+  gEfiCpuArchProtocolGuid         ## CONSUMES ## NOTIFY
+
+[Pcd.common]
+  gM1PkgTokenSpaceGuid.PcdAicV1InterruptControllerBase
+
+[Depex]
+  TRUE
