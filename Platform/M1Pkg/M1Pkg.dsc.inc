@@ -80,7 +80,6 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesData|800
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode|10
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData|0
-  gEmbeddedTokenSpaceGuid.PcdPrePiStackSize|0x00020000      # 128K stack
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|36
   
   #PCIe settings
@@ -93,7 +92,7 @@
 
   #EFI debug settings
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x800fee0f
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x807B57FF
 
   #variable size
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x2000
