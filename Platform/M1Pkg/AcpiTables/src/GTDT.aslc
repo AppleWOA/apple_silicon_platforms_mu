@@ -1,0 +1,23 @@
+/**
+ * GTDT.aslc
+ * @author amarioguy (arminders208@outlook.com)
+ * 
+ * Generic Timer Descriptor Table for Apple Silicon platforms.
+ * 
+ * @date 2022-08-07
+ * 
+ * @copyright Copyright amarioguy (Arminder Singh) (c) 2022. All rights reserved.
+ * 
+ * SPDX-License-Identifier: BSD-2-Clause-Patent
+ * 
+ */
+
+
+#include <Library/AcpiLib.h>
+#include <Library/PcdLib.h>
+#include <IndustryStandard/Acpi.h>
+
+#define GTDT_GLOBAL_FLAGS_MAPPED      EFI_ACPI_6_4_GTDT_GLOBAL_FLAG_MEMORY_MAPPED_BLOCK_PRESENT
+#define GTDT_GLOBAL_FLAGS_NOT_MAPPED  0
+#define GTDT_GLOBAL_FLAGS_EDGE        0
+#define GTDT_GLOBAL_FLAGS_LEVEL       EFI_ACPI_6_4_GTDT_TIMER_FLAG_TIMER_INTERRUPT_MODE

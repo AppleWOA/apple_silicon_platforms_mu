@@ -1,0 +1,17 @@
+/**
+ * DBG2.aslc
+ * @author amarioguy (Arminder Singh)
+ * 
+ * Debug Port 2 Table (This is required to allow Windows to use a specified port for kernel debugging)
+ *
+ * Copyright (c) amarioguy (Arminder Singh) 2022. All rights reserved.
+ * 
+ * SPDX-License-Identifier: BSD-2-Clause-Patent
+ * 
+ */
+
+#include <Library/AcpiLib.h>
+#include <Library/ArmLib.h>
+#include <Library/PcdLib.h>
+#include <IndustryStandard/Acpi.h>
+#include <IndustryStandard/DebugPort2Table.h>
