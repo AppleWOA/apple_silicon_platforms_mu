@@ -28,6 +28,7 @@
   BaseLib
   DebugLib
   IoLib
+  FdtLib
   ExtractGuidedSectionLib
   LzmaDecompressLib
   PeCoffGetEntryPointLib
@@ -38,6 +39,7 @@
   MemoryAllocationLib
   PrePiMemoryAllocationLib
   PerformanceLib
+  PeCoffLib
   HobLib
   CompilerIntrinsicsLib
   # These pertain to HOB setup
@@ -49,20 +51,20 @@
   gEfiVariableGuid
 
 [PatchPcd]
-  gArmTokenSpaceGuid.PcdSystemMemorySize
-  gM1PkgTokenSpaceGuid.PcdFdtPointer
-
-[FixedPcd]
   #System RAM
   gArmTokenSpaceGuid.PcdSystemMemoryBase
+  gArmTokenSpaceGuid.PcdSystemMemorySize
+  gM1PkgTokenSpaceGuid.PcdFdtPointer
+  gArmTokenSpaceGuid.PcdFvBaseAddress
+  gArmTokenSpaceGuid.PcdFdBaseAddress
+
+[FixedPcd]
   #CPU exception vectors
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress
 
   #FV settings
-  gArmTokenSpaceGuid.PcdFvBaseAddress
   gArmTokenSpaceGuid.PcdFvSize
   #FD (aka actual image) settings
-  gArmTokenSpaceGuid.PcdFdBaseAddress
   gArmTokenSpaceGuid.PcdFdSize
 
   gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
