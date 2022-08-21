@@ -15,8 +15,6 @@
 
 [PcdsFixedAtBuild.common]
 
-  #Framebuffer
-  gM1PkgTokenSpaceGuid.PcdFrameBufferAddress|0x9e20dc000|UINT64|0x00004400
   gM1PkgTokenSpaceGuid.PcdFrameBufferWidth|2560|UINT32|0x00004401
   gM1PkgTokenSpaceGuid.PcdFrameBufferHeight|1600|UINT32|0x00004402
   gM1PkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30|UINT32|0x00004403
@@ -26,6 +24,8 @@
 
   # Stack stuff (128k stack by default)
   gM1PkgTokenSpaceGuid.PcdSecPhaseStackSize|0x20000|UINT32|0x00004405
+  #Fallback stack base in case ModuleEntryPoint setup won't work.
+  gM1PkgTokenSpaceGuid.PcdSecPhaseStackBase|0x900000000|UINT64|0x0000440b
 
   #Number of Cores (this is static per SoC)
   gM1PkgTokenSpaceGuid.PcdCoreCount|8|UINT32|0x00004406
@@ -37,5 +37,8 @@
 [PcdsPatchableInModule.common]
   #saved FDT pointer from loader boot
   gM1PkgTokenSpaceGuid.PcdFdtPointer|0|UINT64|0x00004409
+
+  #Framebuffer (this will be filled in by the loader)
+  gM1PkgTokenSpaceGuid.PcdFrameBufferAddress|0x9e20dc000|UINT64|0x00004400
 
   
