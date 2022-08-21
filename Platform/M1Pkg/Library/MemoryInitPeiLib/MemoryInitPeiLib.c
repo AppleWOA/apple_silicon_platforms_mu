@@ -23,6 +23,7 @@
 #include <Library/HobLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
+#include <Library/IoLib.h>
 
 //Device memory map configuration file for UEFI (this is to help with pagetable initialization)
 #include <Configuration/DeviceMemoryMap.h>
@@ -37,81 +38,159 @@ STATIC VOID InitMmu(IN ARM_MEMORY_REGION_DESCRIPTOR *MemoryTable)
 
     DEBUG(
         (DEBUG_INFO, 
-        "MemoryInitPeiLib: Enabling MMU, Page Table Base: 0x%p, Page Table Size: 0x%p", 
+        "MemoryInitPeiLib: Enabling MMU, Page Table Base: 0x%p, Page Table Size: 0x%p\n", 
         &MemoryTranslationTableBase, &MemoryTranslationTableBase)
         );
     StatusCode = ArmConfigureMmu(MemoryTable, &MemoryTranslationTableBase, &MemoryTranslationTableSize);
 
     if(EFI_ERROR(StatusCode))
     {
-        DEBUG((DEBUG_ERROR | DEBUG_INFO, "MemoryInitPeiLib: MMU enable failed!! Status: %llx", StatusCode));
+        DEBUG((DEBUG_ERROR | DEBUG_INFO, "MemoryInitPeiLib: MMU enable failed!! Status: %llx\n", StatusCode));
     }
-}
-
-STATIC
-VOID AddHob(PARM_MEMORY_REGION_DESCRIPTOR_EX Desc)
-{
-  BuildResourceDescriptorHob(
-      Desc->ResourceType, Desc->ResourceAttribute, Desc->Address, Desc->Length);
-
-  if (Desc->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY ||
-      Desc->MemoryType == EfiRuntimeServicesData)
-  {
-    BuildMemoryAllocationHob(Desc->Address, Desc->Length, Desc->MemoryType);
-  }
 }
 
 EFI_STATUS EFIAPI MemoryPeim(IN EFI_PHYSICAL_ADDRESS UefiMemoryBase, IN UINT64 UefiMemorySize)
 {
-    PARM_MEMORY_REGION_DESCRIPTOR_EX MemoryDescriptorEx = gDeviceMemoryDescriptorEx;
-    ARM_MEMORY_REGION_DESCRIPTOR MemoryDescriptor[MAX_ARM_MEMORY_REGION_DESCRIPTOR_COUNT];
-    UINTN Index = 0;
+  ARM_MEMORY_REGION_DESCRIPTOR  *MemoryTable;
+  ARM_MEMORY_REGION_DESCRIPTOR  **VirtualMemoryMap;
+  EFI_RESOURCE_ATTRIBUTE_TYPE   ResourceAttributes;
+  UINT64                        ResourceLength;
+  EFI_PEI_HOB_POINTERS          NextHob;
+  EFI_PHYSICAL_ADDRESS          FdTop;
+  EFI_PHYSICAL_ADDRESS          SystemMemoryTop;
+  EFI_PHYSICAL_ADDRESS          ResourceTop;
+  BOOLEAN                       Found;
 
-    //assert that PcdSystemMemorySize is set
-    ASSERT(PcdGet64(PcdSystemMemorySize) != 0);
-    DEBUG(
-        (DEBUG_INFO,
-        "Setting up memory HOB with UEFI memory base @ 0x%llx, size 0x%llx",
-        UefiMemoryBase,
-        UefiMemorySize)
-        );
-    // Run through each memory descriptor
-    while (MemoryDescriptorEx->Length != 0) {
-        switch (MemoryDescriptorEx->HobOption) {
-        case AddMem:
-        case AddDev:
-            AddHob(MemoryDescriptorEx);
-            break;
-        case NoHob:
-        default:
-            goto update;
+  // build up virtual memory map
+
+  // Ensure PcdSystemMemorySize has been set
+  ASSERT (PcdGet64 (PcdSystemMemorySize) != 0);
+
+  //
+  // Now, the permanent memory has been installed, we can call AllocatePages()
+  //
+  ResourceAttributes = (
+                        EFI_RESOURCE_ATTRIBUTE_PRESENT |
+                        EFI_RESOURCE_ATTRIBUTE_INITIALIZED |
+                        EFI_RESOURCE_ATTRIBUTE_WRITE_COMBINEABLE |
+                        EFI_RESOURCE_ATTRIBUTE_WRITE_THROUGH_CACHEABLE |
+                        EFI_RESOURCE_ATTRIBUTE_WRITE_BACK_CACHEABLE |
+                        EFI_RESOURCE_ATTRIBUTE_TESTED
+                        );
+
+  //
+  // Check if the resource for the main system memory has been declared
+  //
+  Found       = FALSE;
+  NextHob.Raw = GetHobList ();
+  while ((NextHob.Raw = GetNextHob (EFI_HOB_TYPE_RESOURCE_DESCRIPTOR, NextHob.Raw)) != NULL) {
+    if ((NextHob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) &&
+        (PcdGet64 (PcdSystemMemoryBase) >= NextHob.ResourceDescriptor->PhysicalStart) &&
+        (NextHob.ResourceDescriptor->PhysicalStart + NextHob.ResourceDescriptor->ResourceLength <= PcdGet64 (PcdSystemMemoryBase) + PcdGet64 (PcdSystemMemorySize)))
+    {
+      Found = TRUE;
+      break;
     }
 
-  update:
-    ASSERT(Index < MAX_ARM_MEMORY_REGION_DESCRIPTOR_COUNT);
-
-    MemoryDescriptor[Index].PhysicalBase = MemoryDescriptorEx->Address;
-    MemoryDescriptor[Index].VirtualBase  = MemoryDescriptorEx->Address;
-    MemoryDescriptor[Index].Length       = MemoryDescriptorEx->Length;
-    MemoryDescriptor[Index].Attributes   = MemoryDescriptorEx->ArmAttributes;
-
-    Index++;
-    MemoryDescriptorEx++;
+    NextHob.Raw = GET_NEXT_HOB (NextHob);
   }
 
-  // Last one (terminator)
-  ASSERT(Index < MAX_ARM_MEMORY_REGION_DESCRIPTOR_COUNT);
-  MemoryDescriptor[Index].PhysicalBase = 0;
-  MemoryDescriptor[Index].VirtualBase  = 0;
-  MemoryDescriptor[Index].Length       = 0;
-  MemoryDescriptor[Index].Attributes   = 0;
-  
-  DEBUG((DEBUG_INFO, "Configuring MMU now\n"));
-  InitMmu(MemoryDescriptor);
+  if (!Found) {
+    // Reserved the memory space occupied by the firmware volume
+    BuildResourceDescriptorHob (
+      EFI_RESOURCE_SYSTEM_MEMORY,
+      ResourceAttributes,
+      PcdGet64 (PcdSystemMemoryBase),
+      PcdGet64 (PcdSystemMemorySize)
+      );
+  }
 
-  if (FeaturePcdGet(PcdPrePiProduceMemoryTypeInformationHob)) {
+  //
+  // Reserved the memory space occupied by the firmware volume
+  //
+
+  SystemMemoryTop = (EFI_PHYSICAL_ADDRESS)PcdGet64 (PcdSystemMemoryBase) + (EFI_PHYSICAL_ADDRESS)PcdGet64 (PcdSystemMemorySize);
+  FdTop           = (EFI_PHYSICAL_ADDRESS)PcdGet64 (PcdFdBaseAddress) + (EFI_PHYSICAL_ADDRESS)PcdGet32 (PcdFdSize);
+
+  // EDK2 does not have the concept of boot firmware copied into DRAM. To avoid the DXE
+  // core to overwrite this area we must create a memory allocation HOB for the region,
+  // but this only works if we split off the underlying resource descriptor as well.
+  if ((PcdGet64 (PcdFdBaseAddress) >= PcdGet64 (PcdSystemMemoryBase)) && (FdTop <= SystemMemoryTop)) {
+    Found = FALSE;
+
+    // Search for System Memory Hob that contains the firmware
+    NextHob.Raw = GetHobList ();
+    while ((NextHob.Raw = GetNextHob (EFI_HOB_TYPE_RESOURCE_DESCRIPTOR, NextHob.Raw)) != NULL) {
+      if ((NextHob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) &&
+          (PcdGet64 (PcdFdBaseAddress) >= NextHob.ResourceDescriptor->PhysicalStart) &&
+          (FdTop <= NextHob.ResourceDescriptor->PhysicalStart + NextHob.ResourceDescriptor->ResourceLength))
+      {
+        ResourceAttributes = NextHob.ResourceDescriptor->ResourceAttribute;
+        ResourceLength     = NextHob.ResourceDescriptor->ResourceLength;
+        ResourceTop        = NextHob.ResourceDescriptor->PhysicalStart + ResourceLength;
+
+        if (PcdGet64 (PcdFdBaseAddress) == NextHob.ResourceDescriptor->PhysicalStart) {
+          if (SystemMemoryTop != FdTop) {
+            // Create the System Memory HOB for the firmware
+            BuildResourceDescriptorHob (
+              EFI_RESOURCE_SYSTEM_MEMORY,
+              ResourceAttributes,
+              PcdGet64 (PcdFdBaseAddress),
+              PcdGet32 (PcdFdSize)
+              );
+
+            // Top of the FD is system memory available for UEFI
+            NextHob.ResourceDescriptor->PhysicalStart  += PcdGet32 (PcdFdSize);
+            NextHob.ResourceDescriptor->ResourceLength -= PcdGet32 (PcdFdSize);
+          }
+        } else {
+          // Create the System Memory HOB for the firmware
+          BuildResourceDescriptorHob (
+            EFI_RESOURCE_SYSTEM_MEMORY,
+            ResourceAttributes,
+            PcdGet64 (PcdFdBaseAddress),
+            PcdGet32 (PcdFdSize)
+            );
+
+          // Update the HOB
+          NextHob.ResourceDescriptor->ResourceLength = PcdGet64 (PcdFdBaseAddress) - NextHob.ResourceDescriptor->PhysicalStart;
+
+          // If there is some memory available on the top of the FD then create a HOB
+          if (FdTop < NextHob.ResourceDescriptor->PhysicalStart + ResourceLength) {
+            // Create the System Memory HOB for the remaining region (top of the FD)
+            BuildResourceDescriptorHob (
+              EFI_RESOURCE_SYSTEM_MEMORY,
+              ResourceAttributes,
+              FdTop,
+              ResourceTop - FdTop
+              );
+          }
+        }
+
+        // Mark the memory covering the Firmware Device as boot services data
+        BuildMemoryAllocationHob (
+          PcdGet64 (PcdFdBaseAddress),
+          PcdGet32 (PcdFdSize),
+          EfiBootServicesData
+          );
+
+        Found = TRUE;
+        break;
+      }
+
+      NextHob.Raw = GET_NEXT_HOB (NextHob);
+    }
+
+    ASSERT (Found);
+  }
+
+  // Build Memory Allocation Hob
+  InitMmu (MemoryTable);
+
+  if (FeaturePcdGet (PcdPrePiProduceMemoryTypeInformationHob)) {
     // Optional feature that helps prevent EFI memory map fragmentation.
-    BuildMemoryTypeInformationHob();
+    BuildMemoryTypeInformationHob ();
   }
+
   return EFI_SUCCESS;
 }
