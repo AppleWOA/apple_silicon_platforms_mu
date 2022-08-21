@@ -41,14 +41,11 @@
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=8103
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
 
-
-[PcdsFixedAtBuild.common]
-
-  #ARM architectural settings, fixed at build time
-  gArmTokenSpaceGuid.PcdSystemMemoryBase|0x800000000
-
 [PcdsPatchableInModule.common]
+  #These will get overriden by the FDT settings
+  gArmTokenSpaceGuid.PcdSystemMemoryBase|0x800000000
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x200000000 #8GB RAM space by default
+  gM1PkgTokenSpaceGuid.PcdFdtPointer|0x810000000
   
 !include M1Pkg/M1Pkg.dsc.inc
 !include M1Pkg/FrontpageDsc.inc
