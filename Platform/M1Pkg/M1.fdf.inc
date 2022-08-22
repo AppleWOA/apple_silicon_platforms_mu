@@ -46,6 +46,12 @@
     TE  TE Align = Auto                 $(INF_OUTPUT)/$(MODULE_NAME).efi
   }
 
+[Rule.Common.SEC.SELF_RELOC]
+  FILE SEC = $(NAMED_GUID) {
+    TE  TE Align = Auto             $(INF_OUTPUT)/$(MODULE_NAME).efi
+  }
+
+
 [Rule.Common.PEI_CORE]
   FILE PEI_CORE = $(NAMED_GUID) FIXED {
     TE     TE Align = Auto              $(INF_OUTPUT)/$(MODULE_NAME).efi
