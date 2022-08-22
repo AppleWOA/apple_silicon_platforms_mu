@@ -10,6 +10,7 @@
 
 
 [Sources.common]
+  FdtParser.c
   PrePi.c
 
 [Sources.AARCH64]
