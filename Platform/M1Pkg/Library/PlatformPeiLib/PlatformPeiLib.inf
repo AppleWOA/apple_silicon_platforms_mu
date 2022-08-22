@@ -34,11 +34,13 @@
   gEfiPeiMasterBootModePpiGuid                  # PPI ALWAYS_PRODUCED
   gEfiPeiBootInRecoveryModePpiGuid              # PPI SOMETIMES_PRODUCED
 
-[FixedPcd]
+[Pcd]
   gArmTokenSpaceGuid.PcdFdBaseAddress
-  gArmTokenSpaceGuid.PcdFdSize
-
   gArmTokenSpaceGuid.PcdFvBaseAddress
+
+
+[FixedPcd]
+  gArmTokenSpaceGuid.PcdFdSize
   gArmTokenSpaceGuid.PcdFvSize
 
 [depex]
