@@ -26,9 +26,16 @@
 #include <Library/IoLib.h>
 
 //Device memory map configuration file for UEFI (this is to help with pagetable initialization)
-#include <Configuration/DeviceMemoryMap.h>
+#include <Library/AppleVirtualMemoryMapDefines.h>
+
+#define MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS 15
+
+#define DDR_ATTRIBUTES_CACHED           ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK
+#define DDR_ATTRIBUTES_UNCACHED         ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED
 
 VOID BuildMemoryTypeInformationHob(VOID);
+
+VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap);
 
 STATIC VOID InitMmu(IN ARM_MEMORY_REGION_DESCRIPTOR *MemoryTable)
 {
@@ -49,10 +56,11 @@ STATIC VOID InitMmu(IN ARM_MEMORY_REGION_DESCRIPTOR *MemoryTable)
     }
 }
 
+
+//Borrowed from ArmPlatformPkg
 EFI_STATUS EFIAPI MemoryPeim(IN EFI_PHYSICAL_ADDRESS UefiMemoryBase, IN UINT64 UefiMemorySize)
 {
   ARM_MEMORY_REGION_DESCRIPTOR  *MemoryTable;
-  ARM_MEMORY_REGION_DESCRIPTOR  **VirtualMemoryMap;
   EFI_RESOURCE_ATTRIBUTE_TYPE   ResourceAttributes;
   UINT64                        ResourceLength;
   EFI_PEI_HOB_POINTERS          NextHob;
@@ -62,6 +70,7 @@ EFI_STATUS EFIAPI MemoryPeim(IN EFI_PHYSICAL_ADDRESS UefiMemoryBase, IN UINT64 U
   BOOLEAN                       Found;
 
   // build up virtual memory map
+  BuildVirtualMemoryMap(&MemoryTable);
 
   // Ensure PcdSystemMemorySize has been set
   ASSERT (PcdGet64 (PcdSystemMemorySize) != 0);
@@ -193,4 +202,129 @@ EFI_STATUS EFIAPI MemoryPeim(IN EFI_PHYSICAL_ADDRESS UefiMemoryBase, IN UINT64 U
   }
 
   return EFI_SUCCESS;
+}
+
+/**
+ * BuildVirtualMemoryMap
+ * 
+ * This will build up the memory map of the platform used to initialize the MMU and page tables.
+ * 
+ * @param VirtualMemoryMap - A pointer to a pointer to be used for page table setup.
+ * 
+ * does not return anything as the value will be stored in a pointer accessible by MemoryPeim.
+ * 
+ */
+VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
+{
+  ARM_MEMORY_REGION_ATTRIBUTES CacheAttributes;
+  UINTN Index = 0;
+  ARM_MEMORY_REGION_DESCRIPTOR *VirtualMemoryTable;
+
+  //ensure we actually have a valid memory map pointer
+  ASSERT(VirtualMemoryMap != NULL);
+
+  DEBUG((DEBUG_INFO, "Allocating virtual memory table pages\n"));
+  VirtualMemoryTable = (ARM_MEMORY_REGION_DESCRIPTOR *)AllocatePages (EFI_SIZE_TO_PAGES (sizeof (ARM_MEMORY_REGION_DESCRIPTOR) * MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS));
+  if (VirtualMemoryTable == NULL) {
+    DEBUG((DEBUG_INFO, "Unexpected failure to allocate VirtualMemoryTable\n"));
+    return;
+  }
+
+  CacheAttributes = DDR_ATTRIBUTES_CACHED;
+
+  /**
+   * NOTE - On Apple silicon platforms, non PCIe MMIO regions *must* use nGnRnE mappings, while all PCIe regions *must* use nGnRE mappings.
+   * m1n1 sets up MAIR_EL1 correctly but not sure if that's preserved during BDS -> OS transition, nor if EFI reconfigures it.
+   **/
+
+  //MMIO - PMGR/AIC/Core System Peripherals and PCIe
+  VirtualMemoryTable[Index].PhysicalBase = APPLE_CORE_SYSTEM_MMIO_RANGE_1_BASE;
+  VirtualMemoryTable[Index].VirtualBase  = APPLE_CORE_SYSTEM_MMIO_RANGE_1_BASE;
+  VirtualMemoryTable[Index].Length       = APPLE_CORE_SYSTEM_MMIO_RANGE_1_SIZE;
+  VirtualMemoryTable[Index].Attributes   = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_CORE_SYSTEM_MMIO_RANGE_2_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_CORE_SYSTEM_MMIO_RANGE_2_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_CORE_SYSTEM_MMIO_RANGE_2_SIZE;
+  VirtualMemoryTable[Index].Attributes   = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_PCIE_MMIO_RANGE_1_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_PCIE_MMIO_RANGE_1_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_PCIE_MMIO_RANGE_1_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_PCIE_MMIO_RANGE_2_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_PCIE_MMIO_RANGE_2_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_PCIE_MMIO_RANGE_2_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_CORE_SYSTEM_MMIO_RANGE_3_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_CORE_SYSTEM_MMIO_RANGE_3_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_CORE_SYSTEM_MMIO_RANGE_3_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_PCIE_MMIO_RANGE_3_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_PCIE_MMIO_RANGE_3_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_PCIE_MMIO_RANGE_3_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_PCIE_MMIO_RANGE_4_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_PCIE_MMIO_RANGE_4_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_PCIE_MMIO_RANGE_4_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_CORE_SYSTEM_MMIO_RANGE_4_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_CORE_SYSTEM_MMIO_RANGE_4_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_CORE_SYSTEM_MMIO_RANGE_4_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_PCIE_MMIO_RANGE_5_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_PCIE_MMIO_RANGE_5_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_PCIE_MMIO_RANGE_5_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_PCIE_MMIO_RANGE_6_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_PCIE_MMIO_RANGE_6_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_PCIE_MMIO_RANGE_6_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_PCIE_MMIO_RANGE_7_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_PCIE_MMIO_RANGE_7_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_PCIE_MMIO_RANGE_7_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  //System DRAM
+  VirtualMemoryTable[++Index].PhysicalBase = PcdGet64(PcdSystemMemoryBase);
+  VirtualMemoryTable[Index].VirtualBase    = PcdGet64(PcdSystemMemoryBase);
+  VirtualMemoryTable[Index].Length         = PcdGet64(PcdSystemMemorySize);
+  VirtualMemoryTable[Index].Attributes     = CacheAttributes;
+
+
+  DEBUG ((
+    DEBUG_ERROR,
+    "%a: Dumping System DRAM Memory Map:\n"
+    "\tPhysicalBase: 0x%lX\n"
+    "\tVirtualBase: 0x%lX\n"
+    "\tLength: 0x%lX\n",
+    __FUNCTION__,
+    VirtualMemoryTable[Index].PhysicalBase,
+    VirtualMemoryTable[Index].VirtualBase,
+    VirtualMemoryTable[Index].Length
+    ));
+
+  //Framebuffer
+  VirtualMemoryTable[++Index].PhysicalBase = PcdGet64(PcdFrameBufferAddress);
+  VirtualMemoryTable[Index].VirtualBase    = PcdGet64(PcdFrameBufferAddress);
+  VirtualMemoryTable[Index].Length         = 0x2D5C000;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED;
+
+  // End of Table
+  VirtualMemoryTable[++Index].PhysicalBase  = 0;
+  VirtualMemoryTable[Index].VirtualBase     = 0;
+  VirtualMemoryTable[Index].Length          = 0;
+  VirtualMemoryTable[Index].Attributes      = (ARM_MEMORY_REGION_ATTRIBUTES)0;
+
+  ASSERT((Index + 1) <= MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS);
+
+  *VirtualMemoryMap = VirtualMemoryTable;
 }
