@@ -9,13 +9,13 @@
 [Sources.common]
   SmbiosInfoDxe.c
 
-[PatchPcd]
+[Pcd]
+  gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
   gM1PkgTokenSpaceGuid.PcdFdtPointer
 
 [FixedPcd]
   gM1PkgTokenSpaceGuid.PcdCoreCount
-  gArmTokenSpaceGuid.PcdSystemMemoryBase
   
 [Packages]
   ArmPkg/ArmPkg.dec
