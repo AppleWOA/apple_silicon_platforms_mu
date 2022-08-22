@@ -10,36 +10,16 @@ GCC_ASM_IMPORT(CEntryPoint)
 GCC_ASM_EXPORT(_ModuleEntryPoint)
 GCC_ASM_IMPORT (ArmEnableInstructionCache)
 GCC_ASM_IMPORT (ArmEnableDataCache)
+GCC_ASM_IMPORT(InitializeUART)
+GCC_ASM_IMPORT(UARTRelocationDebugMessage)
 
 ASM_FUNC(_ModuleEntryPoint)
 
-  //code borrowed from OnePlus6TPkg/SurfaceDuoPkg/ArmPlatformPkg
-  //verify we are in the right location in RAM
-  adr x4, .
-  ldr x5, =_ModuleEntryPoint
-  cmp x4, x5
-  //backup devicetree pointer into x20
-  mov x20, x0
-  b.ne _CopyFirmware
+  //Use FDT to discover usable DRAM base/size
+  bl ASM_PFX(DiscoverDramFromDt)
+  bl ASM_PFX(InitializeUART)
+  bl ASM_PFX(UARTRelocationDebugMessage)
   b _ModuleEntrySetupStack
-
-_CopyFirmware:
-  //pull desired address, get offset from ModuleEntryPoint and desired FD base address
-  ldr x6, =FixedPcdGet64(PcdFdBaseAddress)
-  sub	x5, x5, x6 // x5 now holds offset of _ModuleEntryPoint from start of FD base
-  sub	x4, x4, x5 // x4 now holds address of actual FD base
-
-  //update return address as necessary
-  sub	   x30, x30, x4
-  add	   x30, x30, x6
-  ldr	   x5, =FixedPcdGet64 (PcdFdSize)
-
-// crappy memcpy borrowed from OnePlus6TPkg/SurfaceDuoPkg
-_memcpy_loop:
-  ldp	   x2, x3, [x4], #16
-  stp	   x2, x3, [x6], #16
-  subs   x5, x5, #16
-  b.ne   _memcpy_loop
 
 _ModuleEntrySetupStack:
 
@@ -131,6 +111,90 @@ _PrepareArgumentsAndJump:
 
   bl CEntryPoint
 
-// if we get here, something *very bad* has happened.
+// if we get here, something *very bad* has happened. (or we're debugging)
 _NeverReturn:
   b _NeverReturn
+
+
+// VOID
+// DiscoverDramFromDt (
+//   VOID   *DeviceTreeBaseAddress,   // passed by loader in x0
+//   VOID   *ImageBase                // passed by FDF trampoline in x1
+//   );
+ASM_PFX(DiscoverDramFromDt):
+  //
+  // If we are booting from RAM using the Linux kernel boot protocol, x0 will
+  // point to the DTB image in memory. Otherwise, use the default value defined
+  // by the platform.
+  //
+  cbnz  x0, 0f
+  ldr   x0, PcdGet64 (PcdFdtPointer)
+
+0:mov   x28, x30            // preserve LR
+  mov   x27, x0             // preserve DTB pointer
+  mov   x26, x1             // preserve base of image pointer
+
+  //
+  // The base of the runtime image has been preserved in x1. Check whether
+  // the expected magic number can be found in the header.
+  //
+  ldr   w8, .LArm64LinuxMagic
+  ldr   w9, [x1, #0x38]
+  cmp   w8, w9
+  bne   .Lout
+
+  //
+  //
+  // OK, so far so good. We have confirmed that we likely have a DTB and are
+  // booting via the arm64 Linux boot protocol. Update the base-of-image PCD
+  // to the actual relocated value, and add the shift of PcdFdBaseAddress to
+  // PcdFvBaseAddress as well
+  //
+  adr   x8, PcdGet64 (PcdFdBaseAddress)
+  adr   x9, PcdGet64 (PcdFvBaseAddress)
+  ldr   x6, [x8]
+  ldr   x7, [x9]
+  sub   x7, x7, x6
+  add   x7, x7, x1
+  str   x1, [x8]
+  str   x7, [x9]
+
+  //
+  // The runtime address may be different from the link time address so fix
+  // up the PE/COFF relocations. Since we are calling a C function, use the
+  // window at the beginning of the FD image as a temp stack.
+  //
+  mov   x0, x7
+  adr   x1, PeCoffLoaderImageReadFromMemory
+  mov   sp, x7
+  bl    RelocatePeCoffImage
+
+  //
+  // Discover the memory size and offset from the DTB, and record in the
+  // respective PCDs. This will also return false if a corrupt DTB is
+  // encountered.
+  //
+  mov   x0, x27
+  adr   x1, PcdGet64 (PcdSystemMemoryBase)
+  adr   x2, PcdGet64 (PcdSystemMemorySize)
+  bl    FindMemnode
+  cbz   x0, .Lout
+
+  //
+  // Copy the DTB to the slack space right after the 64 byte arm64/Linux style
+  // image header at the base of this image (defined in the FDF), and record the
+  // pointer in PcdFdtPointer.
+  //
+  adr   x8, PcdGet64 (PcdFdtPointer)
+  add   x26, x26, #0x40
+  str   x26, [x8]
+
+  mov   x0, x26
+  mov   x1, x27
+  bl    CopyFdt
+
+.Lout:
+  ret    x28
+
+.LArm64LinuxMagic:
+  .byte   0x41, 0x52, 0x4d, 0x64
