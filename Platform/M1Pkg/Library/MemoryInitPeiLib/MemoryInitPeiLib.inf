@@ -40,7 +40,6 @@
   gEmbeddedTokenSpaceGuid.PcdPrePiProduceMemoryTypeInformationHob
 
 [FixedPcd]
-  gArmTokenSpaceGuid.PcdFdBaseAddress
   gArmTokenSpaceGuid.PcdFdSize
 
   gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
@@ -54,10 +53,12 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesData
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData
-  gArmTokenSpaceGuid.PcdSystemMemoryBase
 
-[PatchPcd]
+[Pcd]
+  gArmTokenSpaceGuid.PcdFdBaseAddress
   gArmTokenSpaceGuid.PcdSystemMemorySize
+  gArmTokenSpaceGuid.PcdSystemMemoryBase
+  gM1PkgTokenSpaceGuid.PcdFrameBufferAddress
 
 [Depex]
   TRUE
