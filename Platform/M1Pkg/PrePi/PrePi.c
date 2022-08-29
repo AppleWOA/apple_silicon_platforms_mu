@@ -44,7 +44,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
     EFI_STATUS Status;
 
     UINTN UefiMemoryLength = FixedPcdGet32(PcdSystemMemoryUefiRegionSize);
-    InitializeUART();
+    //InitializeUART();
 
     DEBUG(
         (EFI_D_INFO | EFI_D_LOAD,
@@ -146,7 +146,7 @@ UINT32 InitializeUART(VOID)
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "If you can see this message, this means the UART works!!!\n"));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "Initial FD Base Address - 0x%llx\n", PcdGet64(PcdFdBaseAddress)));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "Initial FV Base Address - 0x%llx\n", PcdGet64(PcdFvBaseAddress)));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current FDT Pointer (Placeholder): 0x%llx", PcdGet64(PcdFdtPointer)));
+    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current FDT Pointer (Placeholder): 0x%llx\n", PcdGet64(PcdFdtPointer)));
     return EFI_SUCCESS;
 }
 
@@ -154,7 +154,7 @@ VOID UARTRelocationDebugMessage(VOID)
 {
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "New FD Base Address - 0x%llx\n", PcdGet64(PcdFdBaseAddress)));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "New FV Base Address - 0x%llx\n", PcdGet64(PcdFvBaseAddress)));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current FDT Pointer: 0x%llx", PcdGet64(PcdFdtPointer)));
+    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current FDT Pointer: 0x%llx\n", PcdGet64(PcdFdtPointer)));
     return;
 
 }
