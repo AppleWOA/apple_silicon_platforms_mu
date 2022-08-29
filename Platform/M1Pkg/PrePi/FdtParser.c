@@ -85,7 +85,7 @@ FindMemnode (
   if (SizeCells > 1) {
     *SystemMemorySize = (*SystemMemorySize << 32) | fdt32_to_cpu (Prop[1]);
   }
-  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "New System RAM Size = %p\n", SystemMemoryBase));
+  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "New System RAM Size = %p\n", SystemMemorySize));
 
   return TRUE;
 }
@@ -97,6 +97,6 @@ CopyFdt (
   )
 {
   fdt_pack (FdtSource);
-  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "Copying FDT from %p to %p", FdtSource, FdtDest));
+  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "Copying FDT from %p to %p\n", FdtSource, FdtDest));
   CopyMem (FdtDest, FdtSource, fdt_totalsize (FdtSource));
 }
