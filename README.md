@@ -13,7 +13,7 @@ I probably do not know what I'm doing 100%. It goes without saying, but *please*
 
 This implementation at the moment is wildly incomplete, and many things are due to be filled out/worked on over time.
 
-As of 08/21/22 - *this will not boot just yet* as there are major bugs I'm currently sorting out on my end.
+As of 08/29/22 - *this will not boot just yet* as there are major bugs I'm currently sorting out on my end.
 
 ### Description
 
@@ -24,7 +24,7 @@ Regarding interrupt controllers, this implementation can be built with optional 
 
 ### Status
 
-Very work in progress, currently fixing a bug where SEC phase will data abort due to memory allocation occurring in regions with carveouts.
+Very work in progress, currently fixing a bug where DXE Core gets stuck in a 4 function loop.
 
 M1v2 and M2 - awaiting a successful boot to DXE Core on M1 before implementing these (in particular, M1v2 requires many addresses to be changed given the increased address space.)
 
