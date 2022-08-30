@@ -66,7 +66,7 @@ FindMemnode (
   //
   DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "searching for reg property in /memory node\n"));
   Prop = fdt_getprop (DeviceTreeBlob, MemoryNode, "reg", &Length);
-  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "/memory/reg property = %p\n"));
+  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "/memory/reg property = %p\n", Prop));
   if (Length < (AddressCells + SizeCells) * sizeof (INT32)) {
     DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "invalid or missing /memory/reg property, exiting\n"));
     return FALSE;
@@ -77,7 +77,6 @@ FindMemnode (
     *SystemMemoryBase = (*SystemMemoryBase << 32) | fdt32_to_cpu (Prop[1]);
   }
 
-  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "New System RAM Base = %p\n", SystemMemoryBase));
 
   Prop += AddressCells;
 
@@ -85,7 +84,6 @@ FindMemnode (
   if (SizeCells > 1) {
     *SystemMemorySize = (*SystemMemorySize << 32) | fdt32_to_cpu (Prop[1]);
   }
-  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "New System RAM Size = %p\n", SystemMemorySize));
 
   return TRUE;
 }

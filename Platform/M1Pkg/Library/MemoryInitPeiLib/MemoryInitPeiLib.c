@@ -46,7 +46,7 @@ STATIC VOID InitMmu(IN ARM_MEMORY_REGION_DESCRIPTOR *MemoryTable)
     DEBUG(
         (DEBUG_INFO, 
         "MemoryInitPeiLib: Enabling MMU, Page Table Base: 0x%p, Page Table Size: 0x%p\n", 
-        &MemoryTranslationTableBase, &MemoryTranslationTableBase)
+        &MemoryTranslationTableBase, &MemoryTranslationTableSize)
         );
     StatusCode = ArmConfigureMmu(MemoryTable, &MemoryTranslationTableBase, &MemoryTranslationTableSize);
 
@@ -305,11 +305,13 @@ VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
     "%a: Dumping System DRAM Memory Map:\n"
     "\tPhysicalBase: 0x%lX\n"
     "\tVirtualBase: 0x%lX\n"
-    "\tLength: 0x%lX\n",
+    "\tLength: 0x%lX\n"
+    "\tTop of system RAM: 0x%lX\n",
     __FUNCTION__,
     VirtualMemoryTable[Index].PhysicalBase,
     VirtualMemoryTable[Index].VirtualBase,
-    VirtualMemoryTable[Index].Length
+    VirtualMemoryTable[Index].Length,
+    VirtualMemoryTable[Index].PhysicalBase + VirtualMemoryTable[Index].Length
     ));
 
   //Framebuffer

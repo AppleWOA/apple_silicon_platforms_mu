@@ -155,6 +155,8 @@ VOID UARTRelocationDebugMessage(VOID)
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "New FD Base Address - 0x%llx\n", PcdGet64(PcdFdBaseAddress)));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "New FV Base Address - 0x%llx\n", PcdGet64(PcdFvBaseAddress)));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current FDT Pointer: 0x%llx\n", PcdGet64(PcdFdtPointer)));
+    DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "New System RAM Base = 0x%llx\n", PcdGet64(PcdSystemMemoryBase)));
+    DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "New System RAM Size = 0x%llx\n", PcdGet64(PcdSystemMemorySize)));
     return;
 
 }

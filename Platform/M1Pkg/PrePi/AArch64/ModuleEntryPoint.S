@@ -15,9 +15,15 @@ GCC_ASM_IMPORT(UARTRelocationDebugMessage)
 
 ASM_FUNC(_ModuleEntryPoint)
 
+  //back up initial start addr and FDT pointer
+  mov x27, x0
+  mov x26, x1
   //Use FDT to discover usable DRAM base/size
-  bl ASM_PFX(DiscoverDramFromDt)
   bl ASM_PFX(InitializeUART)
+  //restore values
+  mov x0, x27
+  mov x1, x26
+  bl ASM_PFX(DiscoverDramFromDt)
   bl ASM_PFX(UARTRelocationDebugMessage)
   b _ModuleEntrySetupStack
 
@@ -79,6 +85,10 @@ _GetStackBase:
   //TODO - make the PCD value work properly, for now hardcode this value.
   MOV32 (x2, 0x20000)
   sub   x12, x1, x2
+  //HACK for now - subtract both stack top and base by 0x40 to mitigate an ASSERT
+  //TODO - fix the root cause of the stack base being misaligned by 0x40 bytes
+  sub   x1, x1, #0x40
+  sub   x12, x12, #0x40
 
 _StackSetup:
   //x1, top of stack
@@ -106,7 +116,7 @@ _EnableCaches:
 _PrepareArgumentsAndJump:
   mov x0, x12 //Stack Base
   mov x1, x2  //Stack Size
-  mov x2, x20 //DeviceTree pointer
+  mov x2, x26 //DeviceTree pointer
   mov x3, x22 //UEFI memory base
 
   bl CEntryPoint
@@ -131,8 +141,8 @@ ASM_PFX(DiscoverDramFromDt):
   ldr   x0, PcdGet64 (PcdFdtPointer)
 
 0:mov   x28, x30            // preserve LR
-  mov   x27, x0             // preserve DTB pointer
-  mov   x26, x1             // preserve base of image pointer
+  mov   x27, x0             // preserve FDT pointer
+  mov   x26, x1             // preserve base of image addr
 
   //
   // The base of the runtime image has been preserved in x1. Check whether
@@ -181,12 +191,14 @@ ASM_PFX(DiscoverDramFromDt):
   cbz   x0, .Lout
 
   //
-  // Copy the DTB to the slack space right after the 64 byte arm64/Linux style
-  // image header at the base of this image (defined in the FDF), and record the
-  // pointer in PcdFdtPointer.
+  // Copy the DTB to a predefined location (cannot put it in FDF slack space due to how m1n1 does memory reservation)
+  // guaranteed to never be allocated until OS boot (at which point this is no longer relevant)
+  // and record the pointer in PcdFdtPointer.
+  // TODO - if there's a location that's more suitable that doesn't depend on hardcoding values, use it.
   //
+
   adr   x8, PcdGet64 (PcdFdtPointer)
-  add   x26, x26, #0x40
+  MOV64(x26, 0x900000000)
   str   x26, [x8]
 
   mov   x0, x26
