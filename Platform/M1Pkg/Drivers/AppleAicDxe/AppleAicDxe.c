@@ -15,4 +15,15 @@
  * 
  */
 
-//TODO: literally the entire file
+#include <PiDxe.h>
+
+#include "AppleAicDxe.h"
+
+EFI_STATUS
+InterruptDxeInitialize (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
+{
+
+}

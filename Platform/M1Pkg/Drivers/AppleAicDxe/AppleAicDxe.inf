@@ -35,7 +35,7 @@
   M1Pkg/M1Pkg.dec
 
 [LibraryClasses]
-  ArmGicLib
+  AppleAicLib
   BaseLib
   UefiLib
   UefiBootServicesTableLib
