@@ -1,0 +1,44 @@
+#M1 EDK2 Package Description File
+#SPDX-License-Identifier: BSD-2-Clause-Patent
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = M1v2Pkg
+  PACKAGE_GUID                   = 5db07ea1-61bc-45e6-8ea6-78f40852b1c7
+  PACKAGE_VERSION                = 1.0
+
+[Includes.common]
+  Include
+
+[Guids.common]
+  gM1v2PkgTokenSpaceGuid = { 0x0f497529, 0x6ac6, 0x4438, { 0xa5, 0xee, 0xdc, 0xfb, 0x84, 0xa1, 0x5b, 0xba } }
+
+
+[PcdsFixedAtBuild.common]
+
+  gM1v2PkgTokenSpaceGuid.PcdFrameBufferWidth|3840|UINT32|0x00004401
+  gM1v2PkgTokenSpaceGuid.PcdFrameBufferHeight|2160|UINT32|0x00004402
+  gM1v2PkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30|UINT32|0x00004403
+
+  # RAM reservation (128 MB reserved for EFI FD image)
+  gM1v2PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000|UINT32|0x00004404
+
+  # Stack stuff (128k stack by default)
+  gM1v2PkgTokenSpaceGuid.PcdSecPhaseStackSize|0x20000|UINT32|0x00004405
+  #Fallback stack base in case ModuleEntryPoint setup won't work.
+  #gM1v2PkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10060000000|UINT64|0x0000440b
+
+  #Number of Cores (this is static per SoC) (however this must be gated by a compile-time switch for multi-die systems)
+  gM1v2PkgTokenSpaceGuid.PcdCoreCount|20|UINT32|0x00004406
+
+  gM1v2PkgTokenSpaceGuid.PcdAicV2InterruptControllerBase|0|UINT64|0x00004407
+
+  #File name GUID for frontpage app
+  gM1v2PkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }|VOID*|0x00004408
+[PcdsPatchableInModule.common]
+  #saved FDT pointer from loader boot
+  gM1v2PkgTokenSpaceGuid.PcdFdtPointer|0|UINT64|0x00004409
+
+  #Framebuffer (this will be filled in by the loader)
+  gM1v2PkgTokenSpaceGuid.PcdFrameBufferAddress|0x10fc5c28000|UINT64|0x00004400
+
+  
