@@ -1,0 +1,73 @@
+## M1 SEC Phase INF description file
+## SPDX-License-Identifier: BSD-2-Clause-Patent
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = Sec
+  FILE_GUID                      = fa8e7979-a845-4378-b7f8-ceede175b1e9
+  MODULE_TYPE                    = SEC
+  VERSION_STRING                 = 1.0
+
+
+[Sources.common]
+  FdtParser.c
+  PrePi.c
+
+[Sources.AARCH64]
+  AArch64/ModuleEntryPoint.S | GCC
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  ArmPkg/ArmPkg.dec
+  M1v2Pkg/M1v2Pkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+
+[LibraryClasses]
+  ArmLib
+  ArmMmuLib
+  BaseLib
+  DebugLib
+  IoLib
+  FdtLib
+  ExtractGuidedSectionLib
+  LzmaDecompressLib
+  PeCoffGetEntryPointLib
+  PrePiHobListPointerLib
+  CacheMaintenanceLib
+  DebugAgentLib
+  SerialPortLib
+  MemoryAllocationLib
+  PrePiMemoryAllocationLib
+  PerformanceLib
+  PeCoffLib
+  HobLib
+  CompilerIntrinsicsLib
+  # These pertain to HOB setup
+  MemoryInitPeiLib
+  PlatformPeiLib
+
+[Guids]
+  gEfiSystemNvDataFvGuid
+  gEfiVariableGuid
+
+[PatchPcd]
+  #System RAM
+  gArmTokenSpaceGuid.PcdSystemMemoryBase
+  gArmTokenSpaceGuid.PcdSystemMemorySize
+  gM1PkgTokenSpaceGuid.PcdFdtPointer
+  gArmTokenSpaceGuid.PcdFvBaseAddress
+  gArmTokenSpaceGuid.PcdFdBaseAddress
+
+[FixedPcd]
+  #CPU exception vectors
+  gArmTokenSpaceGuid.PcdCpuVectorBaseAddress
+
+  #FV settings
+  gArmTokenSpaceGuid.PcdFvSize
+  #FD (aka actual image) settings
+  gArmTokenSpaceGuid.PcdFdSize
+
+  gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize
