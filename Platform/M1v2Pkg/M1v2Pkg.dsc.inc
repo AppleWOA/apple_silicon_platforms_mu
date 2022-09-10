@@ -43,9 +43,9 @@
   gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18 #IRQ timer INTID
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
-  #On M1v2, this is a lot easier to pick, at the moment the current idea is memory base + 0x30000000000
-  gArmTokenSpaceGuid.PcdGicDistributorBase|0x40000000000
-  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x41000000000
+  #On M1v2, this is a lot easier to pick as most of the 40 bit address space is reserved for MMIO and a lot goes unused
+  gArmTokenSpaceGuid.PcdGicDistributorBase|0x5000000000
+  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x5100000000
 !else
   #this is MMIO space where the AIC lives
   gM1v2PkgTokenSpaceGuid.PcdAicV1InterruptControllerBase|0x28e100000
