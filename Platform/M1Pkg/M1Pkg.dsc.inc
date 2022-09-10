@@ -133,11 +133,11 @@
 !if $(AIC_BUILD) == FALSE
   ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
 !else
-  AppleAicLib  |M1Pkg/Drivers/AppleAicDxe/AppleAicLib.inf
+  AppleAicLib  |AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicLib.inf
 !endif
   ArmHvcLib  |ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
   ArmSmcLib  |ArmPkg/Library/ArmSmcLibNull/ArmSmcLibNull.inf
-  AppleArmGxfHvcLib  |M1Pkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
+  AppleArmGxfHvcLib  |AppleSiliconPkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
   ArmGicArchLib  |ArmPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
   TimerLib  |ArmPkg/Library/ArmArchTimerLib/ArmArchTimerLib.inf
   BaseLib  |MdePkg/Library/BaseLib/BaseLib.inf
@@ -221,12 +221,12 @@
   RealTimeClockLib  |EmbeddedPkg/Library/VirtualRealTimeClockLib/VirtualRealTimeClockLib.inf
   ResetUtilityLib  |MdeModulePkg/Library/ResetUtilityLib/ResetUtilityLib.inf
   SecurityLockAuditLib  |MdeModulePkg/Library/SecurityLockAuditLibNull/SecurityLockAuditLibNull.inf
-  ResetSystemLib  |M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
+  ResetSystemLib  |AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
   SerialPortLib|M1Pkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
   #Platform specific drivers
-  HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
+  HwResetSystemLib|AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
 
   MemoryTypeInfoSecVarCheckLib|MdeModulePkg/Library/MemoryTypeInfoSecVarCheckLib/MemoryTypeInfoSecVarCheckLib.inf
@@ -368,11 +368,11 @@
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
   ArmHvcLib|ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
-  AppleArmGxfHvcLib|M1Pkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
+  AppleArmGxfHvcLib|AppleSiliconPkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
 
   # System Reset
-  HwResetSystemLib|M1Pkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
+  HwResetSystemLib|AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
 
@@ -390,7 +390,7 @@
   #SEC phase
   M1Pkg/PrePi/PrePi.inf {
     <LibraryClasses>
-    SerialPortLib|M1Pkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
+    SerialPortLib|AppleSiliconPkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
   }
 
 
@@ -418,7 +418,7 @@
 !if $(AIC_BUILD) == FALSE
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
 !else
-  M1Pkg/Drivers/AppleAicDxe/AppleAicDxe.inf
+  AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicDxe.inf
 !endif
   MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
