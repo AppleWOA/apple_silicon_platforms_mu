@@ -2,6 +2,8 @@
 
 # Dynamic Generated
 Platform/M1Pkg/Include/Resources/ReleaseInfo.h
+Platform/M1v2Pkg/Include/Resources/ReleaseInfo.h
+Platform/M2Pkg/Include/Resources/ReleaseInfo.h
 
 
 # Local
