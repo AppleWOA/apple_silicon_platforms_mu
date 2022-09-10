@@ -49,5 +49,5 @@
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
   
-!include M1Pkg/M1Pkg.dsc.inc
+!include M1v2Pkg/M1v2Pkg.dsc.inc
 !include AppleSiliconPkg/FrontpageDsc.inc
