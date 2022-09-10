@@ -36,6 +36,6 @@ If you wish to add the AIC driver to your own UEFI implementation (for example i
 
 ## Current status of AIC Driver
 
-- DXE driver: just started
+- DXE driver: implementing initial base
 
-- Library: not yet started
+- Library: just started

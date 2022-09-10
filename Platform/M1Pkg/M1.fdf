@@ -105,6 +105,14 @@ READ_STATUS        = TRUE
 READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
 
+APRIORI DXE {
+  INF ArmPkg/Drivers/CpuDxe/CpuDxe.inf
+  INF MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
+  INF MdeModulePkg/Core/Dxe/DxeMain.inf
+  INF MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe.inf
+  INF MdeModulePkg/Universal/StatusCodeHandler/RuntimeDxe/StatusCodeHandlerRuntimeDxe.inf
+}
+
   #Main DXE core
   INF MdeModulePkg/Core/Dxe/DxeMain.inf
 
@@ -165,7 +173,7 @@ READ_LOCK_STATUS   = TRUE
   # Usb Support
   #
   #INF  MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
-  #INF MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
+  #INF  MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
   #INF  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbMouseAbsolutePointerDxe/UsbMouseAbsolutePointerDxe.inf
@@ -234,7 +242,7 @@ READ_LOCK_STATUS   = TRUE
   # DT
   INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
   
-!include M1Pkg/FrontpageFdf.inc
+!include AppleSiliconPkg/FrontpageFdf.inc
 
 [FV.FVMAIN_COMPACT]
 FvAlignment        = 8
@@ -262,6 +270,6 @@ READ_LOCK_STATUS   = TRUE
     }
   }
 
-!include M1Pkg/M1.fdf.inc
+!include AppleSiliconPkg/AppleSiliconFdfRules.fdf.inc
 
 
