@@ -28,7 +28,7 @@
     SECTION UI= "EdkShell"
   }
   FILE FREEFORM = PCD(gOemPkgTokenSpaceGuid.PcdLogoFile) {
-    SECTION RAW = M1Pkg/Include/Resources/BootLogo.bmp
+    SECTION RAW = AppleSiliconPkg/Include/Resources/BootLogo.bmp
     SECTION UI = "Logo"
   }
   FILE FREEFORM = PCD(gOemPkgTokenSpaceGuid.PcdFrontPageLogoFile) {
@@ -49,6 +49,6 @@
   FILE FREEFORM = PCD(gOemPkgTokenSpaceGuid.PcdBootFailIndicatorFile) {
     SECTION RAW = OemPkg/FrontPage/Resources/NoBoot.bmp
   }
-  FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
-    SECTION RAW = M1Pkg/Include/Resources/RegulatoryLogos.png
-  }
+#  FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
+#    SECTION RAW = M1Pkg/Include/Resources/RegulatoryLogos.png
+#  }
