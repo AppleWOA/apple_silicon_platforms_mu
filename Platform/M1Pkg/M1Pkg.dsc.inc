@@ -213,7 +213,7 @@
 !endif
 
   MemoryInitPeiLib|M1Pkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
-  PlatformPeiLib|M1Pkg/Library/PlatformPeiLib/PlatformPeiLib.inf
+  PlatformPeiLib|AppleSiliconPkg/Library/PlatformPeiLib/PlatformPeiLib.inf
 
   BaseBinSecurityLib  |MdePkg/Library/BaseBinSecurityLibNull/BaseBinSecurityLibNull.inf
   DxeMemoryProtectionHobLib  |MdeModulePkg/Library/MemoryProtectionHobLibNull/DxeMemoryProtectionHobLibNull.inf
