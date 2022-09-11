@@ -27,7 +27,7 @@
 ################################################################################
 
 # always prefer loading at 0x830000000 (this is totally arbitrary btw)
-[FD.T8103_EFI]
+[FD.T6000_EFI]
 BaseAddress   = 0x10030000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired address of firmware (will always be loaded from RAM)
 Size          = 0x00000400000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 ErasePolarity = 1
@@ -104,6 +104,7 @@ READ_ENABLED_CAP   = TRUE
 READ_STATUS        = TRUE
 READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
+FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 
 APRIORI DXE {
   INF ArmPkg/Drivers/CpuDxe/CpuDxe.inf

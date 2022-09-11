@@ -79,7 +79,7 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesData|800
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode|10
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData|0
-  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|36
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|40
   
   #PCIe settings
   gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|FALSE
@@ -212,7 +212,7 @@
 !endif
 
   MemoryInitPeiLib|M1v2Pkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
-  PlatformPeiLib|M1v2Pkg/Library/PlatformPeiLib/PlatformPeiLib.inf
+  PlatformPeiLib|AppleSiliconPkg/Library/PlatformPeiLib/PlatformPeiLib.inf
 
   BaseBinSecurityLib  |MdePkg/Library/BaseBinSecurityLibNull/BaseBinSecurityLibNull.inf
   DxeMemoryProtectionHobLib  |MdeModulePkg/Library/MemoryProtectionHobLibNull/DxeMemoryProtectionHobLibNull.inf
