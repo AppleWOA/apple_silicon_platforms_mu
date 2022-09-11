@@ -56,7 +56,7 @@
   #System RAM
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
-  gM1PkgTokenSpaceGuid.PcdFdtPointer
+  gM1v2PkgTokenSpaceGuid.PcdFdtPointer
   gArmTokenSpaceGuid.PcdFvBaseAddress
   gArmTokenSpaceGuid.PcdFdBaseAddress
 
@@ -69,5 +69,5 @@
   #FD (aka actual image) settings
   gArmTokenSpaceGuid.PcdFdSize
 
-  gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
+  gM1v2PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize
