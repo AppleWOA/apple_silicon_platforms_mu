@@ -44,7 +44,6 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
     EFI_STATUS Status;
 
     UINTN UefiMemoryLength = FixedPcdGet32(PcdSystemMemoryUefiRegionSize);
-    //InitializeUART();
 
     DEBUG(
         (EFI_D_INFO | EFI_D_LOAD,
@@ -57,6 +56,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
        "Size = 0x%llx\n",
        UefiMemoryBase, UefiMemoryLength, StackBase, StackSize));
     
+    //Set the FdtPointer PCD to the set location we copied the FDT to during ModuleEntryPoint
     PatchPcdSet64(PcdFdtPointer, (UINT64)DeviceTreePtr);
 
 
@@ -107,6 +107,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "Setting boot mode to full configuration...\n"));
     SetBootMode(BOOT_WITH_FULL_CONFIGURATION);
 
+    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Starting PlatformPeim\n"));
     Status = PlatformPeim();
     ASSERT_EFI_ERROR(Status);
 
@@ -115,6 +116,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
 
     // Assume the FV that contains the PI (our code) also contains a compressed
     // FV.
+    DEBUG((DEBUG_INFO, "Decompressing FV...\n"));
     Status = DecompressFirstFv();
     ASSERT_EFI_ERROR(Status);
 
@@ -133,6 +135,8 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
 VOID CEntryPoint(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UINT64 UefiMemoryBase)
 {
     Main(StackBase, StackSize, DeviceTreePtr, UefiMemoryBase);
+    //DXE Core should not return, if it does, something is *very* wrong
+    ASSERT(FALSE);
 }
 
 
@@ -144,21 +148,10 @@ UINT32 InitializeUART(VOID)
         "M1 Project Mu Firmware (arm64e), version 1.0-alpha\n")
         );
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "If you can see this message, this means the UART works!!!\n"));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Initial FD Base Address - 0x%llx\n", PcdGet64(PcdFdBaseAddress)));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Initial FV Base Address - 0x%llx\n", PcdGet64(PcdFvBaseAddress)));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current FDT Pointer (Placeholder): 0x%llx\n", PcdGet64(PcdFdtPointer)));
-    return EFI_SUCCESS;
-}
-
-VOID UARTRelocationDebugMessage(VOID)
-{
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "New FD Base Address - 0x%llx\n", PcdGet64(PcdFdBaseAddress)));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "New FV Base Address - 0x%llx\n", PcdGet64(PcdFvBaseAddress)));
+    DEBUG((EFI_D_INFO | EFI_D_LOAD, "FD Base Address - 0x%llx\n", PcdGet64(PcdFdBaseAddress)));
+    DEBUG((EFI_D_INFO | EFI_D_LOAD, "FV Base Address - 0x%llx\n", PcdGet64(PcdFvBaseAddress)));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current FDT Pointer: 0x%llx\n", PcdGet64(PcdFdtPointer)));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "New System RAM Base = 0x%llx\n", PcdGet64(PcdSystemMemoryBase)));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "New System RAM Size = 0x%llx\n", PcdGet64(PcdSystemMemorySize)));
-    return;
-
+    return EFI_SUCCESS;
 }
 
 //borrowed from ArmVirtPkg/PrePi/PrePi.c

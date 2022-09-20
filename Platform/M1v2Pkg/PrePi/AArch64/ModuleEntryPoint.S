@@ -24,7 +24,6 @@ ASM_FUNC(_ModuleEntryPoint)
   mov x0, x27
   mov x1, x26
   bl ASM_PFX(DiscoverDramFromDt)
-  bl ASM_PFX(UARTRelocationDebugMessage)
   b _ModuleEntrySetupStack
 
 _ModuleEntrySetupStack:
@@ -119,7 +118,10 @@ _PrepareArgumentsAndJump:
   mov x2, x26 //DeviceTree pointer
   mov x3, x22 //UEFI memory base
 
-  bl CEntryPoint
+  ldr x4, =ASM_PFX(CEntryPoint)
+  //null frame pointer such that backtraces terminate here
+  mov x29, xzr
+  blr x4
 
 // if we get here, something *very bad* has happened. (or we're debugging)
 _NeverReturn:
