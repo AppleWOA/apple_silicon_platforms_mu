@@ -26,8 +26,7 @@
 #include <Chipset/AArch64.h>
 #include <Library/AppleUartSerialPortLib.h>
 #include <Library/IoLib.h>
-
-UINT64 AppleUARTBaseAddress = 0;
+#include <Library/PcdLib.h>
 
 /**
   Initialize the serial device hardware.
@@ -44,11 +43,11 @@ UINT64 AppleUARTBaseAddress = 0;
 EFI_STATUS EFIAPI SerialPortInitialize(VOID)
 {
     UINT32 BaudRateConfig = AppleSerialPortCalculateBaudRateConfig();
-    AppleUARTBaseAddress = UART_BASE;
+    //AppleUARTBaseAddress = UART_BASE;
     
     SerialPortFlush();
     //set baud rate to 115200
-    MmioWrite32((AppleUARTBaseAddress + UART_BAUD_RATE_CONFIG), BaudRateConfig);
+    MmioWrite32((UART_BASE + UART_BAUD_RATE_CONFIG), BaudRateConfig);
     
     return EFI_SUCCESS;
 }
@@ -78,11 +77,11 @@ UINTN EFIAPI SerialPortWrite(IN UINT8 *Buffer, IN UINTN NumberOfBytes)
     ArmDisableInterrupts();
     for(UINTN i = 0; i < NumberOfBytesToTransmit; i++)
     {
-        while(!(MmioRead32(AppleUARTBaseAddress + UART_TRANSFER_STATUS) & UART_TRANSFER_STATUS_TXBE))
+        while(!(MmioRead32(UART_BASE + UART_TRANSFER_STATUS) & UART_TRANSFER_STATUS_TXBE))
         {
 
         }
-        MmioWrite32((AppleUARTBaseAddress + UART_TX_BYTE), Buffer[i]);
+        MmioWrite32((UART_BASE + UART_TX_BYTE), Buffer[i]);
         NumberOfBytes--;
     }
     ArmEnableInterrupts();
@@ -129,7 +128,7 @@ UINT32 AppleSerialPortCalculateBaudRateConfig(VOID)
 
 UINTN SerialPortFlush(VOID)
 {
-    while(!(MmioRead32(AppleUARTBaseAddress + UART_TRANSFER_STATUS) & UART_TRANSFER_STATUS_TXE))
+    while(!(MmioRead32(UART_BASE + UART_TRANSFER_STATUS) & UART_TRANSFER_STATUS_TXE))
     {
 
     }
