@@ -67,6 +67,11 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision|0x00008103
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision|0x00000001
 
+  #
+  # Make VariableRuntimeDxe work at emulated non-volatile variable mode.
+  #
+  gEfiMdeModulePkgTokenSpaceGuid.PcdEmuVariableNvModeEnable|TRUE
+
 !if $(SECURE_BOOT_ENABLE) == TRUE
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesData|600
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesCode|400
@@ -137,7 +142,8 @@
   ArmHvcLib  |ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
   ArmSmcLib  |ArmPkg/Library/ArmSmcLibNull/ArmSmcLibNull.inf
   AppleArmGxfHvcLib  |AppleSiliconPkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
-  ArmGicArchLib  |ArmPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
+  #needs to be pulled from AppleSiliconPkg and not ArmPkg due to required workaround for GICv3 detection/selection logic
+  ArmGicArchLib  |AppleSiliconPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
   TimerLib  |ArmPkg/Library/ArmArchTimerLib/ArmArchTimerLib.inf
   BaseLib  |MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib  |MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
