@@ -13,8 +13,11 @@
   FdtParser.c
   PrePi.c
 
+#Comment/uncomment either line out if you want SEC phase to be relocatable or not relocatable
+#mutually exclusive (one or the other, not both)
 [Sources.AARCH64]
   AArch64/ModuleEntryPoint.S | GCC
+  #AArch64/ModuleEntryPoint_NoRelocation.S | GCC
 
 [Packages]
   MdePkg/MdePkg.dec
