@@ -17,9 +17,13 @@
 
 #ifndef APPLE_UART_SERIAL_PORT_H_
 #define APPLE_UART_SERIAL_PORT_H_
+
+#include <Library/PcdLib.h>
+#include <PiPei.h>
+
 //UART base address and clock freq
 
-#define UART_BASE 0x235200000
+#define UART_BASE FixedPcdGet64(PcdAppleUartBase)
 
 #define UART_CLOCK 24000000
 

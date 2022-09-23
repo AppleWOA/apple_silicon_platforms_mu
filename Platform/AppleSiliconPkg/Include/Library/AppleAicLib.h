@@ -3,7 +3,7 @@
  * @author amarioguy (Arminder Singh)
  * @brief 
  * 
- * AppleAicLib C header file. Contains register defines/other neat things needed by the library
+ * AppleAicLib C header file. Contains register defines/other things needed by the library
  * 
  * Note - all register defines are relative to AIC_V1_BASE or AIC_V2_BASE
  * 
