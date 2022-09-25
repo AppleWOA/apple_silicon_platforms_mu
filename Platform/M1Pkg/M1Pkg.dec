@@ -30,8 +30,6 @@
   #Number of Cores (this is static per SoC)
   gM1PkgTokenSpaceGuid.PcdCoreCount|8|UINT32|0x00004406
 
-  gM1PkgTokenSpaceGuid.PcdAicV1InterruptControllerBase|0|UINT64|0x00004407
-
   #File name GUID for frontpage app
   gM1PkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }|VOID*|0x00004408
 [PcdsPatchableInModule.common]

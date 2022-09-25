@@ -13,6 +13,7 @@
 [Protocols]
 
 [PcdsFixedAtBuild.common]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase|0|UINT64|0x0000389f
 
 [PcdsPatchableInModule.common]
 

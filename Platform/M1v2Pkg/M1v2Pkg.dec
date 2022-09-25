@@ -30,8 +30,6 @@
   #Number of Cores (this is static per SoC) (however this must be gated by a compile-time switch for multi-die systems)
   gM1v2PkgTokenSpaceGuid.PcdCoreCount|20|UINT32|0x00004406
 
-  gM1v2PkgTokenSpaceGuid.PcdAicV2InterruptControllerBase|0|UINT64|0x00004407
-
   #File name GUID for frontpage app
   gM1v2PkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }|VOID*|0x00004408
 [PcdsPatchableInModule.common]

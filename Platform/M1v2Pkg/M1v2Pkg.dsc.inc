@@ -48,7 +48,7 @@
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x5100000000
 !else
   #this is MMIO space where the AIC lives
-  gM1v2PkgTokenSpaceGuid.PcdAicV1InterruptControllerBase|0x28e100000
+  gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase|0x28e100000
 
 !endif
   #MdeModulePkg build time fixed settings.
