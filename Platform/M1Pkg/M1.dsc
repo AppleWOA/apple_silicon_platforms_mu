@@ -49,7 +49,7 @@
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
   #Serial port base addr
-  #gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x235200000
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x235200000
   
 !include M1Pkg/M1Pkg.dsc.inc
 !include AppleSiliconPkg/FrontpageDsc.inc

@@ -16,4 +16,4 @@
 
 [PcdsPatchableInModule.common]
 
-  #gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0|UINT64|0x00003900
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0|UINT64|0x00003900
