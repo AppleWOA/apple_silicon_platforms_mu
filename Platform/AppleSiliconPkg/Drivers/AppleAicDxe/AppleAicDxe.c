@@ -19,11 +19,23 @@
 
 #include "AppleAicDxe.h"
 
+/**
+ * Initialize the AIC protocol.
+ * 
+ * @param ImageHandle 
+ * @param SystemTable 
+ * @return EFI_STATUS 
+ */
+
 EFI_STATUS
 InterruptDxeInitialize (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
+  EFI_STATUS Status;
+  APPLE_AIC_VERSION Version;
 
+  Version = AppleArmGetAicVersion();
+  return EFI_SUCCESS;
 }

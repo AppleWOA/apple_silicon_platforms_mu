@@ -11,10 +11,16 @@
  * 
  */
 
+#ifndef APPLE_AIC_DXE_H
+#define APPLE_AIC_DXE_H
+
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/ArmLib.h>
+#include <Library/AppleAicLib.h>
 
+
+#endif //APPLE_AIC_DXE_H

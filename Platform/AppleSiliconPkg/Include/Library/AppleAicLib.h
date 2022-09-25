@@ -21,6 +21,16 @@
 #include <Library/PcdLib.h>
 #include <PiPei.h>
 
+/*
+ * AIC versions.
+ */
+typedef enum {
+    APPLE_AIC_VERSION_1,
+    APPLE_AIC_VERSION_2,
+    APPLE_AIC_VERSION_UNKNOWN
+} APPLE_AIC_VERSION;
+
+
 //AICv1 Registers
 
 #define AIC_V1_BASE FixedPcdGet64(PcdAicV1InterruptControllerBase)

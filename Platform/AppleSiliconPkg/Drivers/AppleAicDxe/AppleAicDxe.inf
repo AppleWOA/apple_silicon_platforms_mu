@@ -32,7 +32,7 @@
   MdePkg/MdePkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
   ArmPkg/ArmPkg.dec
-  M1Pkg/M1Pkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
   AppleAicLib
@@ -53,7 +53,7 @@
   gEfiCpuArchProtocolGuid         ## CONSUMES ## NOTIFY
 
 [Pcd.common]
-  gM1PkgTokenSpaceGuid.PcdAicV1InterruptControllerBase
+  gAppleSiliconPkgTokenSpaceGuid.PcdAicV1InterruptControllerBase
 
 [Depex]
   TRUE
