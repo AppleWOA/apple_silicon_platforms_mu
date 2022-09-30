@@ -13,6 +13,7 @@
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/PcdLib.h>
+#include <Include/libfdt.h>
 #include <Library/AppleAicLib.h>
 
 
@@ -27,13 +28,20 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
     UINT32 Midr = ArmReadMidr();
     if (Midr & 0x61000000)
     {
-        //Check the SoC to see if we're using AICv1 or AICv2
+        //HACK - use a PCD containing the chip identifier for now
+        //if we need to support platforms beyond desktop Apple silicon platforms, this behavior must change
+        //(haven't figured out if there's an MSR or MMIO address that will give us this information)
+        //default to AICv1 if the platform doesn't explicitly specify it's for AICv2
+        if ((FixedPcdGet32(PcdAppleSocIdentifier) == 0x6000) || (FixedPcdGet32(PcdAppleSocIdentifier) == 0x8112))
+        {
+            return APPLE_AIC_VERSION_2;
+        }
+        return APPLE_AIC_VERSION_1;
     }
     else
     {
         DEBUG((DEBUG_INFO, "Not on an Apple platform, AIC won't be present. Aborting\n"));
-        return RETURN_UNSUPPORTED;
+        return APPLE_AIC_VERSION_UNKNOWN;
     }
-    return RETURN_SUCCESS;
 }
 

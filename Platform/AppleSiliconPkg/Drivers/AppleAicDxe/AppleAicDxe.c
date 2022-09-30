@@ -2,7 +2,7 @@
  * @file AppleAicDxe.c
  * @author amarioguy (arminders208@outlook.com)
  * 
- * This file implements the selector logic for the AIC DXE Driver.
+ * This file implements the selector logic for the AIC DXE Driver. Based off ArmGicDxe
  * 
  * @version 1.0
  * @date 2022-08-16
@@ -37,5 +37,16 @@ InterruptDxeInitialize (
   APPLE_AIC_VERSION Version;
 
   Version = AppleArmGetAicVersion();
-  return EFI_SUCCESS;
+  if (Version == APPLE_AIC_VERSION_1) {
+    Status = AppleAicV1DxeInit(ImageHandle, SystemTable);
+  }
+  else if (Version == APPLE_AIC_VERSION_2) {
+    Status = AppleAicV2DxeInit(ImageHandle, SystemTable);
+  }
+  else {
+    DEBUG((DEBUG_INFO, "Unsupported AIC revision, exiting\n"));
+    Status = EFI_UNSUPPORTED;
+  }
+
+  return Status;
 }

@@ -53,7 +53,8 @@
   gEfiCpuArchProtocolGuid         ## CONSUMES ## NOTIFY
 
 [Pcd.common]
-  gAppleSiliconPkgTokenSpaceGuid.PcdAicV1InterruptControllerBase
+  gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
 
 [Depex]
   TRUE
