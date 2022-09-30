@@ -49,6 +49,7 @@
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
   
 !include M1v2Pkg/M1v2Pkg.dsc.inc
 !include AppleSiliconPkg/FrontpageDsc.inc
