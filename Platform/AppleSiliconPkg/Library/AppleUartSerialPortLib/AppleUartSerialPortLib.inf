@@ -24,4 +24,5 @@
   HobLib
   CompilerIntrinsicsLib
 
-
+[FixedPcd]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase

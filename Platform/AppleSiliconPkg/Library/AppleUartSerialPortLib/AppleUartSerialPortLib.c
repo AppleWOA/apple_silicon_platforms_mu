@@ -28,6 +28,8 @@
 #include <Library/IoLib.h>
 #include <Library/PcdLib.h>
 
+#define UART_BASE FixedPcdGet64(PcdAppleUartBase)
+
 /**
   Initialize the serial device hardware.
 

@@ -21,9 +21,7 @@
 #include <Library/PcdLib.h>
 #include <PiPei.h>
 
-//UART base address and clock freq
-
-#define UART_BASE FixedPcdGet64(PcdAppleUartBase)
+//UART clock freq
 
 #define UART_CLOCK 24000000
 
