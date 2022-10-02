@@ -41,6 +41,10 @@
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=6000
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
 
+[PcdsFixedAtBuild.common]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
+
 [PcdsPatchableInModule.common]
   #These will get overriden by the FDT settings
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x10000000000
@@ -48,8 +52,6 @@
   gM1PkgTokenSpaceGuid.PcdFdtPointer|0x10200000000
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
   
 !include M1v2Pkg/M1v2Pkg.dsc.inc
 !include AppleSiliconPkg/FrontpageDsc.inc

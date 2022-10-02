@@ -15,7 +15,6 @@
 [PcdsFixedAtBuild.common]
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0|UINT32|0x0000389e
   gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase|0|UINT64|0x0000389f
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0|UINT64|0x00003900
 
 [PcdsPatchableInModule.common]
-
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0|UINT64|0x00003900
