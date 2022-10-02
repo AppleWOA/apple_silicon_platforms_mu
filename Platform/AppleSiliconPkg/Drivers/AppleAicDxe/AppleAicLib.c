@@ -17,6 +17,8 @@
 #include <Library/AppleAicLib.h>
 
 
+STATIC APPLE_AIC_VERSION mAicVersion;
+
 /**
  * @brief Returns the version of AIC on the platform.
  * 
@@ -34,14 +36,29 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
         //default to AICv1 if the platform doesn't explicitly specify it's for AICv2
         if ((FixedPcdGet32(PcdAppleSocIdentifier) == 0x6000) || (FixedPcdGet32(PcdAppleSocIdentifier) == 0x8112))
         {
+            mAicVersion = APPLE_AIC_VERSION_2;
             return APPLE_AIC_VERSION_2;
         }
+        mAicVersion = APPLE_AIC_VERSION_1;
         return APPLE_AIC_VERSION_1;
     }
     else
     {
         DEBUG((DEBUG_INFO, "Not on an Apple platform, AIC won't be present. Aborting\n"));
         return APPLE_AIC_VERSION_UNKNOWN;
+    }
+}
+
+UINTN AppleAicGetMaxInterrupts(VOID)
+{
+    UINTN NumIrqs;
+    if(mAicVersion == APPLE_AIC_VERSION_2)
+    {
+        NumIrqs = MmioRead32((FixedPcdGet64(PcdAicInterruptControllerBase)) + AIC_V2_INFO_REG1) & AIC_V2_NUM_IRQS_MASK;
+    }
+    else if (mAicVersion == APPLE_AIC_VERSION_1)
+    {
+        NumIrqs = MmioRead32((FixedPcdGet64(PcdAicInterruptControllerBase)) + 0x0004) & AIC_V2_NUM_IRQS_MASK;
     }
 }
 

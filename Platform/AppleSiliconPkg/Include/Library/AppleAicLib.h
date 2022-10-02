@@ -33,8 +33,6 @@ typedef enum {
 
 //AICv1 Registers
 
-#define AIC_V1_BASE FixedPcdGet64(PcdAicV1InterruptControllerBase)
-
 #define AIC_V1_HW_INFO 0x0004
 //AIC_WHOAMI in m1n1/Linux sources
 #define AIC_V1_CPU_IDENTIFIER_REG 0x2000
@@ -59,10 +57,17 @@ typedef enum {
 
 //AICv2 Registers
 
+#define AIC_V2_INFO_REG1 0x0004
+#define AIC_V2_INFO_REG2 0x0008
+#define AIC_V2_INFO_REG3 0x000c
 
 //AIC IMPDEF system registers
 
-#define AIC_V2_BASE FixedPcdGet64(PcdAicV2InterruptControllerBase)
+
+//AICv2 bitmasks
+
+#define AIC_V2_NUM_IRQS_MASK 0xFFFF
+
 
 
 #endif //APPLEAIC_H_

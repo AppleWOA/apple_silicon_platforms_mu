@@ -22,5 +22,11 @@
 #include <Library/ArmLib.h>
 #include <Library/AppleAicLib.h>
 
+#include <Protocol/Cpu.h>
+#include <Protocol/HardwareInterrupt.h>
+#include <Protocol/HardwareInterrupt2.h>
+
+
+
 
 #endif //APPLE_AIC_DXE_H
