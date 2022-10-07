@@ -49,7 +49,7 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
     }
 }
 
-UINTN AppleAicGetMaxInterrupts(VOID)
+UINT32 AppleAicGetNumInterrupts(VOID)
 {
     UINTN NumIrqs;
     if(mAicVersion == APPLE_AIC_VERSION_2)
