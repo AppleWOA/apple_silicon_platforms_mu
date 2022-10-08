@@ -62,3 +62,10 @@ UINT32 AppleAicGetNumInterrupts(VOID)
     }
 }
 
+VOID EFIAPI AppleAicMaskInterrupt(
+    IN UINTN AicBase,
+    IN UINTN Source
+)
+{
+    
+}

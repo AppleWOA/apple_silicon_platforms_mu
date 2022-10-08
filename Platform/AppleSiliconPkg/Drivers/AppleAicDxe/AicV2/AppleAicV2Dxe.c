@@ -21,6 +21,25 @@ STATIC UINT64 AicV2Base;
 extern EFI_HARDWARE_INTERRUPT_PROTOCOL   gHardwareInterruptAicV2Protocol;
 extern EFI_HARDWARE_INTERRUPT2_PROTOCOL  gHardwareInterrupt2AicV2Protocol;
 
+
+STATIC EFI_STATUS EFIAPI AppleAicV2MaskInterrupt(
+    IN EFI_HARDWARE_INTERRUPT_PROTOCOL *This,
+    IN HARDWARE_INTERRUPT_SOURCE Source
+)
+{
+    //right now this value is hardcoded to max IRQ amount supported on M1v2/M1 Ultra
+    //TODO: don't hardcode this
+    if(Source >= 4096)
+    {
+        DEBUG((DEBUG_INFO, "%a: Cannot mask IRQ higher than maximum supported IRQ!", __FUNCTION__));
+        ASSERT(FALSE);
+        return EFI_UNSUPPORTED;
+    }
+
+    AppleAicMaskInterrupt(AicV2Base, Source);
+    return EFI_SUCCESS;
+}
+
 /**
  * Prepares the AIC protocol for use by the DXE environment.
  * 
@@ -34,18 +53,16 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     UINTN InterruptIndex;
     EFI_STATUS Status;
     UINT32 AicV2NumInterrupts;
-    //Assert that Interrupt protocol is not installed already.
+    //Assert that the Hardware Interrupt protocol is not installed already.
     ASSERT_PROTOCOL_ALREADY_INSTALLED (NULL, &gHardwareInterruptProtocolGuid);
 
-    AicV2Base = FixedPcdGet64(PcdAicInterruptControllerBase);
+    AicV2Base = PcdGet64(PcdAicInterruptControllerBase);
     AicV2NumInterrupts = AppleAicGetNumInterrupts();
     DEBUG((DEBUG_INFO, "AICv2 with %d configured IRQs", AicV2NumInterrupts));
 
     //start from a clean state by disabling all interrupts
     for(InterruptIndex = 0; InterruptIndex < AicV2NumInterrupts; InterruptIndex++)
     {
-
+        AppleAicV2MaskInterrupt(&gHardwareInterruptAicV2Protocol, InterruptIndex);
     }
-    //TODO: the rest of the init, make sure only core 0 can receive interrupts
-    //to be answered: will we need to register the timer FIQ?
 }
