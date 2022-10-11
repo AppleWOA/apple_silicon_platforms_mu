@@ -61,7 +61,7 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     AicV2Base = PcdGet64(PcdAicInterruptControllerBase);
     AicInfoStruct->NumIrqs = AicV2NumInterrupts = AppleAicGetNumInterrupts(AicV2Base);
     AicInfoStruct->MaxIrqs = AicV2MaxInterrupts = AppleAicGetMaxInterrupts(AicV2Base);
-    DEBUG((DEBUG_INFO, "AICv2 with %d/%d configured IRQs, at 0x%llx\n", AicV2NumInterrupts, AicV2MaxInterrupts, AicV2Base);
+    DEBUG((DEBUG_INFO, "AICv2 with %d/%d configured IRQs, at 0x%llx\n", AicV2NumInterrupts, AicV2MaxInterrupts, AicV2Base));
 
     //start from a clean state by disabling all interrupts
     for(InterruptIndex = 0; InterruptIndex < AicV2NumInterrupts; InterruptIndex++)
