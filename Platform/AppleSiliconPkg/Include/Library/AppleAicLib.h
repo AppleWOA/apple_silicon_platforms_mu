@@ -19,7 +19,8 @@
 #define APPLEAIC_H_
 
 #include <Library/PcdLib.h>
-#include <PiPei.h>
+#include <PiDxe.h>
+#include <ConvenienceMacros.h>
 
 /*
  * AIC versions.
@@ -30,13 +31,47 @@ typedef enum {
     APPLE_AIC_VERSION_UNKNOWN
 } APPLE_AIC_VERSION;
 
+/**
+ * 
+ * AIC structs, to keep register offsets and frequently used values in a single place to keep the code readable/sane.
+ * 
+ * Inspired by m1n1 and Linux
+ * 
+ */
+
+typedef struct aic_reg_info_struct {
+    //required on AICv2, AICv1 has a static value for this register.
+    UINT64 EventRegOffset;
+
+    //Only used on AICv1
+    UINT64 TargetCpuRegOffset;
+    UINT64 IrqConfigRegOffset;
+    UINT64 SoftwareSetRegOffset;
+    UINT64 SoftwareClearRegOffset;
+    UINT64 IrqMaskSetRegOffset;
+    UINT64 IrqMaskClearRegOffset;
+} AIC_REG_INFO;
+
+typedef struct aic_info_struct {
+    UINT32 NumIrqs;
+    UINT32 NumCpuDies;
+    UINT32 MaxIrqs;
+    UINT32 MaxCpuDies;
+    //used to ensure that AIC MMIO writes are applying to the correct CPU die
+    UINT32 DieStride;
+
+    AIC_REG_INFO regs;
+} AIC_INFO_STRUCT;
+
+extern AIC_INFO_STRUCT *AicInfoStruct;
+
 
 //AICv1 Registers
 
 #define AIC_V1_HW_INFO 0x0004
 //AIC_WHOAMI in m1n1/Linux sources
 #define AIC_V1_CPU_IDENTIFIER_REG 0x2000
-#define AIC_V1_EVENT_TYPE 0x2004
+#define AIC_V1_EVENT_REG 0x2004
 #define AIC_V1_SEND_IPI_REG 0x2008
 #define AIC_V1_ACKNOWLEDGE_IPI_REG 0x200c
 //mask/clear IPIs
@@ -44,15 +79,17 @@ typedef enum {
 #define AIC_V1_CLEAR_IPI_MASK_REG 0x2028
 
 
-
-
-
-
-//AICv1 Event Types
+//AIC Event Types
 //which CPU die did this occur on?
-#define AIC_V1_EVENT_WHICH_CPU_DIE 0xFF000000
+#define AIC_EVENT_NUM_DIE GENMASK(31, 24)
 //are we an FIQ, IRQ, or IPI?
-#define AIC_V1_EVENT_INTERRUPT_TYPE 0xFF0000
+#define AIC_EVENT_INTERRUPT_TYPE GENMASK(23, 16)
+//Interrupt number
+#define AIC_EVENT_IRQ_NUM GENMASK(15, 0)
+
+
+//AICv1 bitmasks
+
 
 
 //AICv2 Registers
@@ -60,14 +97,18 @@ typedef enum {
 #define AIC_V2_INFO_REG1 0x0004
 #define AIC_V2_INFO_REG2 0x0008
 #define AIC_V2_INFO_REG3 0x000c
+#define AIC_V2_CONFIG 0x0014
 
 //AIC IMPDEF system registers
 
 
 //AICv2 bitmasks
 
-#define AIC_V2_NUM_IRQS_MASK 0xFFFF
+#define AIC_V2_NUM_AND_MAX_IRQS_MASK GENMASK(15, 0)
 
+// IRQ Mask macros
 
+#define AIC_MASK_REG(num) (4 * ((num) >> 5))
+#define AIC_MASK_BIT(num) BIT(num) & GENMASK(4, 0)
 
 #endif //APPLEAIC_H_
