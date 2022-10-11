@@ -49,23 +49,64 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
     }
 }
 
-UINT32 AppleAicGetNumInterrupts(VOID)
+UINT32 EFIAPI AppleAicGetNumInterrupts(
+    IN UINTN AicBase
+)
 {
-    UINTN NumIrqs;
+    UINT32 NumIrqs;
     if(mAicVersion == APPLE_AIC_VERSION_2)
     {
-        NumIrqs = MmioRead32((FixedPcdGet64(PcdAicInterruptControllerBase)) + AIC_V2_INFO_REG1) & AIC_V2_NUM_IRQS_MASK;
+        NumIrqs = MmioRead32(AicBase + AIC_V2_INFO_REG1) & AIC_V2_NUM_AND_MAX_IRQS_MASK;
     }
     else if (mAicVersion == APPLE_AIC_VERSION_1)
     {
-        NumIrqs = MmioRead32((FixedPcdGet64(PcdAicInterruptControllerBase)) + 0x0004) & AIC_V2_NUM_IRQS_MASK;
+        NumIrqs = MmioRead32(AicBase + 0x0004) & AIC_V2_NUM_AND_MAX_IRQS_MASK;
     }
+    return NumIrqs;
 }
 
+UINT32 EFIAPI AppleAicGetMaxInterrupts(
+    IN UINTN AicBase
+)
+{
+    UINT32 MaxIrqs;
+    if(mAicVersion == APPLE_AIC_VERSION_2)
+    {
+        MaxIrqs = MmioRead32(AicBase + AIC_V2_INFO_REG3) & AIC_V2_NUM_AND_MAX_IRQS_MASK;
+    }
+    else if (mAicVersion == APPLE_AIC_VERSION_1)
+    {
+        //AICv1 is hard capped to 1024 IRQs
+        MaxIrqs = 0x400;
+    }
+    return MaxIrqs;
+}
+
+/**
+ * @brief Masks an IRQ by writing to the AIC's MASK_SET register.
+ * 
+ * @param AicBase - AIC Base Address
+ * @param Source - IRQ number 
+ * 
+ */
 VOID EFIAPI AppleAicMaskInterrupt(
     IN UINTN AicBase,
     IN UINTN Source
 )
 {
-    
+    /**
+     * Here's the general flow of how this works:
+     * 
+     * 1) Find out which CPU die the IRQ is on (if this is for AICv2)
+     * 2) Calculate the bit of MASK_SET that needs to be written to.
+     * 3) perform the memory write.
+     * 
+     */
+    UINT32 CpuDieNum = 0;
+    DEBUG((DEBUG_INFO, "%a: masking interrupt 0x%llx", __FUNCTION__, Source));
+    if (mAicVersion == APPLE_AIC_VERSION_2)
+    {
+        CpuDieNum = FIELD_GET(AIC_EVENT_NUM_DIE, Source);
+    }
+    UINT32 IrqNum;
 }
