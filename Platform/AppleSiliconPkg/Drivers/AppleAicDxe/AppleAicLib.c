@@ -60,7 +60,7 @@ UINT32 EFIAPI AppleAicGetNumInterrupts(
     }
     else if (mAicVersion == APPLE_AIC_VERSION_1)
     {
-        NumIrqs = MmioRead32(AicBase + 0x0004) & AIC_V2_NUM_AND_MAX_IRQS_MASK;
+        NumIrqs = MmioRead32(AicBase + AIC_V1_HW_INFO) & AIC_V2_NUM_AND_MAX_IRQS_MASK;
     }
     return NumIrqs;
 }
@@ -103,7 +103,7 @@ VOID EFIAPI AppleAicMaskInterrupt(
      * 
      */
     UINT32 CpuDieNum = 0;
-    DEBUG((DEBUG_INFO, "%a: masking interrupt 0x%llx", __FUNCTION__, Source));
+    DEBUG((DEBUG_INFO, "%a: masking interrupt 0x%llx\n", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
     {
         CpuDieNum = FIELD_GET(AIC_EVENT_NUM_DIE, Source);
