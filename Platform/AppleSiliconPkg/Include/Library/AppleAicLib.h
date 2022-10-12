@@ -43,7 +43,7 @@ typedef struct aic_reg_info_struct {
     //required on AICv2, AICv1 has a static value for this register.
     UINT64 EventRegOffset;
 
-    //Only used on AICv1
+    // target cpu reg only used on AICv1
     UINT64 TargetCpuRegOffset;
     UINT64 IrqConfigRegOffset;
     UINT64 SoftwareSetRegOffset;
@@ -60,7 +60,7 @@ typedef struct aic_info_struct {
     //used to ensure that AIC MMIO writes are applying to the correct CPU die
     UINT32 DieStride;
 
-    AIC_REG_INFO regs;
+    AIC_REG_INFO Regs;
 } AIC_INFO_STRUCT;
 
 extern AIC_INFO_STRUCT *AicInfoStruct;
@@ -102,9 +102,11 @@ extern AIC_INFO_STRUCT *AicInfoStruct;
 //AIC IMPDEF system registers
 
 
-//AICv2 bitmasks
+//AICv2 bitmasks and bitfield definitions
 
 #define AIC_V2_NUM_AND_MAX_IRQS_MASK GENMASK(15, 0)
+#define AIC_V2_INFO_REG3_MAX_DIE_COUNT_BITFIELD GENMASK(27, 24)
+#define AIC_V2_INFO_REG1_LAST_CPU_DIE_BITFIELD GENMASK(27, 24)
 
 // IRQ Mask macros
 
