@@ -118,7 +118,24 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     
     DEBUG((DEBUG_INFO, "AICv2 with %u/%u configured IRQs, at 0x%llx\n", AicV2NumInterrupts, AicV2MaxInterrupts, AicV2Base));
     DEBUG((DEBUG_INFO, "%u/%u CPU dies, Die Stride: 0x%lx", AicInfoStruct->NumCpuDies, AicInfoStruct->MaxCpuDies, AicInfoStruct->DieStride));
-    DEBUG((DEBUG_VERBOSE, "AIC register addresses: \n"));
+    DEBUG((DEBUG_VERBOSE, "AIC register addresses: \n"
+    "\tAIC_V2_BASE: 0x%llx\n"
+    "\tAIC_V2_IRQ_CFG: 0x%llx\n"
+    "\tAIC_V2_SW_SET: 0x%llx\n"
+    "\tAIC_V2_SW_CLR: 0x%llx\n"
+    "\tAIC_V2_MASK_SET: 0x%llx\n"
+    "\tAIC_V2_MASK_CLR: 0x%llx\n"
+    "\tAIC_V2_HW_STATE: 0x%llx\n"
+    "\tAIC_V2_EVENT: 0x%llx\n",
+    AicV2Base,
+    (AicV2Base + AicInfoStruct->Regs.IrqConfigRegOffset),
+    (AicV2Base + AicInfoStruct->Regs.SoftwareSetRegOffset),
+    (AicV2Base + AicInfoStruct->Regs.SoftwareClearRegOffset),
+    (AicV2Base + AicInfoStruct->Regs.IrqMaskSetRegOffset),
+    (AicV2Base + AicInfoStruct->Regs.IrqMaskClearRegOffset),
+    (AicV2Base + AicInfoStruct->Regs.HwStateRegOffset),
+    (AicInfoStruct->Regs.EventReg)
+    ));
 
     //start from a clean state by disabling all interrupts
     for(InterruptIndex = 0; InterruptIndex < AicV2NumInterrupts; InterruptIndex++)
