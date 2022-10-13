@@ -49,19 +49,47 @@ STATIC EFI_STATUS EFIAPI AppleAicV2MaskInterrupt(
 EFI_STATUS AppleAicV2CalculateRegisterOffsets(IN VOID)
 {
     //needed for devicetree calculations
-    UINT32 SocNode;
+    VOID* FdtBlob = (VOID *)(PcdGet64(PcdFdtPointer));
     UINT32 InterruptControllerNode;
+    UINT32 Length;
+    UINT32 AddressCells;
+    UINT32 SizeCells;
+    UINT64 StartOffset;
+    UINT64 CurrentOffset;
 
     //Start with simple things
     AicV2Base = PcdGet64(PcdAicInterruptControllerBase);
     AicInfoStruct->NumIrqs = AppleAicGetNumInterrupts(AicV2Base);
     AicInfoStruct->MaxIrqs = AppleAicGetMaxInterrupts(AicV2Base);
     AicInfoStruct->MaxCpuDies = FIELD_GET(AIC_V2_INFO_REG3_MAX_DIE_COUNT_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG3));
-    AicInfoStruct->NumCpuDies = FIELD_GET(AIC_V2_INFO_REG1_LAST_CPU_DIE_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG1));
+    AicInfoStruct->NumCpuDies = (FIELD_GET(AIC_V2_INFO_REG1_LAST_CPU_DIE_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG1))) + 1;
     
     //Now for the more complicated bits...
     //Start by getting the event register offset from the devicetree
-    //TODO: event reg, die stride, set/clear regs
+    InterruptControllerNode = fdt_path_offset(FdtBlob, "/soc/interrupt-controller");
+    AicInfoStruct->Regs.EventReg = fdt_getprop(FdtBlob, InterruptControllerNode, "event", Length);
+    if(Length < (AddressCells + SizeCells) * sizeof(UINT32)) {
+        DEBUG((DEBUG_ERROR, "%a: Failed to get event register offset from DeviceTree!\n", __FUNCTION__));
+        return EFI_ERROR(-1);
+    }
+    //Now calculate everything else, starting from the IRQ_CFG register
+    StartOffset = AicInfoStruct->Regs.IrqConfigRegOffset = (AicV2Base + AIC_V2_IRQ_CFG_REG);
+    CurrentOffset = (StartOffset + sizeof(UINT32) * AicInfoStruct->MaxIrqs);
+
+    AicInfoStruct->Regs.SoftwareSetRegOffset = CurrentOffset;
+    CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
+    AicInfoStruct->Regs.SoftwareClearRegOffset = CurrentOffset;
+    CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
+    AicInfoStruct->Regs.IrqMaskSetRegOffset = CurrentOffset;
+    CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
+    AicInfoStruct->Regs.IrqMaskClearRegOffset = CurrentOffset;
+    CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
+    AicInfoStruct->Regs.HwStateRegOffset = CurrentOffset;
+    AicInfoStruct->DieStride = CurrentOffset - StartOffset;
+    AicInfoStruct->RegSize = AicInfoStruct->Regs.EventReg + 4;
+    
+    return EFI_SUCCESS;
+
 }
 
 /**

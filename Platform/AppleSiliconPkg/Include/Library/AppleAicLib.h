@@ -41,7 +41,7 @@ typedef enum {
 
 typedef struct aic_reg_info_struct {
     //required on AICv2, AICv1 has a static value for this register.
-    UINT64 EventRegOffset;
+    UINT64 EventReg;
 
     // target cpu reg only used on AICv1
     UINT64 TargetCpuRegOffset;
@@ -50,6 +50,7 @@ typedef struct aic_reg_info_struct {
     UINT64 SoftwareClearRegOffset;
     UINT64 IrqMaskSetRegOffset;
     UINT64 IrqMaskClearRegOffset;
+    UINT64 HwStateRegOffset;
 } AIC_REG_INFO;
 
 typedef struct aic_info_struct {
@@ -59,6 +60,7 @@ typedef struct aic_info_struct {
     UINT32 MaxCpuDies;
     //used to ensure that AIC MMIO writes are applying to the correct CPU die
     UINT32 DieStride;
+    UINT32 RegSize;
 
     AIC_REG_INFO Regs;
 } AIC_INFO_STRUCT;
@@ -92,12 +94,13 @@ extern AIC_INFO_STRUCT *AicInfoStruct;
 
 
 
-//AICv2 Registers
+//AICv2 Registers (the constant offsets)
 
 #define AIC_V2_INFO_REG1 0x0004
 #define AIC_V2_INFO_REG2 0x0008
 #define AIC_V2_INFO_REG3 0x000c
 #define AIC_V2_CONFIG 0x0014
+#define AIC_V2_IRQ_CFG_REG 0x2000
 
 //AIC IMPDEF system registers
 
