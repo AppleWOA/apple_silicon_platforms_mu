@@ -33,8 +33,6 @@
   #File name GUID for frontpage app
   gM1PkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }|VOID*|0x00004408
 [PcdsPatchableInModule.common]
-  #saved FDT pointer from loader boot
-  gM1PkgTokenSpaceGuid.PcdFdtPointer|0|UINT64|0x00004409
 
   #Framebuffer (this will be filled in by the loader)
   gM1PkgTokenSpaceGuid.PcdFrameBufferAddress|0x9e20dc000|UINT64|0x00004400

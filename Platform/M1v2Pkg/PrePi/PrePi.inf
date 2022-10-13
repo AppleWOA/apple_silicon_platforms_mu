@@ -59,7 +59,7 @@
   #System RAM
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
-  gM1v2PkgTokenSpaceGuid.PcdFdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
   gArmTokenSpaceGuid.PcdFvBaseAddress
   gArmTokenSpaceGuid.PcdFdBaseAddress
 

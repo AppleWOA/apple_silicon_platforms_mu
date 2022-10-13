@@ -22,6 +22,7 @@
   EmbeddedPkg/EmbeddedPkg.dec
   ArmPkg/ArmPkg.dec
   M1Pkg/M1Pkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
   ArmLib
@@ -55,7 +56,7 @@
   #System RAM
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
-  gM1PkgTokenSpaceGuid.PcdFdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
   gArmTokenSpaceGuid.PcdFvBaseAddress
   gArmTokenSpaceGuid.PcdFdBaseAddress
 

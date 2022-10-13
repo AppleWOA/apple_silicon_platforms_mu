@@ -12,7 +12,7 @@
 [Pcd]
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
-  gM1PkgTokenSpaceGuid.PcdFdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
 
 [FixedPcd]
   gM1PkgTokenSpaceGuid.PcdCoreCount
@@ -24,6 +24,7 @@
   EmbeddedPkg/EmbeddedPkg.dec
   MdeModulePkg/MdeModulePkg.dec
   M1Pkg/M1Pkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
   BaseLib

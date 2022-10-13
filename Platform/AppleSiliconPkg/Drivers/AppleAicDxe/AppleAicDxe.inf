@@ -46,6 +46,7 @@
   IoLib
   PcdLib
   UefiLib
+  FdtLib
 
 [Protocols]
   gHardwareInterruptProtocolGuid  ## PRODUCES
@@ -55,6 +56,7 @@
 [Pcd.common]
   gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
 
 [Depex]
   TRUE

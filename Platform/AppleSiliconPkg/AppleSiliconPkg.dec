@@ -18,3 +18,5 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0|UINT64|0x00003900
 
 [PcdsPatchableInModule.common]
+  #FDT pointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0|UINT64|0x00003901
