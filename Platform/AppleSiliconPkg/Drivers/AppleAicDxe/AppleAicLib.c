@@ -39,8 +39,12 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
             mAicVersion = APPLE_AIC_VERSION_2;
             return APPLE_AIC_VERSION_2;
         }
-        mAicVersion = APPLE_AIC_VERSION_1;
-        return APPLE_AIC_VERSION_1;
+        else
+        {
+            mAicVersion = APPLE_AIC_VERSION_1;
+            return APPLE_AIC_VERSION_1;
+        }
+
     }
     else
     {
