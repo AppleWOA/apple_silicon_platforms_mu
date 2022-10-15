@@ -53,6 +53,12 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
     }
 }
 
+/**
+ * Return the implemented number of IRQs on the platform.
+ * 
+ * @param AicBase - AIC base address
+ * @return UINT32 - number of IRQs
+ */
 UINT32 EFIAPI AppleAicGetNumInterrupts(
     IN UINTN AicBase
 )
@@ -69,6 +75,12 @@ UINT32 EFIAPI AppleAicGetNumInterrupts(
     return NumIrqs;
 }
 
+/**
+ * Returns the maximum supported number of IRQs on the SoC.
+ * 
+ * @param AicBase - AIC Base Address
+ * @return UINT32 - max number of IRQs supported on the SoC.
+ */
 UINT32 EFIAPI AppleAicGetMaxInterrupts(
     IN UINTN AicBase
 )
@@ -89,6 +101,10 @@ UINT32 EFIAPI AppleAicGetMaxInterrupts(
 /**
  * @brief Masks an IRQ by writing to the AIC's MASK_SET register.
  * 
+ * Note that all FIQ sources are directly implemented in the cores instead of going through AIC.
+ * 
+ * TODO: deal with FIQs.
+ * 
  * @param AicBase - AIC Base Address
  * @param Source - IRQ number 
  * 
@@ -105,12 +121,54 @@ VOID EFIAPI AppleAicMaskInterrupt(
      * 2) Calculate the bit of MASK_SET that needs to be written to.
      * 3) perform the memory write.
      * 
-     */
+     * On AICv1, the CPU die calculation is skipped (there's only one CPU die on all AICv1 systems)
+     * 
+     * Note that the IRQ number must match the representation in hardware.
+     * 
+     **/
     UINT32 CpuDieNum = 0;
     DEBUG((DEBUG_INFO, "%a: masking interrupt 0x%llx\n", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
     {
-        CpuDieNum = FIELD_GET(AIC_EVENT_NUM_DIE, Source);
+        //this is assuming the understanding of IRQ numbers in HW matches the one in SW
+        CpuDieNum = (Source / AicInfoStruct->MaxIrqs) * AicInfoStruct->DieStride;
     }
-    UINT32 IrqNum;
+    UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
+
+    MmioWrite32(AicBase + AicInfoStruct->Regs.IrqMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
+
 }
+
+/**
+ * @brief Unmask an IRQ by writing to the AIC's MASK_SET register.
+ * 
+ * Note that all FIQ sources are directly implemented in the cores instead of going through AIC.
+ * 
+ * TODO: deal with FIQs.
+ * 
+ * @param AicBase - AIC Base Address
+ * @param Source - IRQ number 
+ * 
+ */
+VOID EFIAPI AppleAicUnmaskInterrupt(
+    IN UINTN AicBase,
+    IN UINTN Source
+)
+{
+    /**
+     * The general flow is the same as AppleAicMaskInterrupt, but instead of 
+     * writing MASK_SET, we write MASK_CLR instead.
+     **/
+    UINT32 CpuDieNum = 0;
+    DEBUG((DEBUG_INFO, "%a: unmasking interrupt 0x%llx\n", __FUNCTION__, Source));
+    if (mAicVersion == APPLE_AIC_VERSION_2)
+    {
+        //this is assuming the understanding of IRQ numbers in HW matches the one in SW
+        CpuDieNum = Source / AicInfoStruct->MaxIrqs * AicInfoStruct->DieStride;
+    }
+    UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
+
+    MmioWrite32(AicBase + AicInfoStruct->Regs.IrqMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
+
+}
+

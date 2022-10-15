@@ -72,6 +72,7 @@ extern AIC_INFO_STRUCT *AicInfoStruct;
 
 #define AIC_V1_HW_INFO 0x0004
 //AIC_WHOAMI in m1n1/Linux sources
+//on AICv1, used in CPU affinity modifications
 #define AIC_V1_CPU_IDENTIFIER_REG 0x2000
 #define AIC_V1_EVENT_REG 0x2004
 #define AIC_V1_SEND_IPI_REG 0x2008

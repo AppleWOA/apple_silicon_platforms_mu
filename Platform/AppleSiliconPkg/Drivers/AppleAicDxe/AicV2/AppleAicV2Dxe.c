@@ -86,7 +86,7 @@ EFI_STATUS AppleAicV2CalculateRegisterOffsets(IN VOID)
     CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
     AicInfoStruct->Regs.HwStateRegOffset = CurrentOffset;
     AicInfoStruct->DieStride = CurrentOffset - StartOffset;
-    AicInfoStruct->RegSize = AicInfoStruct->Regs.EventReg + 4;
+    AicInfoStruct->RegSize = (AicInfoStruct->Regs.EventReg - AicV2Base) + 4;
     
     return EFI_SUCCESS;
 
@@ -106,6 +106,7 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     EFI_STATUS Status;
     UINT32 AicV2NumInterrupts;
     UINT32 AicV2MaxInterrupts;
+    UINT32 CoreID;
     DEBUG((DEBUG_INFO, "%a: AIC driver start\n", __FUNCTION__));
     //Assert that the Hardware Interrupt protocol is not installed already.
     ASSERT_PROTOCOL_ALREADY_INSTALLED (NULL, &gHardwareInterruptProtocolGuid);
@@ -142,5 +143,26 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     {
         AppleAicV2MaskInterrupt(&gHardwareInterruptAicV2Protocol, InterruptIndex);
     }
-    MmioAnd32(AicV2Base + AIC_V2_CONFIG, ~(1));
+
+    /**
+     * 
+     * On Apple CPUs, IRQs and FIQs can be opted out of by writing 
+     * to a implementation defined MSR per-core. (S3_4_C15_C10_4)
+     * 
+     * For now, rely on the hardware heuristic to select core 0 by default for IRQs
+     * (as the other cores are in a spin loop and not running anything)
+     * 
+     * If this turns out to be unreliable, uncomment the below code, this will opt all other cores
+     * out of IRQs and FIQs.
+     * 
+     */
+
+    //CoreID = (ArmReadMpidr()) & (ARM_CORE_AFF0 | ARM_CORE_AFF1 | ARM_CORE_AFF2 | ARM_CORE_AFF3);
+    // any result other than 0 implies that this is not core 0
+    //if (CoreID != 0) {
+    //    AppleArmDisableIrqsAndFiqs();
+    //}
+
+    //TODO: register interrupt protocol as ArmGicDxe does
+
 }
