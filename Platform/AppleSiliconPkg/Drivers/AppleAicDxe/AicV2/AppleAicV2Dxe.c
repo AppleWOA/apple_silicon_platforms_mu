@@ -44,9 +44,9 @@ STATIC EFI_STATUS EFIAPI AppleAicV2MaskInterrupt(
 /**
  * Calculate the AIC register offsets on the platform
  * 
- * @return EFI_SUCCESS unconditionally.
+ * @return EFI_SUCCESS if successful, EFI_ERROR(-1) if an error occurred.
  */
-EFI_STATUS AppleAicV2CalculateRegisterOffsets(IN VOID)
+EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
 {
     //needed for devicetree calculations
     VOID* FdtBlob = (VOID *)(PcdGet64(PcdFdtPointer));
@@ -90,6 +90,17 @@ EFI_STATUS AppleAicV2CalculateRegisterOffsets(IN VOID)
     
     return EFI_SUCCESS;
 
+}
+
+VOID EFIAPI AppleAicV2ExitBootServicesEvent(
+    IN EFI_EVENT Event,
+    IN VOID *Context
+)
+{
+    UINTN InterruptIndex;
+
+    //acknowledge any outstanding interrupts by reading the event register
+    //(this will mask those interrupts at the same time)
 }
 
 /**
@@ -149,11 +160,12 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
      * On Apple CPUs, IRQs and FIQs can be opted out of by writing 
      * to a implementation defined MSR per-core. (S3_4_C15_C10_4)
      * 
-     * For now, rely on the hardware heuristic to select core 0 by default for IRQs
-     * (as the other cores are in a spin loop and not running anything)
+     * Typically used when a core is in a state where it's undesirable for it to service IRQs.
+     * (sleep for example)
      * 
-     * If this turns out to be unreliable, uncomment the below code, this will opt all other cores
-     * out of IRQs and FIQs.
+     * For now we're only using 1 core (the others are in a spin loop) but when multi-core support is turned on
+     * if it turns out the hardware heuristic is sending IRQs to inactive cores, uncomment the below code to disable IRQs on
+     * those other cores.
      * 
      */
 
@@ -163,6 +175,14 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     //    AppleArmDisableIrqsAndFiqs();
     //}
 
-    //TODO: register interrupt protocol as ArmGicDxe does
+    //enable the AIC
+    MmioOr32(AicV2Base + AIC_V2_CONFIG, AIC_V2_CFG_ENABLE);
 
+    Status = InstallAndRegisterInterruptService(
+        &gHardwareInterruptAicV2Protocol,
+        &gHardwareInterrupt2AicV2Protocol,
+        NULL,
+        NULL
+    );
+    return Status;
 }

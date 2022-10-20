@@ -18,6 +18,8 @@ EFI_HANDLE  gHardwareInterruptHandle = NULL;
 
 EFI_EVENT  EfiExitBootServicesEvent = (EFI_EVENT)NULL;
 
+HARDWARE_INTERRUPT_HANDLER  *AicRegisteredInterruptHandlers = NULL;
+
 //borrowed from ArmGicDxe as it does the job well enough
 /**
   Register Handler for the specified interrupt source.
@@ -38,20 +40,20 @@ RegisterInterruptSource (
   IN HARDWARE_INTERRUPT_HANDLER       Handler
   )
 {
-  if (Source >= mGicNumInterrupts) {
+  if (Source >= AicInfoStruct->MaxIrqs) {
     ASSERT (FALSE);
     return EFI_UNSUPPORTED;
   }
 
-  if ((Handler == NULL) && (gRegisteredInterruptHandlers[Source] == NULL)) {
+  if ((Handler == NULL) && (AicRegisteredInterruptHandlers[Source] == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if ((Handler != NULL) && (gRegisteredInterruptHandlers[Source] != NULL)) {
+  if ((Handler != NULL) && (AicRegisteredInterruptHandlers[Source] != NULL)) {
     return EFI_ALREADY_STARTED;
   }
 
-  gRegisteredInterruptHandlers[Source] = Handler;
+  AicRegisteredInterruptHandlers[Source] = Handler;
 
   // If the interrupt handler is unregistered then disable the interrupt
   if (NULL == Handler) {
@@ -60,3 +62,23 @@ RegisterInterruptSource (
     return This->EnableInterruptSource (This, Source);
   }
 }
+
+EFI_STATUS
+InstallAndRegisterInterruptService (
+  IN EFI_HARDWARE_INTERRUPT_PROTOCOL   *InterruptProtocol,
+  IN EFI_HARDWARE_INTERRUPT2_PROTOCOL  *Interrupt2Protocol,
+  IN EFI_CPU_INTERRUPT_HANDLER         InterruptHandler,
+  IN EFI_EVENT_NOTIFY                  ExitBootServicesEvent
+  )
+{
+    EFI_STATUS Status;
+    CONST UINTN InterruptHandlersSize = (sizeof(HARDWARE_INTERRUPT_HANDLER) * AicInfoStruct->NumIrqs);
+
+    //set up RAM for IRQ handlers
+    AicRegisteredInterruptHandlers = AllocateZeroPool(InterruptHandlersSize);
+    if(AicRegisteredInterruptHandlers == NULL)
+    {
+        return EFI_OUT_OF_RESOURCES;
+    }
+    
+} 
