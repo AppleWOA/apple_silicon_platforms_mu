@@ -111,10 +111,29 @@ extern AIC_INFO_STRUCT *AicInfoStruct;
 #define AIC_V2_NUM_AND_MAX_IRQS_MASK GENMASK(15, 0)
 #define AIC_V2_INFO_REG3_MAX_DIE_COUNT_BITFIELD GENMASK(27, 24)
 #define AIC_V2_INFO_REG1_LAST_CPU_DIE_BITFIELD GENMASK(27, 24)
+#define AIC_V2_CFG_ENABLE BIT(0)
 
 // IRQ Mask macros
 
 #define AIC_MASK_REG(num) (4 * ((num) >> 5))
 #define AIC_MASK_BIT(num) BIT(num) & GENMASK(4, 0)
+
+/* Function prototypes */
+
+
+//AICv1 specific
+
+
+
+//AICv2 specific
+
+/**
+ * Calculate the AIC register offsets on the platform
+ * 
+ * @return EFI_SUCCESS if successful, EFI_ERROR(-1) if an error occurred.
+ */
+EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID);
+
+
 
 #endif //APPLEAIC_H_
