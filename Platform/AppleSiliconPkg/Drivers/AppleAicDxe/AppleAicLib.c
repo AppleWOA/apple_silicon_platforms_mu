@@ -53,6 +53,22 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
     }
 }
 
+
+/**
+ * Reads the event register on the platform AIC, which serves as an interrupt ack
+ * (masks it at the same time)
+ * 
+ * TODO: use this in some meaningful way other than in the ExitBootServices event
+ * 
+ * @return UINT32 - Event register value
+ */
+UINT32 AppleAicReadEventRegister(
+    IN VOID
+)
+{
+    return MmioRead32(AicInfoStruct->Regs.EventReg);
+}
+
 /**
  * Return the implemented number of IRQs on the platform.
  * 
@@ -130,7 +146,7 @@ VOID EFIAPI AppleAicMaskInterrupt(
     DEBUG((DEBUG_INFO, "%a: masking interrupt 0x%llx\n", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
     {
-        //this is assuming the understanding of IRQ numbers in HW matches the one in SW
+        //the IRQ number will come from DeviceTree, which uses the interrupt numbers as they are in hardware
         CpuDieNum = (Source / AicInfoStruct->MaxIrqs) * AicInfoStruct->DieStride;
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
@@ -163,7 +179,7 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
     DEBUG((DEBUG_INFO, "%a: unmasking interrupt 0x%llx\n", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
     {
-        //this is assuming the understanding of IRQ numbers in HW matches the one in SW
+        //the IRQ number will come from DeviceTree, which uses the interrupt numbers as they are in hardware
         CpuDieNum = Source / AicInfoStruct->MaxIrqs * AicInfoStruct->DieStride;
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
@@ -172,3 +188,25 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
 
 }
 
+/**
+ * Read interrupt state from the AIC's IRQ_CFG register
+ * 
+ * @param AicBase - AIC base address
+ * @param Source - IRQ number
+ * @return TRUE if enabled, FALSE if disabled.
+ */
+BOOLEAN EFIAPI AppleAicReadInterruptState(
+    IN UINTN AicBase,
+    IN UINTN Source
+)
+{
+    UINT32 CpuDieOffset = 0;
+    DEBUG((DEBUG_INFO, "%a: reading interrupt state for IRQ number 0x%llx", __FUNCTION__, Source));
+    if (mAicVersion == APPLE_AIC_VERSION_2)
+    {
+        CpuDieOffset = Source / AicInfoStruct->MaxIrqs * AicInfoStruct->DieStride;
+    }
+    UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
+
+    return MmioRead32(AicBase + AicInfoStruct->Regs.HwStateRegOffset + CpuDieOffset + AIC_MASK_REG(IrqNum)) & (AIC_MASK_BIT(IrqNum)) != 0;
+}

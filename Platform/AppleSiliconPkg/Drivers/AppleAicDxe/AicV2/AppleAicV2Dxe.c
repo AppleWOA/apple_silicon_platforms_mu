@@ -23,14 +23,20 @@ AIC_INFO_STRUCT *AicInfoStruct;
 extern EFI_HARDWARE_INTERRUPT_PROTOCOL   gHardwareInterruptAicV2Protocol;
 extern EFI_HARDWARE_INTERRUPT2_PROTOCOL  gHardwareInterrupt2AicV2Protocol;
 
+/**
+ * Masks an IRQ on an AICv2 platform.
+ * 
+ * @param This - pointer to interrupt protocol instance
+ * @param Source - IRQ number.
+ * @return EFI_SUCCESS if successful, ASSERTs if source is > than max IRQs
+ */
 
 STATIC EFI_STATUS EFIAPI AppleAicV2MaskInterrupt(
     IN EFI_HARDWARE_INTERRUPT_PROTOCOL *This,
     IN HARDWARE_INTERRUPT_SOURCE Source
 )
 {
-    UINT32 MaxIrqs = AppleAicGetMaxInterrupts(AicV2Base);
-    if(Source >= MaxIrqs)
+    if(Source >= AicInfoStruct->MaxIrqs)
     {
         DEBUG((DEBUG_INFO, "%a: Cannot mask IRQ higher than maximum supported IRQ!\n", __FUNCTION__));
         ASSERT(FALSE);
@@ -40,6 +46,77 @@ STATIC EFI_STATUS EFIAPI AppleAicV2MaskInterrupt(
     AppleAicMaskInterrupt(AicV2Base, Source);
     return EFI_SUCCESS;
 }
+
+/**
+ * Unmasks an IRQ on an AICv2 platform.
+ * 
+ * @param This - pointer to interrupt protocol instance
+ * @param Source - IRQ number.
+ * @return EFI_SUCCESS if successful, ASSERTs if source is > than max IRQs
+ */
+
+STATIC EFI_STATUS EFIAPI AppleAicV2UnmaskInterrupt(
+    IN EFI_HARDWARE_INTERRUPT_PROTOCOL *This,
+    IN HARDWARE_INTERRUPT_SOURCE Source
+)
+{
+    if(Source >= AicInfoStruct->MaxIrqs)
+    {
+        DEBUG((DEBUG_INFO, "%a: Cannot unmask IRQ higher than maximum supported IRQ!\n", __FUNCTION__));
+        ASSERT(FALSE);
+        return EFI_UNSUPPORTED;
+    }
+
+    AppleAicUnmaskInterrupt(AicV2Base, Source);
+    return EFI_SUCCESS;
+}
+
+/**
+ * Gets the state of a particular interrupt on the platform.
+ * 
+ * TODO: figure out if we need to read HW_STATE or IRQ_CFG to read the state of interrupts
+ * 
+ * @param This - Interrupt protocol instance pointer
+ * @param Source - IRQ number
+ * @param State - pointer to BOOLEAN that holds the actual interrupt state. TRUE if enabled, FALSE if disabled.
+ * @return EFI_SUCCESS if successful, ASSER 
+ */
+STATIC EFI_STATUS EFIAPI AppleAicV2GetInterruptState(
+    IN EFI_HARDWARE_INTERRUPT_PROTOCOL *This,
+    IN HARDWARE_INTERRUPT_SOURCE Source,
+    OUT BOOLEAN *State
+)
+{
+    if(Source >= AicInfoStruct->MaxIrqs)
+    {
+        ASSERT(FALSE);
+        return EFI_UNSUPPORTED;
+    }
+    *State = AppleAicReadInterruptState(AicV2Base, Source);
+    return EFI_SUCCESS;
+}
+
+
+
+/**
+ * Sends the EOI signal to hardware.
+ * 
+ * @param This - interrupt protocol instance pointer
+ * @param Source - IRQ number
+ * @return EFI_SUCCESS if successful.
+ */
+STATIC EFI_STATUS EFIAPI AppleAicV2EndOfInterrupt(
+    IN EFI_HARDWARE_INTERRUPT_PROTOCOL *This,
+    IN HARDWARE_INTERRUPT_SOURCE Source
+)
+{
+    //TODO: FIQ case
+    
+    //reading the interrupt source in the event register acks and masks it at the same time
+    //all we need to do is unmask it here. (note that for hardware IRQs, this assumes the hardware interrupt source has been cleared)
+    AppleAicUnmaskInterrupt(This, Source);
+}
+
 
 /**
  * Calculate the AIC register offsets on the platform
@@ -92,6 +169,13 @@ EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
 
 }
 
+/**
+ * The ExitBootServices event. Will disable interrupts and shut down AIC hardware in handoff from DXE core to OS.
+ * 
+ * @param Event (input) - event being processed 
+ * @param Context (input) - event context.
+ * @return VOID 
+ */
 VOID EFIAPI AppleAicV2ExitBootServicesEvent(
     IN EFI_EVENT Event,
     IN VOID *Context
@@ -101,6 +185,17 @@ VOID EFIAPI AppleAicV2ExitBootServicesEvent(
 
     //acknowledge any outstanding interrupts by reading the event register
     //(this will mask those interrupts at the same time)
+    AppleAicReadEventRegister();
+
+    //mask all other interrupts
+    for(InterruptIndex = 0; InterruptIndex < AicInfoStruct->NumIrqs; InterruptIndex++)
+    {
+        AppleAicV2MaskInterrupt(&gHardwareInterruptAicV2Protocol, InterruptIndex);
+    }
+
+    //disable the AIC controller
+    MmioAnd32(AicV2Base + AIC_V2_CONFIG, ~(AIC_V2_CFG_ENABLE));
+
 }
 
 /**
@@ -163,7 +258,7 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
      * Typically used when a core is in a state where it's undesirable for it to service IRQs.
      * (sleep for example)
      * 
-     * For now we're only using 1 core (the others are in a spin loop) but when multi-core support is turned on
+     * For now we're only using 1 core (the others are in a spin loop, or 100% inactive) but when multi-core support is turned on,
      * if it turns out the hardware heuristic is sending IRQs to inactive cores, uncomment the below code to disable IRQs on
      * those other cores.
      * 

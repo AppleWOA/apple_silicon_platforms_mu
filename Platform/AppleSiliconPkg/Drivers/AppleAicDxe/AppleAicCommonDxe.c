@@ -20,6 +20,13 @@ EFI_EVENT  EfiExitBootServicesEvent = (EFI_EVENT)NULL;
 
 HARDWARE_INTERRUPT_HANDLER  *AicRegisteredInterruptHandlers = NULL;
 
+VOID
+EFIAPI
+ExitBootServicesEvent (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  );
+
 //borrowed from ArmGicDxe as it does the job well enough
 /**
   Register Handler for the specified interrupt source.
