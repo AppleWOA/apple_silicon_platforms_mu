@@ -79,7 +79,7 @@ STATIC EFI_STATUS EFIAPI AppleAicV2UnmaskInterrupt(
  * @param This - Interrupt protocol instance pointer
  * @param Source - IRQ number
  * @param State - pointer to BOOLEAN that holds the actual interrupt state. TRUE if enabled, FALSE if disabled.
- * @return EFI_SUCCESS if successful, ASSER 
+ * @return EFI_SUCCESS if successful, ASSERTs if Source >= MAX_IRQs 
  */
 STATIC EFI_STATUS EFIAPI AppleAicV2GetInterruptState(
     IN EFI_HARDWARE_INTERRUPT_PROTOCOL *This,
@@ -111,7 +111,7 @@ STATIC EFI_STATUS EFIAPI AppleAicV2EndOfInterrupt(
 )
 {
     //TODO: FIQ case
-    
+
     //reading the interrupt source in the event register acks and masks it at the same time
     //all we need to do is unmask it here. (note that for hardware IRQs, this assumes the hardware interrupt source has been cleared)
     AppleAicUnmaskInterrupt(This, Source);
@@ -170,6 +170,23 @@ EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
 }
 
 /**
+ * EFI_CPU_INTERRUPT_HANDLER entered when a processor interrupt is taken.
+ * 
+ * Note that this handler handles both FIQs and IRQs.
+ * 
+ * @param InterruptType - type of interrupt taken. will be EXCEPT_AARCH64_{IRQ, FIQ, SERROR} for IRQs, FIQs, and SErrors respectively.
+ * @param SystemContext - CPU context snapshot when interrupt was taken
+ * @return Nothing. 
+ */
+STATIC VOID EFIAPI AppleAicV2InterruptHandler(
+    IN EFI_EXCEPTION_TYPE InterruptType,
+    IN EFI_SYSTEM_CONTEXT SystemContext
+)
+{
+    //TODO: everything.
+}
+
+/**
  * The ExitBootServices event. Will disable interrupts and shut down AIC hardware in handoff from DXE core to OS.
  * 
  * @param Event (input) - event being processed 
@@ -185,7 +202,7 @@ VOID EFIAPI AppleAicV2ExitBootServicesEvent(
 
     //acknowledge any outstanding interrupts by reading the event register
     //(this will mask those interrupts at the same time)
-    AppleAicReadEventRegister();
+    AppleAicAcknowledgeInterrupt();
 
     //mask all other interrupts
     for(InterruptIndex = 0; InterruptIndex < AicInfoStruct->NumIrqs; InterruptIndex++)

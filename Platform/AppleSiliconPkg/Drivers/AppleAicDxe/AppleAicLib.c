@@ -62,7 +62,7 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
  * 
  * @return UINT32 - Event register value
  */
-UINT32 AppleAicReadEventRegister(
+UINT32 EFIAPI AppleAicAcknowledgeInterrupt(
     IN VOID
 )
 {
@@ -189,7 +189,7 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
 }
 
 /**
- * Read interrupt state from the AIC's IRQ_CFG register
+ * Read interrupt state from the AIC's HW_STATE register
  * 
  * @param AicBase - AIC base address
  * @param Source - IRQ number
