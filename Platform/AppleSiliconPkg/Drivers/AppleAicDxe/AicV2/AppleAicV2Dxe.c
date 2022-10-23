@@ -183,7 +183,32 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
     IN EFI_SYSTEM_CONTEXT SystemContext
 )
 {
-    //TODO: everything.
+    UINT32 AicInterrupt;
+    HARDWARE_INTERRUPT_HANDLER HwInterruptHandler;
+
+    AicInterrupt = AppleAicAcknowledgeInterrupt();
+
+    /**
+     * In the FIQ case, every possible FIQ source must be checked to avoid an interrupt storm.
+     * (Fast IPIs, timers, performance counters)
+     * 
+     * Note that in the case of timers, we need to use the event register to determine which timer fired.
+     */
+    if (InterruptType == EXCEPT_AARCH64_FIQ) {
+        //hi
+    }
+    /**
+     * The IRQ case is much simpler, just defer it t
+     * @return else 
+     */
+    else if (InterruptType == EXCEPT_AARCH64_IRQ) {
+
+    }
+
+    //SErrors for now are an instant panic.
+    else if (InterruptType == EXCEPT_AARCH64_SERROR) {
+
+    }
 }
 
 /**
