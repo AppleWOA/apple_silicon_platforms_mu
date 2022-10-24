@@ -119,7 +119,7 @@ STATIC EFI_STATUS EFIAPI AppleAicV2EndOfInterrupt(
 
 
 /**
- * Calculate the AIC register offsets on the platform
+ * Calculate the AIC register offsets on the platform.
  * 
  * @return EFI_SUCCESS if successful, EFI_ERROR(-1) if an error occurred.
  */
@@ -195,11 +195,11 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
      * Note that in the case of timers, we need to use the event register to determine which timer fired.
      */
     if (InterruptType == EXCEPT_AARCH64_FIQ) {
-        //hi
     }
     /**
-     * The IRQ case is much simpler, just defer it t
-     * @return else 
+     * The IRQ case is much simpler, in all cases, read the event register, figure out what device
+     * the IRQ originated from, jump to the IRQ handler assigned for that device.
+     * 
      */
     else if (InterruptType == EXCEPT_AARCH64_IRQ) {
 
