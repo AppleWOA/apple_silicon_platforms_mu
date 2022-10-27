@@ -17,6 +17,8 @@
 #include <Include/libfdt.h>
 #include "AppleAicDxe.h"
 
+#define APPLE_FAST_IPI_STATUS_PENDING BIT(0)
+
 STATIC UINT64 AicV2Base;
 AIC_INFO_STRUCT *AicInfoStruct;
 
@@ -185,8 +187,11 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
 {
     UINT32 AicInterrupt;
     HARDWARE_INTERRUPT_HANDLER HwInterruptHandler;
+    UINT64 PmcStatus;
+    UINT64 UncorePmcStatus;
 
     AicInterrupt = AppleAicAcknowledgeInterrupt();
+    HwInterruptHandler = AicRegisteredInterruptHandlers[AicInterrupt];
 
     /**
      * In the FIQ case, every possible FIQ source must be checked to avoid an interrupt storm.
@@ -195,13 +200,59 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
      * Note that in the case of timers, we need to use the event register to determine which timer fired.
      */
     if (InterruptType == EXCEPT_AARCH64_FIQ) {
+        if (AppleAicV2ReadIpiStatusRegister() & APPLE_FAST_IPI_STATUS_PENDING) {
+            DEBUG((DEBUG_INFO, "Fast IPIs not supported yet, acking\n"));
+            AppleAicV2WriteIpiStatusRegister(APPLE_FAST_IPI_STATUS_PENDING);
+        }
+
+        //Timers
+        //Apple Silicon uses standard ARM timers, but just wired to FIQ. Hand off the FIQ as if it were a standard timer IRQ.
+        if (ArmReadCntpCtl() & (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_ISTATUS))
+        {
+            DEBUG((DEBUG_INFO, "Physical timer FIQ asserted\n"));
+            if(HwInterruptHandler != NULL)
+            {
+                HwInterruptHandler(AicInterrupt, SystemContext);
+            }
+
+        }
+        else if (ArmReadCntvCtl() & (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_ISTATUS))
+        {
+            DEBUG((DEBUG_INFO, "Virtual timer FIQ asserted\n"));
+            if(HwInterruptHandler != NULL)
+            {
+                HwInterruptHandler(AicInterrupt, SystemContext);
+            }
+        }
+
+        //unknown: do we handle the el1 timers separately?
+
+        //PMCs
+        PmcStatus = AppleAicV2ReadPmcStatusRegister();
+        UncorePmcStatus = AppleAicV2ReadUncorePmcControlRegister();
+        if (PmcStatus & BIT11) {
+            DEBUG((DEBUG_INFO, "PMCR0 FIQ asserted, unsupported, acking\n"));
+            PmcStatus = PmcStatus & ~(BIT18 | BIT17 | BIT16);
+            PmcStatus |= (BIT18 | BIT17 | BIT16 | BIT0);
+            AppleAicV2WritePmcStatusRegister(PmcStatus);   
+        }
+        else if (FIELD_GET(APPLE_UPMCR0_IMODE, UncorePmcStatus) == APPLE_UPMCR_FIQ_IMODE && (AppleAicV2ReadUncorePmcStatusRegister() & APPLE_UPMSR_IACT))
+        {
+            DEBUG((DEBUG_INFO, "Uncore PMC FIQ asserted, unsupported, acking\n"));
+            UncorePmcStatus = UncorePmcStatus & ~(APPLE_UPMCR0_IMODE)
+            UncorePmcStatus |= APPLE_UPMCR_OFF_IMODE;
+            AppleAicV2WriteUncorePmcControlRegister(UncorePmcStatus);
+        }
     }
+
+
     /**
      * The IRQ case is much simpler, in all cases, read the event register, figure out what device
      * the IRQ originated from, jump to the IRQ handler assigned for that device.
      * 
      */
     else if (InterruptType == EXCEPT_AARCH64_IRQ) {
+        
 
     }
 
@@ -294,7 +345,7 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
 
     /**
      * 
-     * On Apple CPUs, IRQs and FIQs can be opted out of by writing 
+     * On Apple CPUs, IRQs can be opted out of by writing 
      * to a implementation defined MSR per-core. (S3_4_C15_C10_4)
      * 
      * Typically used when a core is in a state where it's undesirable for it to service IRQs.

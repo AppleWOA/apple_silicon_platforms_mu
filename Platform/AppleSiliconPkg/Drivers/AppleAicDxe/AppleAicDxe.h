@@ -26,6 +26,9 @@
 #include <Protocol/HardwareInterrupt.h>
 #include <Protocol/HardwareInterrupt2.h>
 
+
+extern HARDWARE_INTERRUPT_HANDLER  *AicRegisteredInterruptHandlers;
+
 // Common API
 EFI_STATUS
 InstallAndRegisterInterruptService (
