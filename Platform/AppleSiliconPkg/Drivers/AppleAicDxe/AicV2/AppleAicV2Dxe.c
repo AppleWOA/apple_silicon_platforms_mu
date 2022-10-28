@@ -146,7 +146,7 @@ EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
     //Now for the more complicated bits...
     //Start by getting the event register offset from the devicetree
     InterruptControllerNode = fdt_path_offset(FdtBlob, "/soc/interrupt-controller");
-    AicInfoStruct->Regs.EventReg = fdt_getprop(FdtBlob, InterruptControllerNode, "event", Length);
+    AicInfoStruct->Regs.EventReg = fdt_getprop(FdtBlob, InterruptControllerNode, "reg", Length);
     if(Length < (AddressCells + SizeCells) * sizeof(UINT32)) {
         DEBUG((DEBUG_ERROR, "%a: Failed to get event register offset from DeviceTree!\n", __FUNCTION__));
         return EFI_ERROR(-1);
@@ -286,6 +286,42 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
         ASSERT(FALSE);
         return;
     }
+}
+
+// AIC protocol instance
+EFI_HARDWARE_INTERRUPT_PROTOCOL  gHardwareInterruptV3Protocol = {
+  RegisterInterruptSource,
+  AppleAicV2UnmaskInterrupt,
+  AppleAicV2MaskInterrupt,
+  AppleAicV2GetInterruptState,
+  AppleAicV2EndOfInterrupt
+};
+
+
+/**
+ * Gets the type of trigger for a given IRQ.
+ * 
+ * @param This 
+ * @param Source 
+ * @param TriggerType 
+ * @return STATIC 
+ */
+STATIC EFI_STATUS EFIAPI AppleAicV2GetIrqTriggerType(
+    IN EFI_HARDWARE_INTERRUPT2_PROTOCOL *This,
+    IN HARDWARE_INTERRUPT_SOURCE Source,
+    OUT EFI_HARDWARE_INTERRUPT2_TRIGGER_TYPE *TriggerType
+)
+{
+    /**
+     * AIC does not have a facility to see if a given IRQ is level or edge triggered,
+     * however, other than PCIe MSIs, every other IRQ is a level triggered interrupt.
+     * 
+     * As such, get the PCIe MSI IRQ number from the DT, compare it to Source, and if it matches,
+     * state that this is a edge rising triggered interrupt. In all other cases, unconditionally indicate
+     * a level triggered interrupt.
+     */
+
+
 }
 
 /**
