@@ -103,8 +103,6 @@ extern AIC_INFO_STRUCT *AicInfoStruct;
 #define AIC_V2_CONFIG 0x0014
 #define AIC_V2_IRQ_CFG_REG 0x2000
 
-//AIC IMPDEF system registers
-
 
 //AICv2 bitmasks and bitfield definitions
 
@@ -121,11 +119,111 @@ extern AIC_INFO_STRUCT *AicInfoStruct;
 /* Function prototypes */
 
 
+//Common
+
+APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID);
+
+/**
+ * Reads the event register on the platform AIC, which serves as an interrupt ack
+ * (masks it at the same time)
+ * 
+ * @return UINT32 - Event register value
+ */
+UINT32 EFIAPI AppleAicAcknowledgeInterrupt(
+    IN VOID
+);
+
+/**
+ * Return the implemented number of IRQs on the platform.
+ * 
+ * @param AicBase - AIC base address
+ * @return UINT32 - number of IRQs
+ */
+UINT32 EFIAPI AppleAicGetNumInterrupts(
+    IN UINTN AicBase
+);
+
+/**
+ * Returns the maximum supported number of IRQs on the SoC.
+ * 
+ * @param AicBase - AIC Base Address
+ * @return UINT32 - max number of IRQs supported on the SoC.
+ */
+UINT32 EFIAPI AppleAicGetMaxInterrupts(
+    IN UINTN AicBase
+);
+
+/**
+ * @brief Masks an IRQ by writing to the AIC's MASK_SET register.
+ * 
+ * Note that all FIQ sources are directly implemented in the cores instead of going through AIC.
+ * 
+ * TODO: deal with FIQs.
+ * 
+ * @param AicBase - AIC Base Address
+ * @param Source - IRQ number 
+ * 
+ */
+VOID EFIAPI AppleAicMaskInterrupt(
+    IN UINTN AicBase,
+    IN UINTN Source
+);
+
+/**
+ * @brief Unmask an IRQ by writing to the AIC's MASK_SET register.
+ * 
+ * Note that all FIQ sources are directly implemented in the cores instead of going through AIC.
+ * 
+ * TODO: deal with FIQs.
+ * 
+ * @param AicBase - AIC Base Address
+ * @param Source - IRQ number 
+ * 
+ */
+VOID EFIAPI AppleAicUnmaskInterrupt(
+    IN UINTN AicBase,
+    IN UINTN Source
+);
+
+
+/**
+ * Read interrupt state from the AIC's HW_STATE register
+ * 
+ * @param AicBase - AIC base address
+ * @param Source - IRQ number
+ * @return TRUE if enabled, FALSE if disabled.
+ */
+BOOLEAN EFIAPI AppleAicReadInterruptState(
+    IN UINTN AicBase,
+    IN UINTN Source
+);
+
+
+
+
 //AICv1 specific
 
 
 
 //AICv2 specific
+
+UINTN EFIAPI AppleAicV2ReadIpiStatusRegister(VOID);
+
+VOID EFIAPI AppleAicV2WriteIpiStatusRegister(IN UINTN Value);
+
+VOID EFIAPI AppleAicV2WriteIpiLocalRequestRegister(IN UINTN Value);
+
+VOID EFIAPI AppleAicV2WriteIpiGlobalRequestRegister(IN UINTN Value);
+
+UINTN EFIAPI AppleAicV2ReadPmcControlRegister(VOID);
+
+VOID EFIAPI AppleAicV2WritePmcControlRegister(IN UINTN Value);
+
+UINTN EFIAPI AppleAicV2ReadUncorePmcControlRegister(VOID);
+
+VOID EFIAPI AppleAicV2WriteUncorePmcControlRegister(IN UINTN Value);
+
+UINTN EFIAPI AppleAicV2ReadUncorePmcStatusRegister(VOID);
 
 /**
  * Calculate the AIC register offsets on the platform

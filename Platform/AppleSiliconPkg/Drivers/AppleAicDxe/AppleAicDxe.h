@@ -47,5 +47,11 @@ RegisterInterruptSource (
   );
 
 
+//TODO: AICv1 API
+
+//AICv2 API
+
+EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable);
+
 
 #endif //APPLE_AIC_DXE_H

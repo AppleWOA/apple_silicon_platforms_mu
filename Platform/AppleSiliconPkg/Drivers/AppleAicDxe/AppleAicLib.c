@@ -58,8 +58,6 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
  * Reads the event register on the platform AIC, which serves as an interrupt ack
  * (masks it at the same time)
  * 
- * TODO: use this in some meaningful way other than in the ExitBootServices event
- * 
  * @return UINT32 - Event register value
  */
 UINT32 EFIAPI AppleAicAcknowledgeInterrupt(

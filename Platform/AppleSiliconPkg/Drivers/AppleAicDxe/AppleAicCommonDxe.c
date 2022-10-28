@@ -20,6 +20,8 @@ EFI_EVENT  EfiExitBootServicesEvent = (EFI_EVENT)NULL;
 
 HARDWARE_INTERRUPT_HANDLER  *AicRegisteredInterruptHandlers = NULL;
 
+STATIC VOID  *mCpuArchProtocolNotifyEventRegistration;
+
 VOID
 EFIAPI
 ExitBootServicesEvent (
@@ -70,6 +72,45 @@ RegisterInterruptSource (
   }
 }
 
+
+//inspired/borrowed from ArmGicCommonDxe
+/**
+ * Notifies the Interrupt Service registration task when the CPU protocol becomes available.
+ * 
+ * @param Event 
+ * @param Context 
+ */
+STATIC VOID EFIAPI CpuArchProtocolNotify(IN EFI_EVENT Event, IN VOID *Context)
+{
+  EFI_CPU_ARCH_PROTOCOL  *CpuProtocol;
+  EFI_STATUS             Status;
+
+  // Get the required CPU protocol
+  Status = gBS->LocateProtocol (&gEfiCpuArchProtocolGuid, NULL, (VOID **)&CpuProtocol);
+  if (EFI_ERROR (Status)) {
+    return;
+  }
+
+  //unregister the default FIQ and IRQ handler for the CPU protocol
+  Status = CpuProtocol->RegisterInterruptHandler (CpuProtocol, ARM_ARCH_EXCEPTION_IRQ, NULL);
+  Status = CpuProtocol->RegisterInterruptHandler (CpuProtocol, EXCEPT_AARCH64_FIQ, NULL);
+  if (EFI_ERROR (Status)) {
+    DEBUG((DEBUG_ERROR, "%a: Unregistering default exception handler failed!! Status: 0x%llx\n", __FUNCTION__, Status));
+    return;
+  }
+
+  //now register the new handlers
+  Status = CpuProtocol->RegisterInterruptHandler (CpuProtocol, ARM_ARCH_EXCEPTION_IRQ, (EFI_CPU_INTERRUPT_HANDLER)Context);
+  Status = CpuProtocol->RegisterInterruptHandler (CpuProtocol, EXCEPT_AARCH64_FIQ, (EFI_CPU_INTERRUPT_HANDLER)Context);
+  if (EFI_ERROR (Status)) {
+    DEBUG((DEBUG_ERROR, "%a: Registering new exception handler failed!! Status: 0x%llx\n", __FUNCTION__, Status));
+    return;
+  }
+  gBS->CloseEvent (Event);
+
+}
+
+
 EFI_STATUS
 InstallAndRegisterInterruptService (
   IN EFI_HARDWARE_INTERRUPT_PROTOCOL   *InterruptProtocol,
@@ -87,5 +128,31 @@ InstallAndRegisterInterruptService (
     {
         return EFI_OUT_OF_RESOURCES;
     }
+
+    Status = gBS->InstallMultipleProtocolInterfaces (
+                  &gHardwareInterruptHandle,
+                  &gHardwareInterruptProtocolGuid,
+                  InterruptProtocol,
+                  &gHardwareInterrupt2ProtocolGuid,
+                  Interrupt2Protocol,
+                  NULL
+                  );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //Install the IRQ/FIQ handlers when the CPU architecture protocol is ready.
+  EfiCreateProtocolNotifyEvent(&gEfiCpuArchProtocolGuid, TPL_CALLBACK, CpuArchProtocolNotify, (VOID *)InterruptHandler, &mCpuArchProtocolNotifyEventRegistration);
+  
+  //set up the ExitBootServices event
+  Status = gBS->CreateEvent (
+                  EVT_SIGNAL_EXIT_BOOT_SERVICES,
+                  TPL_NOTIFY,
+                  ExitBootServicesEvent,
+                  NULL,
+                  &EfiExitBootServicesEvent
+                  );
+  
+  return Status;
     
 } 

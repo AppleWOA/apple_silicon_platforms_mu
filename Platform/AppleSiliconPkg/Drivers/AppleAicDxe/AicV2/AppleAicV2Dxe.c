@@ -210,18 +210,33 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
         if (ArmReadCntpCtl() & (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_ISTATUS))
         {
             DEBUG((DEBUG_INFO, "Physical timer FIQ asserted\n"));
+            HwInterruptHandler = AicRegisteredInterruptHandlers[17];
             if(HwInterruptHandler != NULL)
             {
-                HwInterruptHandler(AicInterrupt, SystemContext);
+                //for now we hardcode the timer interrupt to 17.
+                HwInterruptHandler(17, SystemContext);
+            }
+            else
+            {
+                DEBUG((DEBUG_ERROR, "Physical timer interrupt not assigned!\n"));
+                ASSERT(FALSE);
             }
 
         }
         else if (ArmReadCntvCtl() & (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_ISTATUS))
         {
             DEBUG((DEBUG_INFO, "Virtual timer FIQ asserted\n"));
+            HwInterruptHandler = AicRegisteredInterruptHandlers[17];
             if(HwInterruptHandler != NULL)
             {
-                HwInterruptHandler(AicInterrupt, SystemContext);
+                //ditto for the virtual timer.
+                HwInterruptHandler(17, SystemContext);
+            }
+            else
+            {
+                DEBUG((DEBUG_ERROR, "Virtual timer interrupt not assigned!\n"));
+                ASSERT(FALSE);
+                return;
             }
         }
 
@@ -239,7 +254,7 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
         else if (FIELD_GET(APPLE_UPMCR0_IMODE, UncorePmcStatus) == APPLE_UPMCR_FIQ_IMODE && (AppleAicV2ReadUncorePmcStatusRegister() & APPLE_UPMSR_IACT))
         {
             DEBUG((DEBUG_INFO, "Uncore PMC FIQ asserted, unsupported, acking\n"));
-            UncorePmcStatus = UncorePmcStatus & ~(APPLE_UPMCR0_IMODE)
+            UncorePmcStatus = UncorePmcStatus & ~(APPLE_UPMCR0_IMODE);
             UncorePmcStatus |= APPLE_UPMCR_OFF_IMODE;
             AppleAicV2WriteUncorePmcControlRegister(UncorePmcStatus);
         }
@@ -253,12 +268,23 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
      */
     else if (InterruptType == EXCEPT_AARCH64_IRQ) {
         
+        if(HwInterruptHandler != NULL) {
+            DEBUG((DEBUG_INFO, "Servicing AIC IRQ 0x%x\n", AicInterrupt));
+            HwInterruptHandler(AicInterrupt, SystemContext);
+        }
+        else
+        {
+            DEBUG((DEBUG_ERROR, "Unassigned AIC IRQ: 0x%x\n", AicInterrupt));
+            AppleAicV2EndOfInterrupt(&gHardwareInterruptAicV2Protocol, AicInterrupt);
+        }
 
     }
 
     //SErrors for now are an instant panic.
     else if (InterruptType == EXCEPT_AARCH64_SERROR) {
-
+        DEBUG((DEBUG_ERROR, "Unhandled SError!\n"));
+        ASSERT(FALSE);
+        return;
     }
 }
 
