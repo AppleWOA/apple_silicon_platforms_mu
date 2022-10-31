@@ -130,6 +130,7 @@ EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
     //needed for devicetree calculations
     VOID* FdtBlob = (VOID *)(PcdGet64(PcdFdtPointer));
     UINT32 InterruptControllerNode;
+    VOID* InterruptControllerRegs;
     UINT32 Length;
     UINT32 AddressCells;
     UINT32 SizeCells;
@@ -146,7 +147,10 @@ EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
     //Now for the more complicated bits...
     //Start by getting the event register offset from the devicetree
     InterruptControllerNode = fdt_path_offset(FdtBlob, "/soc/interrupt-controller");
-    AicInfoStruct->Regs.EventReg = fdt_getprop(FdtBlob, InterruptControllerNode, "reg", Length);
+    InterruptControllerRegs = fdt_getprop(FdtBlob, InterruptControllerNode, "reg", &Length);
+    AicInfoStruct->Regs.EventReg = *(InterruptControllerRegs + 0xF);
+    DEBUG((DEBUG_VERBOSE, "AicInfoStruct reg: 0x%llx\n", AicInfoStruct->Regs.EventReg));
+    DEBUG((DEBUG_VERBOSE, "FDT AIC reg length: 0x%llx\n", (UINT64)Length));
     if(Length < (AddressCells + SizeCells) * sizeof(UINT32)) {
         DEBUG((DEBUG_ERROR, "%a: Failed to get event register offset from DeviceTree!\n", __FUNCTION__));
         return EFI_ERROR(-1);
@@ -166,6 +170,12 @@ EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
     AicInfoStruct->Regs.HwStateRegOffset = CurrentOffset;
     AicInfoStruct->DieStride = CurrentOffset - StartOffset;
     AicInfoStruct->RegSize = (AicInfoStruct->Regs.EventReg - AicV2Base) + 4;
+
+    if(1)
+    {
+        ASSERT(FALSE);
+        return EFI_UNSUPPORTED;
+    }
     
     return EFI_SUCCESS;
 
@@ -279,17 +289,10 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
         }
 
     }
-
-    //SErrors for now are an instant panic.
-    else if (InterruptType == EXCEPT_AARCH64_SERROR) {
-        DEBUG((DEBUG_ERROR, "Unhandled SError!\n"));
-        ASSERT(FALSE);
-        return;
-    }
 }
 
 // AIC protocol instance
-EFI_HARDWARE_INTERRUPT_PROTOCOL  gHardwareInterruptV3Protocol = {
+EFI_HARDWARE_INTERRUPT_PROTOCOL gHardwareInterruptAicV2Protocol = {
   RegisterInterruptSource,
   AppleAicV2UnmaskInterrupt,
   AppleAicV2MaskInterrupt,
@@ -312,6 +315,11 @@ STATIC EFI_STATUS EFIAPI AppleAicV2GetIrqTriggerType(
     OUT EFI_HARDWARE_INTERRUPT2_TRIGGER_TYPE *TriggerType
 )
 {
+    VOID* FdtBlob = (VOID *)(PcdGet64(PcdFdtPointer));
+    UINTN PcieMsiNodeOffset = 0;
+    VOID* PcieMsiRangesProp = (VOID *)0;
+    UINT32 EdgeTriggeredIrqNum = 0;
+    UINT32 MsiRangesLength = 0;
     /**
      * AIC does not have a facility to see if a given IRQ is level or edge triggered,
      * however, other than PCIe MSIs, every other IRQ is a level triggered interrupt.
@@ -321,8 +329,44 @@ STATIC EFI_STATUS EFIAPI AppleAicV2GetIrqTriggerType(
      * a level triggered interrupt.
      */
 
+    PcieMsiNodeOffset = fdt_path_offset(FdtBlob, "/soc/pcie0");
+    PcieMsiRangesProp = fdt_getprop(FdtBlob, PcieMsiNodeOffset, "reg", &MsiRangesLength);
+    EdgeTriggeredIrqNum = *(PcieMsiRangesProp + 0x4);
+    DEBUG((DEBUG_VERBOSE, "Edge triggered IRQ number: %d", EdgeTriggeredIrqNum));
+    if(Source == EdgeTriggeredIrqNum)
+    {
+        *TriggerType = EFI_HARDWARE_INTERRUPT2_TRIGGER_EDGE_RISING;
+    }
+    else
+    {
+        *TriggerType = EFI_HARDWARE_INTERRUPT2_TRIGGER_LEVEL_HIGH;
+    }
+    return EFI_SUCCESS;
 
 }
+
+STATIC EFI_STATUS EFIAPI AppleAicV2SetIrqTriggerType(
+    IN EFI_HARDWARE_INTERRUPT2_PROTOCOL *This,
+    IN HARDWARE_INTERRUPT_SOURCE Source,
+    IN EFI_HARDWARE_INTERRUPT2_TRIGGER_TYPE *TriggerType
+)
+{
+    //unsupported for now, just return EFI_SUCCESS
+    return EFI_SUCCESS;
+}
+
+// AIC HardwareInterrupt2 protocol instance
+EFI_HARDWARE_INTERRUPT2_PROTOCOL gHardwareInterruptAicV2Protocol = {
+  (HARDWARE_INTERRUPT2_REGISTER)RegisterInterruptSource,
+  (HARDWARE_INTERRUPT2_ENABLE)AppleAicV2UnmaskInterrupt,
+  (HARDWARE_INTERRUPT2_DISABLE)AppleAicV2MaskInterrupt,
+  (HARDWARE_INTERRUPT2_INTERRUPT_STATE)AppleAicV2GetInterruptState,
+  (HARDWARE_INTERRUPT2_END_OF_INTERRUPT)AppleAicV2EndOfInterrupt,
+  AppleAicV2GetIrqTriggerType,
+  AppleAicV2SetIrqTriggerType
+};
+
+
 
 /**
  * The ExitBootServices event. Will disable interrupts and shut down AIC hardware in handoff from DXE core to OS.
