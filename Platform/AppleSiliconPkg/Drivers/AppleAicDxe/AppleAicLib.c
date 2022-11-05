@@ -137,7 +137,13 @@ VOID EFIAPI AppleAicMaskInterrupt(
      * 
      * Note that the IRQ number must match the representation in hardware.
      * 
+     * For the timer FIQs, return for now, as we disable/enable those independently.
+     * 
      **/
+
+    if((Source == 17) || (Source == 18) || (Source == 19)) {
+        return;
+    }
     UINT32 CpuDieNum = 0;
     DEBUG((DEBUG_INFO, "%a: masking interrupt 0x%llx\n", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
@@ -171,6 +177,9 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
      * The general flow is the same as AppleAicMaskInterrupt, but instead of 
      * writing MASK_SET, we write MASK_CLR instead.
      **/
+    if((Source == 17) || (Source == 18) || (Source == 19)) {
+        return;
+    }
     UINT32 CpuDieNum = 0;
     DEBUG((DEBUG_INFO, "%a: unmasking interrupt 0x%llx\n", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
