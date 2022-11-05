@@ -20,7 +20,7 @@
 
 #include <Library/PcdLib.h>
 #include <PiDxe.h>
-#include <ConvenienceMacros.h>
+#include <Library/ConvenienceMacros.h>
 
 /*
  * AIC versions.
@@ -230,8 +230,6 @@ UINTN EFIAPI AppleAicV2ReadUncorePmcStatusRegister(VOID);
  * 
  * @return EFI_SUCCESS if successful, EFI_ERROR(-1) if an error occurred.
  */
-EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID);
-
 
 
 #endif //APPLEAIC_H_

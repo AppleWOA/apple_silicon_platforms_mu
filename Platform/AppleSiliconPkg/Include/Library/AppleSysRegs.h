@@ -16,7 +16,7 @@
 #ifndef APPLE_SYSREGS_H
 #define APPLE_SYSREGS_H
 
-#include <ConvenienceMacros.h>
+#include <Library/ConvenienceMacros.h>
 
 /**
  * Fast IPI request and status registers.
@@ -79,5 +79,6 @@
 #define APPLE_UPMCR_OFF_IMODE 0
 #define APPLE_UPMCR_FIQ_IMODE 4
 #define APPLE_UPMSR_IACT BIT(0)
+
 
 #endif //APPLE_SYSREGS_H
