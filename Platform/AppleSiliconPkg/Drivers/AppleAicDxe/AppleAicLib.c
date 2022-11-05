@@ -117,8 +117,6 @@ UINT32 EFIAPI AppleAicGetMaxInterrupts(
  * 
  * Note that all FIQ sources are directly implemented in the cores instead of going through AIC.
  * 
- * TODO: deal with FIQs.
- * 
  * @param AicBase - AIC Base Address
  * @param Source - IRQ number 
  * 
@@ -149,16 +147,16 @@ VOID EFIAPI AppleAicMaskInterrupt(
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
 
+    DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_SET = 0x%llx\n", AicBase + AicInfoStruct->Regs.IrqMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicInfoStruct->Regs.IrqMaskSetRegOffset));
+
     MmioWrite32(AicBase + AicInfoStruct->Regs.IrqMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
 
 }
 
 /**
- * @brief Unmask an IRQ by writing to the AIC's MASK_SET register.
+ * @brief Unmask an IRQ by writing to the AIC's MASK_CLR register.
  * 
  * Note that all FIQ sources are directly implemented in the cores instead of going through AIC.
- * 
- * TODO: deal with FIQs.
  * 
  * @param AicBase - AIC Base Address
  * @param Source - IRQ number 
@@ -182,7 +180,9 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
 
-    MmioWrite32(AicBase + AicInfoStruct->Regs.IrqMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
+    DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_SET = 0x%llx\n", AicBase + AicInfoStruct->Regs.IrqMaskClearRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicInfoStruct->Regs.IrqMaskClearRegOffset));
+
+    MmioWrite32(AicBase + AicInfoStruct->Regs.IrqMaskClearRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
 
 }
 
@@ -199,12 +199,18 @@ BOOLEAN EFIAPI AppleAicReadInterruptState(
 )
 {
     UINT32 CpuDieOffset = 0;
+    UINT32 HwStateValue = 0;
+    UINT32 AicIrqMaskBit = 0;
+    UINT32 Result = 0;
     DEBUG((DEBUG_INFO, "%a: reading interrupt state for IRQ number 0x%llx", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
     {
         CpuDieOffset = Source / AicInfoStruct->MaxIrqs * AicInfoStruct->DieStride;
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
+    HwStateValue = MmioRead32(AicBase + AicInfoStruct->Regs.HwStateRegOffset + CpuDieOffset + AIC_MASK_REG(IrqNum));
+    AicIrqMaskBit = AIC_MASK_BIT(IrqNum);
+    Result = HwStateValue & AicIrqMaskBit;
 
-    return MmioRead32(AicBase + AicInfoStruct->Regs.HwStateRegOffset + CpuDieOffset + AIC_MASK_REG(IrqNum)) & (AIC_MASK_BIT(IrqNum)) != 0;
+    return Result != 0;
 }
