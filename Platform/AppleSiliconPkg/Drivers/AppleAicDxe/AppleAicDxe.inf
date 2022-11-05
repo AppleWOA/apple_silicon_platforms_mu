@@ -47,6 +47,7 @@
   PcdLib
   UefiLib
   FdtLib
+  ArmGenericTimerCounterLib
 
 [Protocols]
   gHardwareInterruptProtocolGuid  ## PRODUCES
