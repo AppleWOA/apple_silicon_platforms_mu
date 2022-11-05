@@ -1,0 +1,41 @@
+# AIC DXE driver library - AppleAicDxe
+# Based off ArmGicLib, original copyright notice below
+#/* @file
+#  Copyright (c) 2011-2018, ARM Limited. All rights reserved.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#*/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = ArmGicLib
+  FILE_GUID                      = 94ecc3fa-8f5f-4e56-8614-0dacb2ec996a
+  MODULE_TYPE                    = SEC
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AppleAicLib
+
+[Sources]
+  AppleAicLib.c
+
+[Sources.AARCH64]
+  AicV2/AArch64/AppleAicV2.S
+
+[LibraryClasses]
+  ArmLib
+  DebugLib
+  FdtLib
+  IoLib
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  ArmPlatformPkg/ArmPlatformPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdePkg/MdePkg.dec
+  M1v2Pkg/M1v2Pkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+
+[Pcd.common]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
