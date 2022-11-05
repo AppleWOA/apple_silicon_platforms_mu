@@ -16,11 +16,15 @@
 #include <Library/AppleAicLib.h>
 #include <Include/libfdt.h>
 #include "AppleAicDxe.h"
+#include <Library/AppleSysRegs.h>
+#include <Library/ArmGenericTimerCounterLib.h>
 
 #define APPLE_FAST_IPI_STATUS_PENDING BIT(0)
 
 STATIC UINT64 AicV2Base;
 AIC_INFO_STRUCT *AicInfoStruct;
+
+STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID);
 
 extern EFI_HARDWARE_INTERRUPT_PROTOCOL   gHardwareInterruptAicV2Protocol;
 extern EFI_HARDWARE_INTERRUPT2_PROTOCOL  gHardwareInterrupt2AicV2Protocol;
@@ -112,11 +116,19 @@ STATIC EFI_STATUS EFIAPI AppleAicV2EndOfInterrupt(
     IN HARDWARE_INTERRUPT_SOURCE Source
 )
 {
-    //TODO: FIQ case
+    //As of 11/4/2022 we are reserving IRQ numbers 17, 18, and 19 for timer FIQs.
+    //If it's any one of these,disable the timer and return.
+    if ((Source == 17) || (Source == 18) || (Source == 19))
+    {
+        ArmGenericTimerDisableTimer();
+        return EFI_SUCCESS;
+    }
 
     //reading the interrupt source in the event register acks and masks it at the same time
     //all we need to do is unmask it here. (note that for hardware IRQs, this assumes the hardware interrupt source has been cleared)
-    AppleAicUnmaskInterrupt(This, Source);
+    AppleAicUnmaskInterrupt(AicV2Base, Source);
+
+    return EFI_SUCCESS;
 }
 
 
@@ -125,57 +137,84 @@ STATIC EFI_STATUS EFIAPI AppleAicV2EndOfInterrupt(
  * 
  * @return EFI_SUCCESS if successful, EFI_ERROR(-1) if an error occurred.
  */
-EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
+STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
 {
     //needed for devicetree calculations
-    VOID* FdtBlob = (VOID *)(PcdGet64(PcdFdtPointer));
-    UINT32 InterruptControllerNode;
-    VOID* InterruptControllerRegs;
-    UINT32 Length;
-    UINT32 AddressCells;
-    UINT32 SizeCells;
+    UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
+    INT32 Length;
+    INT32 InterruptControllerNode = fdt_path_offset((VOID *)FdtBlob, "/soc/die0/interrupt-controller");
+    CONST INT32 *InterruptControllerRegs = fdt_getprop((VOID *)FdtBlob, InterruptControllerNode, "reg", &Length);
+    UINT64 EventRegisterValue = 0;
     UINT64 StartOffset;
     UINT64 CurrentOffset;
 
+    if (fdt_check_header ((VOID *)FdtBlob) != 0) {
+    DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "no FDT supplied, exiting\n"));
+    ASSERT(fdt_check_header ((VOID *)FdtBlob) == 0);
+  }
+    if((InterruptControllerNode == (-FDT_ERR_BADPATH)) || (InterruptControllerNode == (-FDT_ERR_NOTFOUND)) || (InterruptControllerNode == (-FDT_ERR_BADMAGIC)) || (InterruptControllerNode == (-FDT_ERR_BADVERSION)) || (InterruptControllerNode == (-FDT_ERR_BADSTATE)) || (InterruptControllerNode == (-FDT_ERR_BADSTRUCTURE)) || (InterruptControllerNode == (-FDT_ERR_TRUNCATED)))
+    {
+        DEBUG((DEBUG_ERROR, "FDT path offset finding failed!!\n"));
+        DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-InterruptControllerNode)));
+        ASSERT(InterruptControllerNode != (-FDT_ERR_BADPATH));
+        ASSERT(InterruptControllerNode != (-FDT_ERR_NOTFOUND));
+        ASSERT(InterruptControllerNode != (-FDT_ERR_BADMAGIC));
+        ASSERT(InterruptControllerNode != (-FDT_ERR_BADVERSION));
+        ASSERT(InterruptControllerNode != (-FDT_ERR_BADSTATE));
+        ASSERT(InterruptControllerNode != (-FDT_ERR_BADSTRUCTURE));
+        ASSERT(InterruptControllerNode != (-FDT_ERR_TRUNCATED));
+
+    }
+    DEBUG((DEBUG_VERBOSE, "/soc/die0/interrupt-controller node found successfully!!\n"));
+    DEBUG((DEBUG_VERBOSE, "Value: 0x%x\n", InterruptControllerNode));
+    if(InterruptControllerRegs == 0)
+    {
+        DEBUG((DEBUG_ERROR, "FDT reg finding failed!!\n"));
+        INT32 ErrCode = Length;
+        DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-ErrCode)));
+        ASSERT(FALSE);
+    }
+    DEBUG((DEBUG_VERBOSE, "%a: calculating register offsets\n", __FUNCTION__));
+    DEBUG((DEBUG_VERBOSE, "InterruptControllerNode = 0x%llx\n", (INT64)InterruptControllerNode));
+    DEBUG((DEBUG_VERBOSE, "InterruptControllerRegs = 0x%p\n", InterruptControllerRegs));
+    DEBUG((DEBUG_VERBOSE, "*InterruptControllerRegs = 0x%llx\n", *InterruptControllerRegs));
+
     //Start with simple things
     AicV2Base = PcdGet64(PcdAicInterruptControllerBase);
+    DEBUG((DEBUG_VERBOSE, "AIC_V2_BASE: 0x%llx\n", AicV2Base));
     AicInfoStruct->NumIrqs = AppleAicGetNumInterrupts(AicV2Base);
+    DEBUG((DEBUG_VERBOSE, "AicInfoStruct->NumIrqs = %u\n", AicInfoStruct->NumIrqs));
     AicInfoStruct->MaxIrqs = AppleAicGetMaxInterrupts(AicV2Base);
+    DEBUG((DEBUG_VERBOSE, "AicInfoStruct->MaxIrqs = %u\n", AicInfoStruct->MaxIrqs));
     AicInfoStruct->MaxCpuDies = FIELD_GET(AIC_V2_INFO_REG3_MAX_DIE_COUNT_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG3));
+    DEBUG((DEBUG_VERBOSE, "AicInfoStruct->MaxCpuDies = %d\n", AicInfoStruct->MaxCpuDies));
     AicInfoStruct->NumCpuDies = (FIELD_GET(AIC_V2_INFO_REG1_LAST_CPU_DIE_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG1))) + 1;
+    DEBUG((DEBUG_VERBOSE, "AicInfoStruct->NumCpuDies = %d\n", AicInfoStruct->NumCpuDies));
     
     //Now for the more complicated bits...
     //Start by getting the event register offset from the devicetree
-    InterruptControllerNode = fdt_path_offset(FdtBlob, "/soc/interrupt-controller");
-    InterruptControllerRegs = fdt_getprop(FdtBlob, InterruptControllerNode, "reg", &Length);
-    AicInfoStruct->Regs.EventReg = *(InterruptControllerRegs + 0xF);
+    EventRegisterValue = fdt32_to_cpu(InterruptControllerRegs[4]);
+    EventRegisterValue = (EventRegisterValue << 32) | fdt32_to_cpu (InterruptControllerRegs[5]);
+    DEBUG((DEBUG_VERBOSE, "EventRegisterValue = 0x%llx\n", EventRegisterValue));
+    AicInfoStruct->Regs.EventReg = EventRegisterValue;
     DEBUG((DEBUG_VERBOSE, "AicInfoStruct reg: 0x%llx\n", AicInfoStruct->Regs.EventReg));
-    DEBUG((DEBUG_VERBOSE, "FDT AIC reg length: 0x%llx\n", (UINT64)Length));
-    if(Length < (AddressCells + SizeCells) * sizeof(UINT32)) {
-        DEBUG((DEBUG_ERROR, "%a: Failed to get event register offset from DeviceTree!\n", __FUNCTION__));
-        return EFI_ERROR(-1);
-    }
+
     //Now calculate everything else, starting from the IRQ_CFG register
-    StartOffset = AicInfoStruct->Regs.IrqConfigRegOffset = (AicV2Base + AIC_V2_IRQ_CFG_REG);
-    CurrentOffset = (StartOffset + sizeof(UINT32) * AicInfoStruct->MaxIrqs);
+    StartOffset = AicInfoStruct->Regs.IrqConfigRegOffset = AIC_V2_IRQ_CFG_REG;
+    CurrentOffset = StartOffset + sizeof(UINT32) * AicInfoStruct->MaxIrqs;
 
     AicInfoStruct->Regs.SoftwareSetRegOffset = CurrentOffset;
-    CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
+    CurrentOffset += sizeof(UINT32) * (AicInfoStruct->MaxIrqs >> 5);
     AicInfoStruct->Regs.SoftwareClearRegOffset = CurrentOffset;
-    CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
+    CurrentOffset += sizeof(UINT32) * (AicInfoStruct->MaxIrqs >> 5);
     AicInfoStruct->Regs.IrqMaskSetRegOffset = CurrentOffset;
-    CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
+    CurrentOffset += sizeof(UINT32) * (AicInfoStruct->MaxIrqs >> 5);
     AicInfoStruct->Regs.IrqMaskClearRegOffset = CurrentOffset;
-    CurrentOffset += sizeof(UINT32) * ((AicInfoStruct->MaxIrqs) >> 5);
+    CurrentOffset += sizeof(UINT32) * (AicInfoStruct->MaxIrqs >> 5);
+    CurrentOffset += sizeof(UINT32) * (AicInfoStruct->MaxIrqs >> 5);
     AicInfoStruct->Regs.HwStateRegOffset = CurrentOffset;
     AicInfoStruct->DieStride = CurrentOffset - StartOffset;
     AicInfoStruct->RegSize = (AicInfoStruct->Regs.EventReg - AicV2Base) + 4;
-
-    if(1)
-    {
-        ASSERT(FALSE);
-        return EFI_UNSUPPORTED;
-    }
     
     return EFI_SUCCESS;
 
@@ -197,6 +236,8 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
 {
     UINT32 AicInterrupt;
     HARDWARE_INTERRUPT_HANDLER HwInterruptHandler;
+    HARDWARE_INTERRUPT_HANDLER TimerInterruptHandlerPhys;
+    HARDWARE_INTERRUPT_HANDLER TimerInterruptHandlerVirt;
     UINT64 PmcStatus;
     UINT64 UncorePmcStatus;
 
@@ -217,14 +258,15 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
 
         //Timers
         //Apple Silicon uses standard ARM timers, but just wired to FIQ. Hand off the FIQ as if it were a standard timer IRQ.
-        if (ArmReadCntpCtl() & (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_ISTATUS))
+        if (((ArmReadCntpCtl()) & (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_IMASK | ARM_ARCH_TIMER_ISTATUS)) == (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_ISTATUS))
         {
-            DEBUG((DEBUG_INFO, "Physical timer FIQ asserted\n"));
-            HwInterruptHandler = AicRegisteredInterruptHandlers[17];
-            if(HwInterruptHandler != NULL)
+            TimerInterruptHandlerPhys = AicRegisteredInterruptHandlers[17];
+            //ArmGenericTimerDisableTimer();
+            if(TimerInterruptHandlerPhys != NULL)
             {
+
                 //for now we hardcode the timer interrupt to 17.
-                HwInterruptHandler(17, SystemContext);
+                TimerInterruptHandlerPhys(17, SystemContext);
             }
             else
             {
@@ -233,33 +275,31 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
             }
 
         }
-        else if (ArmReadCntvCtl() & (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_ISTATUS))
+        else if ((ArmReadCntvCtl() & (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_IMASK | ARM_ARCH_TIMER_ISTATUS)) == (ARM_ARCH_TIMER_ENABLE | ARM_ARCH_TIMER_ISTATUS))
         {
-            DEBUG((DEBUG_INFO, "Virtual timer FIQ asserted\n"));
-            HwInterruptHandler = AicRegisteredInterruptHandlers[17];
-            if(HwInterruptHandler != NULL)
+            TimerInterruptHandlerVirt = AicRegisteredInterruptHandlers[18];
+            if(TimerInterruptHandlerVirt != NULL)
             {
                 //ditto for the virtual timer.
-                HwInterruptHandler(17, SystemContext);
+                TimerInterruptHandlerVirt(18, SystemContext);
             }
             else
             {
                 DEBUG((DEBUG_ERROR, "Virtual timer interrupt not assigned!\n"));
                 ASSERT(FALSE);
-                return;
             }
         }
 
         //unknown: do we handle the el1 timers separately?
 
         //PMCs
-        PmcStatus = AppleAicV2ReadPmcStatusRegister();
+        PmcStatus = AppleAicV2ReadPmcControlRegister();
         UncorePmcStatus = AppleAicV2ReadUncorePmcControlRegister();
         if (PmcStatus & BIT11) {
             DEBUG((DEBUG_INFO, "PMCR0 FIQ asserted, unsupported, acking\n"));
             PmcStatus = PmcStatus & ~(BIT18 | BIT17 | BIT16);
             PmcStatus |= (BIT18 | BIT17 | BIT16 | BIT0);
-            AppleAicV2WritePmcStatusRegister(PmcStatus);   
+            AppleAicV2WritePmcControlRegister(PmcStatus);   
         }
         else if (FIELD_GET(APPLE_UPMCR0_IMODE, UncorePmcStatus) == APPLE_UPMCR_FIQ_IMODE && (AppleAicV2ReadUncorePmcStatusRegister() & APPLE_UPMSR_IACT))
         {
@@ -316,29 +356,36 @@ STATIC EFI_STATUS EFIAPI AppleAicV2GetIrqTriggerType(
 )
 {
     VOID* FdtBlob = (VOID *)(PcdGet64(PcdFdtPointer));
-    UINTN PcieMsiNodeOffset = 0;
-    VOID* PcieMsiRangesProp = (VOID *)0;
-    UINT32 EdgeTriggeredIrqNum = 0;
-    UINT32 MsiRangesLength = 0;
+    INT32 MsiRangesLength = 0;
+    UINTN PcieMsiNodeOffset = fdt_path_offset(FdtBlob, "/soc/pcie0");;
+    CONST INT32* PcieMsiRangesProp = fdt_getprop(FdtBlob, PcieMsiNodeOffset, "reg", &MsiRangesLength);;
+    UINT32 EdgeTriggeredIrqNumStart = fdt32_to_cpu(PcieMsiRangesProp[1]);
+    UINT32 EdgeTriggeredIrqNums = fdt32_to_cpu(PcieMsiRangesProp[3]);
+    BOOLEAN IsEdgeTriggeredIrq = FALSE;
     /**
      * AIC does not have a facility to see if a given IRQ is level or edge triggered,
      * however, other than PCIe MSIs, every other IRQ is a level triggered interrupt.
      * 
-     * As such, get the PCIe MSI IRQ number from the DT, compare it to Source, and if it matches,
+     * As such, get the PCIe MSI IRQ number range from the DT, compare it to Source, and if it matches any of the IRQ numbers,
      * state that this is a edge rising triggered interrupt. In all other cases, unconditionally indicate
      * a level triggered interrupt.
      */
 
-    PcieMsiNodeOffset = fdt_path_offset(FdtBlob, "/soc/pcie0");
-    PcieMsiRangesProp = fdt_getprop(FdtBlob, PcieMsiNodeOffset, "reg", &MsiRangesLength);
-    EdgeTriggeredIrqNum = *(PcieMsiRangesProp + 0x4);
-    DEBUG((DEBUG_VERBOSE, "Edge triggered IRQ number: %d", EdgeTriggeredIrqNum));
-    if(Source == EdgeTriggeredIrqNum)
+    DEBUG((DEBUG_VERBOSE, "Edge triggered IRQ number start: %d", EdgeTriggeredIrqNumStart));
+    for(UINT64 IrqNum = EdgeTriggeredIrqNumStart; IrqNum < (EdgeTriggeredIrqNumStart + EdgeTriggeredIrqNums); IrqNum++)
+    {
+        if(Source == IrqNum)
+        {
+            DEBUG((DEBUG_VERBOSE, "%d is an edge triggered IRQ\n", (UINT32)Source));
+            IsEdgeTriggeredIrq = TRUE;
+            break;
+        }
+    }
+    if(IsEdgeTriggeredIrq)
     {
         *TriggerType = EFI_HARDWARE_INTERRUPT2_TRIGGER_EDGE_RISING;
     }
-    else
-    {
+    else {
         *TriggerType = EFI_HARDWARE_INTERRUPT2_TRIGGER_LEVEL_HIGH;
     }
     return EFI_SUCCESS;
@@ -348,7 +395,7 @@ STATIC EFI_STATUS EFIAPI AppleAicV2GetIrqTriggerType(
 STATIC EFI_STATUS EFIAPI AppleAicV2SetIrqTriggerType(
     IN EFI_HARDWARE_INTERRUPT2_PROTOCOL *This,
     IN HARDWARE_INTERRUPT_SOURCE Source,
-    IN EFI_HARDWARE_INTERRUPT2_TRIGGER_TYPE *TriggerType
+    IN EFI_HARDWARE_INTERRUPT2_TRIGGER_TYPE TriggerType
 )
 {
     //unsupported for now, just return EFI_SUCCESS
@@ -356,7 +403,7 @@ STATIC EFI_STATUS EFIAPI AppleAicV2SetIrqTriggerType(
 }
 
 // AIC HardwareInterrupt2 protocol instance
-EFI_HARDWARE_INTERRUPT2_PROTOCOL gHardwareInterruptAicV2Protocol = {
+EFI_HARDWARE_INTERRUPT2_PROTOCOL gHardwareInterrupt2AicV2Protocol = {
   (HARDWARE_INTERRUPT2_REGISTER)RegisterInterruptSource,
   (HARDWARE_INTERRUPT2_ENABLE)AppleAicV2UnmaskInterrupt,
   (HARDWARE_INTERRUPT2_DISABLE)AppleAicV2MaskInterrupt,
@@ -381,6 +428,8 @@ VOID EFIAPI AppleAicV2ExitBootServicesEvent(
 )
 {
     UINTN InterruptIndex;
+    UINT32 AicConfigValue = (UINT32)(AIC_V2_CFG_ENABLE);
+    AicConfigValue = ~AicConfigValue;
 
     //acknowledge any outstanding interrupts by reading the event register
     //(this will mask those interrupts at the same time)
@@ -393,7 +442,7 @@ VOID EFIAPI AppleAicV2ExitBootServicesEvent(
     }
 
     //disable the AIC controller
-    MmioAnd32(AicV2Base + AIC_V2_CONFIG, ~(AIC_V2_CFG_ENABLE));
+    MmioAnd32(AicV2Base + AIC_V2_CONFIG, AicConfigValue);
 
 }
 
@@ -411,8 +460,23 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     EFI_STATUS Status;
     UINT32 AicV2NumInterrupts;
     UINT32 AicV2MaxInterrupts;
-    UINT32 CoreID;
+
+    // if(Initialized == TRUE)
+    // {
+    //     DEBUG((DEBUG_VERBOSE, "Bug encountered!!!\n"));
+        
+    //     ASSERT(FALSE);
+    // }
+    // if(Initialized == FALSE)
+    // {
+    //     DEBUG((DEBUG_INFO, "%a: AIC driver start\n", __FUNCTION__));
+    //     Initialized = TRUE;
+    // }
+
     DEBUG((DEBUG_INFO, "%a: AIC driver start\n", __FUNCTION__));
+    AicInfoStruct = AllocatePool(sizeof(AIC_INFO_STRUCT));
+    DEBUG((DEBUG_VERBOSE, "Allocated buffer of size 0x%llx, at 0x%p\n", sizeof(AIC_INFO_STRUCT), AicInfoStruct));
+    //UINT32 CoreID;
     //Assert that the Hardware Interrupt protocol is not installed already.
     ASSERT_PROTOCOL_ALREADY_INSTALLED (NULL, &gHardwareInterruptProtocolGuid);
 
@@ -423,7 +487,7 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     AicV2MaxInterrupts = AicInfoStruct->MaxIrqs;
     
     DEBUG((DEBUG_INFO, "AICv2 with %u/%u configured IRQs, at 0x%llx\n", AicV2NumInterrupts, AicV2MaxInterrupts, AicV2Base));
-    DEBUG((DEBUG_INFO, "%u/%u CPU dies, Die Stride: 0x%lx", AicInfoStruct->NumCpuDies, AicInfoStruct->MaxCpuDies, AicInfoStruct->DieStride));
+    DEBUG((DEBUG_INFO, "%u/%u CPU dies, Die Stride: 0x%lx\n", AicInfoStruct->NumCpuDies, AicInfoStruct->MaxCpuDies, AicInfoStruct->DieStride));
     DEBUG((DEBUG_VERBOSE, "AIC register addresses: \n"
     "\tAIC_V2_BASE: 0x%llx\n"
     "\tAIC_V2_IRQ_CFG: 0x%llx\n"
@@ -432,7 +496,7 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     "\tAIC_V2_MASK_SET: 0x%llx\n"
     "\tAIC_V2_MASK_CLR: 0x%llx\n"
     "\tAIC_V2_HW_STATE: 0x%llx\n"
-    "\tAIC_V2_EVENT: 0x%llx\n",
+    "\tAIC_V2_EVENT: 0x%llx\n\n",
     AicV2Base,
     (AicV2Base + AicInfoStruct->Regs.IrqConfigRegOffset),
     (AicV2Base + AicInfoStruct->Regs.SoftwareSetRegOffset),
@@ -442,6 +506,10 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     (AicV2Base + AicInfoStruct->Regs.HwStateRegOffset),
     (AicInfoStruct->Regs.EventReg)
     ));
+
+    //enable the AIC
+    DEBUG((DEBUG_VERBOSE, "%a: enabling AIC\n", __FUNCTION__));
+    MmioOr32(AicV2Base + AIC_V2_CONFIG, AIC_V2_CFG_ENABLE);
 
     //start from a clean state by disabling all interrupts
     for(InterruptIndex = 0; InterruptIndex < AicV2NumInterrupts; InterruptIndex++)
@@ -469,14 +537,11 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     //    AppleArmDisableIrqsAndFiqs();
     //}
 
-    //enable the AIC
-    MmioOr32(AicV2Base + AIC_V2_CONFIG, AIC_V2_CFG_ENABLE);
-
     Status = InstallAndRegisterInterruptService(
         &gHardwareInterruptAicV2Protocol,
         &gHardwareInterrupt2AicV2Protocol,
-        NULL,
-        NULL
+        AppleAicV2InterruptHandler,
+        AppleAicV2ExitBootServicesEvent
     );
     return Status;
 }
