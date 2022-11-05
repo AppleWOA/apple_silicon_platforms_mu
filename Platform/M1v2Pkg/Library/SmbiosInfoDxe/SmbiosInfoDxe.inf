@@ -12,7 +12,7 @@
 [Pcd]
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
-  gM1v2PkgTokenSpaceGuid.PcdFdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
 
 [FixedPcd]
   gM1v2PkgTokenSpaceGuid.PcdCoreCount

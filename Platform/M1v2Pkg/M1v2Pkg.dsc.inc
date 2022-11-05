@@ -39,8 +39,10 @@
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x10000000000
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x100FF000000 #fair warning this location is *totally random*
-  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|17 #FIQ timer INTID (needed because Apple timers fire FIQs)
-  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18 #IRQ timer INTID
+  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|19 # placeholder 
+  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|17 # phys timer IRQ number (this is arbitrary because per-cpu fiq)
+  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|0 #this disables the HV timer
+  gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|18 #virt timer
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #On M1v2, this is a lot easier to pick as most of the 40 bit address space is reserved for MMIO and a lot goes unused
@@ -115,10 +117,10 @@
 
 [PcdsDynamicDefault.common]
   #screen resolution settings
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|2560
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1600
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|2560
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1600
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|1920
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1080
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|150
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|150
 
@@ -132,7 +134,8 @@
   #basic UEFI services
   ArmLib    |ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmMmuLib |ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
-  ArmGenericTimerCounterLib  |ArmPkg/Library/ArmGenericTimerPhyCounterLib/ArmGenericTimerPhyCounterLib.inf
+  ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerPhyCounterLib/AppleArmGenericTimerPhyCounterLib.inf
+  #ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerVirtCounterLib/AppleArmGenericTimerVirtCounterLib.inf
   ArmDisassemblerLib|ArmPkg/Library/ArmDisassemblerLib/ArmDisassemblerLib.inf
 !if $(AIC_BUILD) == FALSE
   ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
