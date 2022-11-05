@@ -15,8 +15,8 @@
 
 [PcdsFixedAtBuild.common]
 
-  gM1v2PkgTokenSpaceGuid.PcdFrameBufferWidth|3840|UINT32|0x00004401
-  gM1v2PkgTokenSpaceGuid.PcdFrameBufferHeight|2160|UINT32|0x00004402
+  gM1v2PkgTokenSpaceGuid.PcdFrameBufferWidth|1920|UINT32|0x00004401
+  gM1v2PkgTokenSpaceGuid.PcdFrameBufferHeight|1080|UINT32|0x00004402
   gM1v2PkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30|UINT32|0x00004403
 
   # RAM reservation (128 MB reserved for EFI FD image)
