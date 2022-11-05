@@ -5,7 +5,7 @@
 
 
 #include <AsmMacroIoLibV8.h>
-#include <AppleSysRegs.h>
+#include <Library/AppleSysRegs.h>
 
 //UINTN EFIAPI AppleAicV2ReadIpiStatusRegister(VOID);
 ASM_FUNC(AppleAicV2ReadIpiStatusRegister)
