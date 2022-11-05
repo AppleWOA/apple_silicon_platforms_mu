@@ -34,7 +34,7 @@
 
   
   DEFINE SECURE_BOOT_ENABLE      = FALSE #disable secure boot for now
-  DEFINE AIC_BUILD               = FALSE #AIC build disabled by default, change to true if you want AIC support
+  DEFINE AIC_BUILD               = TRUE #AIC build disabled by default, change to true if you want AIC support
 
 
 [BuildOptions.common]
@@ -49,7 +49,7 @@
   #These will get overriden by the FDT settings
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x10000000000
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x400000000 #16GB RAM space by default
-  gM1PkgTokenSpaceGuid.PcdFdtPointer|0x10200000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
   
