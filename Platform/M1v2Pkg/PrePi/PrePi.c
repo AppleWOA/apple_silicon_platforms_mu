@@ -104,8 +104,8 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
     BuildStackHob((UINT64)StackBase, StackSize);
     BuildCpuHob(ArmGetPhysicalAddressBits(), PcdGet8(PcdPrePiCpuIoSize));
 
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Setting boot mode to full configuration...\n"));
-    SetBootMode(BOOT_WITH_FULL_CONFIGURATION);
+    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Setting boot mode to default settings...\n"));
+    SetBootMode(BOOT_WITH_DEFAULT_SETTINGS);
 
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "Starting PlatformPeim\n"));
     Status = PlatformPeim();
