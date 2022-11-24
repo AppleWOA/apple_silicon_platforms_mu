@@ -95,10 +95,11 @@
 
   #OEM Sample FrontPage
   gEfiMdeModulePkgTokenSpaceGuid.PcdBootManagerMenuFile|{ 0x8A, 0x70, 0x42, 0x40, 0x2D, 0x0F, 0x23, 0x48, 0xAC, 0x60, 0x0D, 0x77, 0xB3, 0x11, 0x18, 0x89 }
+  gM1v2PkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x8A, 0x70, 0x42, 0x40, 0x2D, 0x0F, 0x23, 0x48, 0xAC, 0x60, 0x0D, 0x77, 0xB3, 0x11, 0x18, 0x89 }
 
   #EFI debug settings
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0xFFFFFFFF
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0xFFFFFF4F
 
   #variable size
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x2000
@@ -123,6 +124,8 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1080
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|150
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|150
+  #color bar default settings
+  #gMsCorePkgTokenSpaceGuid.PcdDeviceStateBitmask|0x0000001F
 
 
 ## Libraries that will be linked into the project
@@ -133,7 +136,7 @@
 
   #basic UEFI services
   ArmLib    |ArmPkg/Library/ArmLib/ArmBaseLib.inf
-  ArmMmuLib |ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
+  ArmMmuLib |AppleSiliconPkg/Library/AppleArmMmuLib/ArmMmuBaseLib.inf
   ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerPhyCounterLib/AppleArmGenericTimerPhyCounterLib.inf
   #ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerVirtCounterLib/AppleArmGenericTimerVirtCounterLib.inf
   ArmDisassemblerLib|ArmPkg/Library/ArmDisassemblerLib/ArmDisassemblerLib.inf
@@ -428,6 +431,9 @@
 !else
   AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicDxe.inf
 !endif
+
+  AppleSiliconPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
+
   MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
@@ -518,6 +524,7 @@
   MsCorePkg/Universal/StatusCodeHandler/Serial/Dxe/SerialStatusCodeHandlerDxe.inf
   EmbeddedPkg/SimpleTextInOutSerial/SimpleTextInOutSerial.inf
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
+  AppleSiliconPkg/Drivers/ColorbarsDxe/ColorbarsDxe.inf
 !if $(SECURE_BOOT_ENABLE) == TRUE
   MsCorePkg/MuCryptoDxe/MuCryptoDxe.inf
   CryptoPkg/Driver/CryptoDxe.inf

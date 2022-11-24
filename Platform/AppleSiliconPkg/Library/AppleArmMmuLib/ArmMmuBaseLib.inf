@@ -1,0 +1,39 @@
+#AppleArmMmuBaseLib - modification of ArmMmuLib to fix an issue preventing it from working on
+#Apple platforms, original notice below
+#/** @file
+#
+#  Copyright (c) 2016 Linaro Ltd. All rights reserved.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AppleArmMmuBaseLib
+  FILE_GUID                      = 421081c1-027d-4105-a4a2-05309c5a60fd
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  # MU_CHANGE - Can't be fully BASE, because it doesn't work in MM_STANDALONE.
+  LIBRARY_CLASS                  = ArmMmuLib | DXE_DRIVER PEIM PEI_CORE DXE_CORE DXE_RUNTIME_DRIVER SEC
+
+[Defines.AARCH64]
+  CONSTRUCTOR                    = ArmMmuBaseLibConstructor
+
+[Sources.AARCH64]
+  AArch64/ArmMmuLibCore.c
+  AArch64/ArmMmuLibReplaceEntry.S    | GCC
+  AArch64/ArmMmuLibReplaceEntry.masm | MSFT
+
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  ArmLib
+  CacheMaintenanceLib
+  MemoryAllocationLib
+
