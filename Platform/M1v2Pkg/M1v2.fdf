@@ -112,6 +112,7 @@ APRIORI DXE {
   INF ArmPkg/Drivers/CpuDxe/CpuDxe.inf
   INF MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe.inf
   INF MdeModulePkg/Universal/StatusCodeHandler/RuntimeDxe/StatusCodeHandlerRuntimeDxe.inf
+  INF AppleSiliconPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
 }
 
   #Main DXE core
@@ -150,6 +151,8 @@ APRIORI DXE {
 !endif
   INF MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
 
+  INF AppleSiliconPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
+
   #
   # PCIe Support
   #
@@ -166,6 +169,7 @@ APRIORI DXE {
   # Virtual Keyboard
   #
   INF EmbeddedPkg/Drivers/VirtualKeyboardDxe/VirtualKeyboardDxe.inf
+  INF OemPkg/FrontpageButtonsVolumeUp/FrontpageButtonsVolumeUp.inf
 
   # FV FileSystem
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
@@ -233,6 +237,7 @@ APRIORI DXE {
   #
   # Bds
   #
+  INF AppleSiliconPkg/Drivers/ColorbarsDxe/ColorbarsDxe.inf
   INF MdeModulePkg/Universal/PrintDxe/PrintDxe.inf
   INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
   INF MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
@@ -242,6 +247,10 @@ APRIORI DXE {
 
   # DT
   INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+  FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
+	SECTION RAW = M1v2Pkg/DeviceTree/t6002-j375d.dtb
+	SECTION UI = "FirmwareDeviceTree"
+}
   
 !include AppleSiliconPkg/FrontpageFdf.inc
 
