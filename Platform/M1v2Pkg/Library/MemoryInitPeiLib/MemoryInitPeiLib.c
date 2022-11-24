@@ -49,6 +49,7 @@ STATIC VOID InitMmu(IN ARM_MEMORY_REGION_DESCRIPTOR *MemoryTable)
         &MemoryTranslationTableBase, &MemoryTranslationTableSize)
         );
     StatusCode = ArmConfigureMmu(MemoryTable, &MemoryTranslationTableBase, &MemoryTranslationTableSize);
+    DEBUG((DEBUG_INFO, "MMU enable successful\n"));
 
     if(EFI_ERROR(StatusCode))
     {
@@ -237,8 +238,12 @@ VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
   CacheAttributes = DDR_ATTRIBUTES_CACHED;
 
   /**
-   * NOTE - On Apple silicon platforms, non PCIe MMIO regions *must* use nGnRnE mappings, while all PCIe regions *must* use nGnRE mappings.
-   * m1n1 sets up MAIR_EL1 correctly but not sure if that's preserved during BDS -> OS transition, nor if EFI reconfigures it.
+   * NOTE - On Apple silicon platforms, non PCIe MMIO regions *must* use nGnRnE mappings, 
+   * while all PCIe regions *must* use nGnRE mappings.
+   * by default EDK2 sets up the MMIO as nGnRnE, good for core system devices
+   * though we will need to add an attribute for nGnRE mappings at some point.
+   * 
+   * TODO: add ARM_MEMORY_REGION_ATTRIBUTE_DEVICE_POSTED_WRITE
    **/
 
   //MMIO - PMGR/AIC/Core System Peripherals and PCIe
@@ -436,7 +441,7 @@ VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
   //Framebuffer
   VirtualMemoryTable[++Index].PhysicalBase = PcdGet64(PcdFrameBufferAddress);
   VirtualMemoryTable[Index].VirtualBase    = PcdGet64(PcdFrameBufferAddress);
-  VirtualMemoryTable[Index].Length         = 0x2000000;
+  VirtualMemoryTable[Index].Length         = 0x854000;
   VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED;
 
   //TODO: add other NC regions here?
