@@ -1,5 +1,5 @@
 //AppleAicV2.S
-//ASM helpers for the AIC DXE driver.
+//ASM helpers for the AIC DXE driver. (namely for FIQ sources)
 //Copyright (c) amarioguy (Arminder Singh), 2022.
 //SPDX-License-Identifier: BSD-2-clause-patent
 

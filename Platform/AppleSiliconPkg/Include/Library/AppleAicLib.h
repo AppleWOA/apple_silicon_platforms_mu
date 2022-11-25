@@ -33,25 +33,9 @@ typedef enum {
 
 /**
  * 
- * AIC structs, to keep register offsets and frequently used values in a single place to keep the code readable/sane.
- * 
- * Inspired by m1n1 and Linux
+ * AIC structs, to keep important information about the AIC like the number of IRQs and CPU dies.
  * 
  */
-
-typedef struct aic_reg_info_struct {
-    //required on AICv2, AICv1 has a static value for this register.
-    UINT64 EventReg;
-
-    // target cpu reg only used on AICv1
-    UINT64 TargetCpuRegOffset;
-    UINT64 IrqConfigRegOffset;
-    UINT64 SoftwareSetRegOffset;
-    UINT64 SoftwareClearRegOffset;
-    UINT64 IrqMaskSetRegOffset;
-    UINT64 IrqMaskClearRegOffset;
-    UINT64 HwStateRegOffset;
-} AIC_REG_INFO;
 
 typedef struct aic_info_struct {
     UINT32 NumIrqs;
@@ -62,7 +46,6 @@ typedef struct aic_info_struct {
     UINT32 DieStride;
     UINT32 RegSize;
 
-    AIC_REG_INFO Regs;
 } AIC_INFO_STRUCT;
 
 extern AIC_INFO_STRUCT *AicInfoStruct;
@@ -130,7 +113,7 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID);
  * @return UINT32 - Event register value
  */
 UINT32 EFIAPI AppleAicAcknowledgeInterrupt(
-    IN VOID
+    IN UINTN AicEventRegister
 );
 
 /**
@@ -166,7 +149,8 @@ UINT32 EFIAPI AppleAicGetMaxInterrupts(
  */
 VOID EFIAPI AppleAicMaskInterrupt(
     IN UINTN AicBase,
-    IN UINTN Source
+    IN UINTN Source,
+    IN UINTN AicMaskSetRegOffset
 );
 
 /**
@@ -182,7 +166,8 @@ VOID EFIAPI AppleAicMaskInterrupt(
  */
 VOID EFIAPI AppleAicUnmaskInterrupt(
     IN UINTN AicBase,
-    IN UINTN Source
+    IN UINTN Source,
+    IN UINTN AicMaskClearRegOffset
 );
 
 
@@ -195,7 +180,8 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
  */
 BOOLEAN EFIAPI AppleAicReadInterruptState(
     IN UINTN AicBase,
-    IN UINTN Source
+    IN UINTN Source,
+    IN UINTN AicHwStateRegOffset
 );
 
 

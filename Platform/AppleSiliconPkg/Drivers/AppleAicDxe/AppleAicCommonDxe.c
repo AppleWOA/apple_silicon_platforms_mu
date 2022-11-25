@@ -95,7 +95,7 @@ STATIC VOID EFIAPI CpuArchProtocolNotify(IN EFI_EVENT Event, IN VOID *Context)
   Status = CpuProtocol->RegisterInterruptHandler (CpuProtocol, ARM_ARCH_EXCEPTION_IRQ, NULL);
   Status = CpuProtocol->RegisterInterruptHandler (CpuProtocol, EXCEPT_AARCH64_FIQ, NULL);
   if (EFI_ERROR (Status)) {
-    DEBUG((DEBUG_ERROR, "%a: Unregistering default exception handler failed!! Status: 0x%llx\n", __FUNCTION__, Status));
+    DEBUG((DEBUG_ERROR, "%a: Unregistering default exception handlers failed!! Status: 0x%llx\n", __FUNCTION__, Status));
     return;
   }
 
