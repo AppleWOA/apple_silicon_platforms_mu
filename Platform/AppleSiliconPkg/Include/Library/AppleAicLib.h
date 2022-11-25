@@ -141,7 +141,6 @@ UINT32 EFIAPI AppleAicGetMaxInterrupts(
  * 
  * Note that all FIQ sources are directly implemented in the cores instead of going through AIC.
  * 
- * TODO: deal with FIQs.
  * 
  * @param AicBase - AIC Base Address
  * @param Source - IRQ number 
@@ -158,7 +157,6 @@ VOID EFIAPI AppleAicMaskInterrupt(
  * 
  * Note that all FIQ sources are directly implemented in the cores instead of going through AIC.
  * 
- * TODO: deal with FIQs.
  * 
  * @param AicBase - AIC Base Address
  * @param Source - IRQ number 

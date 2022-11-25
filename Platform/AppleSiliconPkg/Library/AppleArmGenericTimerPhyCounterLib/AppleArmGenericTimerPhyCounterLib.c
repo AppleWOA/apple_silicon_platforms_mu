@@ -37,7 +37,8 @@ ArmGenericTimerReenableTimer (
   TimerCtrlReg |= ARM_ARCH_TIMER_ENABLE;
   /**
    * 
-   * Try disabling the mask?
+   * We need to unmask the timer here to account for the case where we're
+   * running inside m1n1 or another hypervisor.
    * 
    */
   TimerCtrlReg &= ~ARM_ARCH_TIMER_IMASK;
