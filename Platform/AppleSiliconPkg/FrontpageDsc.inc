@@ -243,7 +243,7 @@
      gDfciPkgTokenSpaceGuid.PcdSettingsManagerInstallProvider|TRUE
   }
 
-  DfciPkg/IdentityAndAuthManager/IdentityAndAuthManagerDxe.inf
+  DfciPkg/AuthManagerNull/AuthManagerNull.inf
   
   #
   # Processes ingoing and outgoing DFCI settings requests.

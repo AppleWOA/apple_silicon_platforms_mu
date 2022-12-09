@@ -1,6 +1,6 @@
 # Continuation of [FV.FvMain]
   INF MsGraphicsPkg/GopOverrideDxe/GopOverrideDxe.inf
-  INF DfciPkg/IdentityAndAuthManager/IdentityAndAuthManagerDxe.inf
+  INF DfciPkg/AuthManagerNull/AuthManagerNull.inf #change when non-volatile storage is ready
   INF DfciPkg/SettingsManager/SettingsManagerDxe.inf
   INF MsGraphicsPkg/MsUiTheme/Dxe/MsUiThemeProtocol.inf
   INF MsGraphicsPkg/RenderingEngineDxe/RenderingEngineDxe.inf
