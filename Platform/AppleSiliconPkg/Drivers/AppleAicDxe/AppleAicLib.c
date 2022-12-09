@@ -154,7 +154,7 @@ VOID EFIAPI AppleAicMaskInterrupt(
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
 
-    DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_SET = 0x%llx\n", AicBase + AicInfoStruct->Regs.IrqMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicInfoStruct->Regs.IrqMaskSetRegOffset));
+    DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_SET = 0x%llx\n", AicBase + AicMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicMaskSetRegOffset));
 
     MmioWrite32(AicBase + AicMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
 
@@ -191,7 +191,7 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
 
-    DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_SET = 0x%llx\n", AicBase + AicInfoStruct->Regs.IrqMaskClearRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicInfoStruct->Regs.IrqMaskClearRegOffset));
+    DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_CLR = 0x%llx\n", AicBase + AicMaskClearRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicMaskClearRegOffset));
 
     MmioWrite32(AicBase + AicMaskClearRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
 

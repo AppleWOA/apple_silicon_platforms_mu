@@ -26,7 +26,7 @@ AIC_INFO_STRUCT *AicInfoStruct;
 STATIC UINT64 mAicV2IrqCfgOffset, mAicV2SoftwareSetRegOffset;
 STATIC UINT64 mAicV2SoftwareClearRegOffset, mAicV2IrqMaskSetOffset;
 STATIC UINT64 mAicV2IrqMaskClearOffset, mAicV2HwStateOffset;
-STATIC UINT64 mAicV2RegSize, mAicV2EventReg;
+STATIC UINT64 mAicV2EventReg;
 
 STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID);
 
@@ -204,14 +204,14 @@ STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
      */
     EventRegisterValue = fdt32_to_cpu(InterruptControllerRegs[4]);
     EventRegisterValue = (EventRegisterValue << 32) | fdt32_to_cpu (InterruptControllerRegs[5]);
-    AicInfoStruct->Regs.EventReg = mAicV2EventReg = EventRegisterValue;
+    mAicV2EventReg = EventRegisterValue;
 
     /**
      * From IRQ_CFG + sizeof(UINT32) * MaxIrqs, the AIC registers are separated
      * by an offset of (sizeof(UINT32) * (MaxIrqs >> 5)).
      * 
      */
-    StartOffset = AicInfoStruct->Regs.IrqConfigRegOffset = mAicV2IrqCfgOffset = AIC_V2_IRQ_CFG_REG;
+    StartOffset = mAicV2IrqCfgOffset = AIC_V2_IRQ_CFG_REG;
     CurrentOffset = StartOffset + sizeof(UINT32) * AicInfoStruct->MaxIrqs;
 
     //SW_SET

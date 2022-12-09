@@ -19,4 +19,5 @@
 EFI_STATUS AppleAicV1DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable) 
 {
     //TODO: this driver.
+    return EFI_SUCCESS;
 }
