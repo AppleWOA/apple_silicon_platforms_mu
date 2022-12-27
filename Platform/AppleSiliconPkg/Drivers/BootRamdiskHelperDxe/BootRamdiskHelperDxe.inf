@@ -1,0 +1,53 @@
+# BootRamdiskHelperDxe.inf: Sets up a RAMDisk embedded in the FV.
+# Copyright (c) amarioguy (Arminder Singh), 2022.
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = BootRamdiskHelperDxe
+  FILE_GUID                      = 69b5dbd8-92c0-492c-859f-7256d5100d2a
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = BootRamdiskHelperDxeInitialize
+
+[Sources.common]
+  BootRamdiskHelperDxe.c
+  BootRamdiskHelperDxe.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  ArmPkg/ArmPkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+
+#just a default set of libraries from HttpBootDxe for now, can scale back if needed
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseLib
+  UefiLib
+  DevicePathLib
+  DxeServicesLib
+  DebugLib
+  HiiLib
+  PrintLib
+  UefiHiiServicesLib
+  UefiBootManagerLib
+
+[Protocols]
+  gEfiRamDiskProtocolGuid                         ## SOMETIMES_CONSUMES
+  gEfiDevicePathProtocolGuid
+
+  gEfiLoadFileProtocolGuid
+
+[Guids]
+  gEfiVirtualCdGuid            ## SOMETIMES_CONSUMES ## GUID
+  gEfiVirtualDiskGuid          ## SOMETIMES_CONSUMES ## GUID
+  gAppleSiliconPkgEmbeddedRamdiskGuid
+
+[Pcd.common]
+  gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk
+
+
+[Depex]
+  gEfiRamDiskProtocolGuid
