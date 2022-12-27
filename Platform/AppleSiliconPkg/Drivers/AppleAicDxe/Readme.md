@@ -2,7 +2,7 @@
 
 ## About
 
-This DXE driver/library implements the required functionality to enable AIC (both v1 and v2) support in the UEFI environment for Apple platforms. This driver's design is overall based off the ArmGicDxe driver and as such borrows some conventions from it.
+This DXE driver/library implements the required functionality to enable AIC (both v1 and v2) support in the UEFI environment for Apple platforms.
 
 Please note this driver is a work in progress, and as such bugs are expected to be present.
 
@@ -34,8 +34,12 @@ It's highly advised you run this EFI under a thin hypervisor providing a vGIC wh
 
 If you wish to add the AIC driver to your own UEFI implementation (for example if you're developing an Apple chip emulator or something similar), copy the AppleAicDxe folder into your implementation's Driver store, then add the INF file locations to the implementation's DSC and FDF files.
 
+## Design philosophy
+
+This DXE driver/library is mainly designed to service the interrupts needed during EFI (this is most likely just going to be any interrupts from boot-critical devices and the timers). As such enough is implemented to allow these kinds of interrupts to work successfully but not every interrupt will actually be acted upon beyond a simple acknowledge (PMC and Uncore PMC interrupts are among those that are "ack-only").
+
+The overall design is inspired from the ArmGicDxe driver and it shares similar conventions to that driver.
+
 ## Current status of AIC Driver
 
-- DXE driver: implementing initial base
-
-- Library: just started
+- AICv2 driver finished, AICv1 in progress
