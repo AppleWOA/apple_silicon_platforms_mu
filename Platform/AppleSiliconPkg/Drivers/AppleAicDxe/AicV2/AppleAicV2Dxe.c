@@ -153,7 +153,7 @@ STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
     UINT64 CurrentOffset;
 
     if (fdt_check_header ((VOID *)FdtBlob) != 0) {
-    DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "no FDT supplied, exiting\n"));
+    //DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "no FDT supplied, exiting\n"));
     ASSERT(fdt_check_header ((VOID *)FdtBlob) == 0);
   }
     if ( (InterruptControllerNode == (-FDT_ERR_BADPATH)) 
@@ -505,7 +505,7 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     UINT32 AicV2NumInterrupts;
     UINT32 AicV2MaxInterrupts;
 
-    DEBUG((DEBUG_INFO, "%a: AIC driver start\n", __FUNCTION__));
+    //DEBUG((DEBUG_INFO, "%a: AIC driver start\n", __FUNCTION__));
     AicInfoStruct = AllocatePool(sizeof(AIC_INFO_STRUCT));
     //multi-core support not added yet
     //UINT32 CoreID;

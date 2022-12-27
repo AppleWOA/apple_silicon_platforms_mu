@@ -146,7 +146,7 @@ VOID EFIAPI AppleAicMaskInterrupt(
         return;
     }
     UINT32 CpuDieNum = 0;
-    DEBUG((DEBUG_INFO, "%a: masking interrupt 0x%llx\n", __FUNCTION__, Source));
+    //DEBUG((DEBUG_INFO, "%a: masking interrupt 0x%llx\n", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
     {
         //the IRQ number will come from DeviceTree, which uses the interrupt numbers as they are in hardware
@@ -154,7 +154,7 @@ VOID EFIAPI AppleAicMaskInterrupt(
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
 
-    DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_SET = 0x%llx\n", AicBase + AicMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicMaskSetRegOffset));
+    //DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_SET = 0x%llx\n", AicBase + AicMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicMaskSetRegOffset));
 
     MmioWrite32(AicBase + AicMaskSetRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
 
@@ -183,7 +183,7 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
         return;
     }
     UINT32 CpuDieNum = 0;
-    DEBUG((DEBUG_INFO, "%a: unmasking interrupt 0x%llx\n", __FUNCTION__, Source));
+    //DEBUG((DEBUG_INFO, "%a: unmasking interrupt 0x%llx\n", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
     {
         //the IRQ number will come from DeviceTree, which uses the interrupt numbers as they are in hardware
@@ -191,7 +191,7 @@ VOID EFIAPI AppleAicUnmaskInterrupt(
     }
     UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
 
-    DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_CLR = 0x%llx\n", AicBase + AicMaskClearRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicMaskClearRegOffset));
+    //DEBUG((DEBUG_VERBOSE, "Writing to 0x%llx with value 0x%llx, 0x%llx, IRQ MASK_CLR = 0x%llx\n", AicBase + AicMaskClearRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum), AicBase + AicMaskClearRegOffset));
 
     MmioWrite32(AicBase + AicMaskClearRegOffset + CpuDieNum + AIC_MASK_REG(IrqNum), AIC_MASK_BIT(IrqNum));
 
