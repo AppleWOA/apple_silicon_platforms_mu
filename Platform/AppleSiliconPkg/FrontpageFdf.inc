@@ -23,10 +23,10 @@
   INF MsCorePkg/AcpiRGRT/AcpiRgrt.inf
 
   # Change AARCH64 to the appropriate architecture for your platform.
-  FILE APPLICATION=PCD(gPcBdsPkgTokenSpaceGuid.PcdShellFile) {
-    SECTION PE32=$(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/AARCH64/Shell.efi
-    SECTION UI= "EdkShell"
-  }
+  #FILE APPLICATION=PCD(gPcBdsPkgTokenSpaceGuid.PcdShellFile) {
+  #  SECTION PE32=$(OUTPUT_DIRECTORY)/$(TARGET)_$(TOOL_CHAIN_TAG)/AARCH64/Shell.efi
+  #  SECTION UI= "EdkShell"
+  #}
   FILE FREEFORM = PCD(gOemPkgTokenSpaceGuid.PcdLogoFile) {
     SECTION RAW = AppleSiliconPkg/Include/Resources/BootLogo.bmp
     SECTION UI = "Logo"
