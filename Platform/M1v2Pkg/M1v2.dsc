@@ -44,6 +44,7 @@
 [PcdsFixedAtBuild.common]
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
+  gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
 
 [PcdsPatchableInModule.common]
   #These will get overriden by the FDT settings
