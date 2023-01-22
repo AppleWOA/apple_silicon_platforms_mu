@@ -24,9 +24,13 @@ Regarding interrupt controllers, this implementation can be built with optional 
 
 ### Status
 
-Very work in progress, working on setting up a non-volatile storage region (possibly in the FD itself)
+BootMGFW gets as far as looking for the FADT ACPI table (need to implement ACPI tables now)
 
-M1v2 and M2 - M1v2 is in progress of bringup, M2 is on hold for the time being.
+### Layout (for non Mu submodules)
+
+Platform/ - code specific to a given platform (MacBook Air, MacBook Pro, Mac Studio, Mac Mini, etc.)
+Silicon/Apple/[socmarketingname]Pkg - code specific to an SoC
+Silicon/Apple/AppleSiliconPkg - code applicable to all platforms (things like general AIC and DART support)
 
 ### Contributions
 
