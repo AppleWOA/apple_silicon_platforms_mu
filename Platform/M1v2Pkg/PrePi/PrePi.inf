@@ -74,3 +74,5 @@
 
   gM1v2PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize
+  gM1v2PkgTokenSpaceGuid.PcdSecPhaseStackBase
+  gM1v2PkgTokenSpaceGuid.PcdSecPhaseStackSize
