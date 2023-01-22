@@ -26,6 +26,7 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   M1Pkg/M1Pkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
   BaseMemoryLib
@@ -40,6 +41,7 @@
 
 [Guids]
   gMsBootPolicyFileGuid
+  gEfiVirtualCdGuid
 
 [Protocols]
   gEfiFirmwareVolume2ProtocolGuid

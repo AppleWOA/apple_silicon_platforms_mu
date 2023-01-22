@@ -8,7 +8,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = MsBootPolicyLib
-  FILE_GUID                      = 8F9D1D45-AA09-4028-BFB6-58B9EEAB3B25
+  FILE_GUID                      = 50670071-478f-4be7-ad13-8754f379c62f
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = MsBootPolicyLib|DXE_DRIVER UEFI_APPLICATION

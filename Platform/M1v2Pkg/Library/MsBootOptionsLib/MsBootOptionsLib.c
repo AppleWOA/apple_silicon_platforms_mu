@@ -24,6 +24,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #define INTERNAL_UEFI_SHELL_NAME  L"Internal UEFI Shell"
 #define INTERNAL_UEFI_FP_NAME     L"MU UEFI UI Front Page"
+#define INTERNAL_WINPE_RAMDISK_NAME L"Internal Windows PE Ramdisk"
 
 #define MS_SDD_BOOT       L"Internal NVMe Storage"
 #define MS_SDD_BOOT_PARM  "SDD"
@@ -264,6 +265,8 @@ CreateFvBootOption (
     return EFI_INVALID_PARAMETER;
   }
 
+  //DEBUG((DEBUG_INFO, "%a - Initializing FWVolDevicepathnode\n", __FUNCTION__));
+
   EfiInitializeFwVolDevicepathNode (&FileNode, FileGuid);
 
   if (!CompareGuid (PcdGetPtr (PcdShellFile), FileGuid)) {
@@ -316,6 +319,7 @@ CreateFvBootOption (
                    );
   }
 
+  //DEBUG((DEBUG_INFO, "%a - initializing load option\n", __FUNCTION__));
   Status = EfiBootManagerInitializeLoadOption (
              BootOption,
              LoadOptionNumberUnassigned,
@@ -327,6 +331,7 @@ CreateFvBootOption (
              OptionalDataSize
              );
   FreePool (DevicePath);
+  //DEBUG((DEBUG_INFO, "%a - returning %r for CDBoot or other option\n", __FUNCTION__, Status));
   return Status;
 }
 
@@ -361,14 +366,17 @@ RegisterFvBootOption (
   UINTN                         i;
 
   NewOption.OptionNumber = LoadOptionNumberUnassigned;
+  //DEBUG((DEBUG_INFO, "%a - Registering CDBoot.efi boot option\n", __FUNCTION__));
   Status                 = CreateFvBootOption (FileGuid, Description, &NewOption, Attributes, OptionalData, OptionalDataSize);
   if (!EFI_ERROR (Status)) {
     BootOptions = EfiBootManagerGetLoadOptions (&BootOptionCount, LoadOptionTypeBoot);
 
     OptionIndex = EfiBootManagerFindLoadOption (&NewOption, BootOptions, BootOptionCount);
+    //DEBUG((DEBUG_INFO, "%a - CDBoot option index is %d\n", __FUNCTION__, OptionIndex));
     if (OptionIndex == -1) {
       NewOption.Attributes ^= LOAD_OPTION_ACTIVE;
       OptionIndex           = EfiBootManagerFindLoadOption (&NewOption, BootOptions, BootOptionCount);
+      //DEBUG((DEBUG_INFO, "%a - CDBoot option index is %d\n", __FUNCTION__, OptionIndex));
       NewOption.Attributes ^= LOAD_OPTION_ACTIVE;
     }
 
@@ -415,6 +423,7 @@ MsBootOptionsLibRegisterDefaultBootOptions (
   VOID
   )
 {
+  RegisterFvBootOption (&gMsBootPolicyFileGuid, INTERNAL_WINPE_RAMDISK_NAME, (UINTN)-1, LOAD_OPTION_ACTIVE, NULL, 0);
   RegisterFvBootOption (&gMsBootPolicyFileGuid, MS_SDD_BOOT, (UINTN)-1, LOAD_OPTION_ACTIVE, (UINT8 *)MS_SDD_BOOT_PARM, sizeof (MS_SDD_BOOT_PARM));
   RegisterFvBootOption (PcdGetPtr (PcdShellFile), INTERNAL_UEFI_SHELL_NAME, (UINTN)-1, LOAD_OPTION_ACTIVE, NULL, 0);
   RegisterFvBootOption (&gMsBootPolicyFileGuid, MS_USB_BOOT, (UINTN)-1, LOAD_OPTION_ACTIVE, (UINT8 *)MS_USB_BOOT_PARM, sizeof (MS_USB_BOOT_PARM));
@@ -435,7 +444,7 @@ MsBootOptionsLibGetDefaultOptions (
   OUT UINTN  *OptionCount
   )
 {
-  UINTN                         LocalOptionCount = 4;
+  UINTN                         LocalOptionCount = 5;
   EFI_BOOT_MANAGER_LOAD_OPTION  *Option;
   EFI_STATUS                    Status;
   EFI_STATUS                    Status2;
@@ -446,12 +455,14 @@ MsBootOptionsLibGetDefaultOptions (
     *OptionCount = 0;
     return NULL;
   }
+  
+  Status = CreateFvBootOption (&gMsBootPolicyFileGuid, MS_SDD_BOOT, &Option[0], LOAD_OPTION_ACTIVE, (UINT8 *)MS_SDD_BOOT_PARM, sizeof (MS_SDD_BOOT_PARM));
+  //DEBUG((DEBUG_INFO, "%a - Creating CDBoot.efi boot option\n", __FUNCTION__));
+  Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, INTERNAL_WINPE_RAMDISK_NAME, &Option[1], LOAD_OPTION_ACTIVE, NULL, 0);
+  Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, MS_USB_BOOT, &Option[2], LOAD_OPTION_ACTIVE, (UINT8 *)MS_USB_BOOT_PARM, sizeof (MS_USB_BOOT_PARM));
+  Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, MS_PXE_BOOT, &Option[3], LOAD_OPTION_ACTIVE, (UINT8 *)MS_PXE_BOOT_PARM, sizeof (MS_PXE_BOOT_PARM));
 
-  Status  = CreateFvBootOption (&gMsBootPolicyFileGuid, MS_SDD_BOOT, &Option[0], LOAD_OPTION_ACTIVE, (UINT8 *)MS_SDD_BOOT_PARM, sizeof (MS_SDD_BOOT_PARM));
-  Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, MS_USB_BOOT, &Option[1], LOAD_OPTION_ACTIVE, (UINT8 *)MS_USB_BOOT_PARM, sizeof (MS_USB_BOOT_PARM));
-  Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, MS_PXE_BOOT, &Option[2], LOAD_OPTION_ACTIVE, (UINT8 *)MS_PXE_BOOT_PARM, sizeof (MS_PXE_BOOT_PARM));
-
-  Status2 = CreateFvBootOption (PcdGetPtr (PcdShellFile), INTERNAL_UEFI_SHELL_NAME, &Option[3], LOAD_OPTION_ACTIVE, NULL, 0);
+  Status2 = CreateFvBootOption (PcdGetPtr (PcdShellFile), INTERNAL_UEFI_SHELL_NAME, &Option[4], LOAD_OPTION_ACTIVE, NULL, 0);
   if (EFI_ERROR (Status2)) {
     // The shell is optional.  So, ignore that we cannot create it.
     LocalOptionCount--;
