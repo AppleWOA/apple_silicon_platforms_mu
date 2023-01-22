@@ -1,0 +1,44 @@
+/** @file
+
+  Patches BootMGFW to not attempt a read from or write to standard ARM PMC registers when running in EL2
+  (TODO: redirect writes to a helper that will configure the equivalent Apple register)
+
+  Copyright (c) 2022 DuoWoA authors (original KernelErrataPatcher)
+  Copyright (c) 2022-2023 amarioguy (for Apple changes)
+
+  SPDX-License-Identifier: MIT
+
+**/
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = KernelErrataPatcher
+  FILE_GUID                      = 964EFA94-9929-4EF8-9E68-8F6F6FA62E63
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = KernelErrataPatcherEntryPoint
+
+[Sources]
+  KernelErrataPatcher.c
+  Utilities.c
+
+[Sources.AARCH64]
+  OsLoaderHelper.S | GCC
+
+[Packages]
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Guids]
+  gEfiEventExitBootServicesGuid       ## CONSUMES
+
+[Depex]
+  TRUE
