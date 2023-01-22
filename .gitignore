@@ -25,3 +25,5 @@ BuildConfig.conf
 /m1uefi/
 /m1v2uefi/
 Platform/M1v2Pkg/DeviceTree/t6002-j375d.dtb
+Platform/M1v2Pkg/RAMDisk/BOOTAA64.EFI
+Platform/M1v2Pkg/RAMDisk/WinPE.iso
