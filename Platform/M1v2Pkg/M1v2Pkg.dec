@@ -23,9 +23,9 @@
   gM1v2PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000|UINT32|0x00004404
 
   # Stack stuff (128k stack by default)
-  gM1v2PkgTokenSpaceGuid.PcdSecPhaseStackSize|0x20000|UINT32|0x00004405
+  gM1v2PkgTokenSpaceGuid.PcdSecPhaseStackSize|0x80000|UINT32|0x00004405
   #Fallback stack base in case ModuleEntryPoint setup won't work.
-  #gM1v2PkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10060000000|UINT64|0x0000440b
+  gM1v2PkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000|UINT64|0x0000440b
 
   #Number of Cores (this is static per SoC) (however this must be gated by a compile-time switch for multi-die systems)
   gM1v2PkgTokenSpaceGuid.PcdCoreCount|20|UINT32|0x00004406

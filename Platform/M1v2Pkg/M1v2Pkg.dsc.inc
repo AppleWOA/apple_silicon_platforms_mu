@@ -100,6 +100,7 @@
   #EFI debug settings
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0xFFFFFF4F
+  #gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000002
 
   #variable size
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x2000
@@ -137,8 +138,8 @@
   #basic UEFI services
   ArmLib    |ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmMmuLib |AppleSiliconPkg/Library/AppleArmMmuLib/ArmMmuBaseLib.inf
-  ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerPhyCounterLib/AppleArmGenericTimerPhyCounterLib.inf
-  #ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerVirtCounterLib/AppleArmGenericTimerVirtCounterLib.inf
+  #ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerPhyCounterLib/AppleArmGenericTimerPhyCounterLib.inf
+  ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerVirtCounterLib/AppleArmGenericTimerVirtCounterLib.inf
   ArmDisassemblerLib|ArmPkg/Library/ArmDisassemblerLib/ArmDisassemblerLib.inf
 !if $(AIC_BUILD) == FALSE
   ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
@@ -480,8 +481,10 @@
   MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
   MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
   #MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
+  MdeModulePkg/Universal/Disk/RamDiskDxe/RamDiskDxe.inf
+  AppleSiliconPkg/Drivers/BootRamdiskHelperDxe/BootRamdiskHelperDxe.inf
 
-  # USB 2.0/3.0 support (this should be OOB working since Apple uses a Synopsys controller)
+  # USB 2.0/3.0 support
   # required for booting off USB mass storage devices
   MdeModulePkg/Bus/Usb/UsbMouseAbsolutePointerDxe/UsbMouseAbsolutePointerDxe.inf
   MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
