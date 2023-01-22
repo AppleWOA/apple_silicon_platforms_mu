@@ -24,3 +24,4 @@ BuildConfig.conf
 /Conf/
 /m1uefi/
 /m1v2uefi/
+Platform/M1v2Pkg/DeviceTree/t6002-j375d.dtb
