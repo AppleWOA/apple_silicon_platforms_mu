@@ -17,7 +17,7 @@
   LIBRARY_CLASS                  = ArmGenericTimerCounterLib
 
 [Sources]
-  ArmGenericTimerVirtCounterLib.c
+  AppleArmGenericTimerVirtCounterLib.c
 
 [Packages]
   MdePkg/MdePkg.dec
