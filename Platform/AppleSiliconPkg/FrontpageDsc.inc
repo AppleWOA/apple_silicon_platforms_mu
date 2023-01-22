@@ -128,7 +128,7 @@
   #
   # Library that is attached BdsDxe to implement Microsoft extensions to UefiBootManagerLib.
   #
-  MsBootOptionsLib|M1Pkg/Library/MsBootOptionsLib/MsBootOptionsLib.inf
+  MsBootOptionsLib|M1v2Pkg/Library/MsBootOptionsLib/MsBootOptionsLib.inf
   #
   # A shared place for all colors used in this package
   #
