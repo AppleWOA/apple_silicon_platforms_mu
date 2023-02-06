@@ -1,4 +1,4 @@
-#M1v2 UEFI DSC file
+#T600x ("Jade {Chop/1C/2C}") UEFI DSC file
 #some parts borrowed from WOA-Project/SurfaceDuoPkg
 #Disclaimer: probably not the best UEFI dev out there
 #
@@ -54,5 +54,6 @@
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
   
-!include M1v2Pkg/M1v2Pkg.dsc.inc
-!include AppleSiliconPkg/FrontpageDsc.inc
+
+[LibraryClasses.common]
+  #TODO: put stuff here
