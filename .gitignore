@@ -1,9 +1,7 @@
 
 
-# Dynamic Generated
-Platform/M1Pkg/Include/Resources/ReleaseInfo.h
-Platform/M1v2Pkg/Include/Resources/ReleaseInfo.h
-Platform/M2Pkg/Include/Resources/ReleaseInfo.h
+# Dynamically Generated platform information
+Silicon/AppleSiliconPkg/Include/Resources/ReleaseInfo.h
 
 
 # Local
@@ -22,8 +20,13 @@ tags/
 BuildConfig.conf
 
 /Conf/
-/m1uefi/
-/m1v2uefi/
-Platform/M1v2Pkg/DeviceTree/t6002-j375d.dtb
-Platform/M1v2Pkg/RAMDisk/BOOTAA64.EFI
-Platform/M1v2Pkg/RAMDisk/WinPE.iso
+/macstudio2021/
+/macbookairmid2020/
+/macbookproearly2023/
+/macbookairmid2022/
+/macbookprolate2021/
+/macminimid2020/
+
+Platform/MacStudio2021Pkg/DeviceTree/t6002-j375d.dtb
+Silicon/AppleSiliconPkg/RAMDisk/BOOTAA64.EFI
+Silicon/AppleSiliconPkg/RAMDisk/WinPE.iso
