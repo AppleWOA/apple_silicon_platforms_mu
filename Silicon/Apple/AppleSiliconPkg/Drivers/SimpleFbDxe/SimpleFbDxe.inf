@@ -17,7 +17,6 @@
   EmbeddedPkg/EmbeddedPkg.dec
   ArmPkg/ArmPkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
-  M1v2Pkg/M1v2Pkg.dec
 
 [LibraryClasses]
   BaseLib
@@ -37,8 +36,8 @@
   gEfiCpuArchProtocolGuid
 
 [FixedPcd]
-  gM1v2PkgTokenSpaceGuid.PcdFrameBufferWidth
-  gM1v2PkgTokenSpaceGuid.PcdFrameBufferHeight
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight
 
 [Guids]
   gEfiMdeModulePkgTokenSpaceGuid
@@ -46,7 +45,7 @@
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution
-  gM1v2PkgTokenSpaceGuid.PcdFrameBufferAddress
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress
 
 [Depex]
   gEfiCpuArchProtocolGuid

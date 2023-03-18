@@ -1,0 +1,56 @@
+/**
+ * @file AppleVirtualMemoryMapDefines.h
+ * @author amarioguy (Arminder Singh)
+ * 
+ * Defines used in configuring the virtual memory map for M1 chips (assuming this also holds for other T810x SoCs for now).
+ * 
+ * @version 0.1
+ * @date 2022-08-22
+ * 
+ * @copyright Copyright (c) amarioguy (Arminder Singh) 2022.
+ * 
+ * SPDX-License-Identiifer: BSD-2-Clause-Patent
+ * 
+ */
+
+#include <Base.h>
+
+#ifndef APPLE_VIRTUAL_MEMORY_MAP_DEFINES_H_
+#define APPLE_VIRTUAL_MEMORY_MAP_DEFINES_H_
+
+//"core" MMIO devices, like PMGR, AIC, USB, etc. (mappings need to be nGnRnE)
+#define APPLE_CORE_SYSTEM_MMIO_RANGE_1_BASE 0x200000000
+#define APPLE_CORE_SYSTEM_MMIO_RANGE_1_SIZE SIZE_2GB
+
+#define APPLE_CORE_SYSTEM_MMIO_RANGE_2_BASE 0x380000000
+#define APPLE_CORE_SYSTEM_MMIO_RANGE_2_SIZE SIZE_1GB
+
+#define APPLE_CORE_SYSTEM_MMIO_RANGE_3_BASE 0x500000000
+#define APPLE_CORE_SYSTEM_MMIO_RANGE_3_SIZE SIZE_1GB
+
+#define APPLE_CORE_SYSTEM_MMIO_RANGE_4_BASE 0x680000000
+#define APPLE_CORE_SYSTEM_MMIO_RANGE_4_SIZE SIZE_512MB
+
+//PCIe MMIO (mappings need to be nGnRE)
+#define APPLE_PCIE_MMIO_RANGE_1_BASE 0x400000000
+#define APPLE_PCIE_MMIO_RANGE_1_SIZE SIZE_2GB
+
+#define APPLE_PCIE_MMIO_RANGE_2_BASE 0x480000000
+#define APPLE_PCIE_MMIO_RANGE_2_SIZE SIZE_2GB
+
+#define APPLE_PCIE_MMIO_RANGE_3_BASE 0x580000000
+#define APPLE_PCIE_MMIO_RANGE_3_SIZE SIZE_2GB
+
+#define APPLE_PCIE_MMIO_RANGE_4_BASE 0x600000000
+#define APPLE_PCIE_MMIO_RANGE_4_SIZE SIZE_2GB
+
+#define APPLE_PCIE_MMIO_RANGE_5_BASE 0x6A0000000
+#define APPLE_PCIE_MMIO_RANGE_5_SIZE SIZE_512MB
+
+#define APPLE_PCIE_MMIO_RANGE_6_BASE 0x6C0000000
+#define APPLE_PCIE_MMIO_RANGE_6_SIZE SIZE_1GB
+
+#define APPLE_PCIE_MMIO_RANGE_7_BASE 0x700000000
+#define APPLE_PCIE_MMIO_RANGE_7_SIZE 0x100000000
+
+#endif // APPLE_VIRTUAL_MEMORY_MAP_DEFINES_H_

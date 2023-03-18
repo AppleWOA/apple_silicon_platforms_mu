@@ -27,6 +27,6 @@ BuildConfig.conf
 /macbookprolate2021/
 /macminimid2020/
 
-Platform/MacStudio2021Pkg/DeviceTree/t6002-j375d.dtb
-Silicon/AppleSiliconPkg/RAMDisk/BOOTAA64.EFI
-Silicon/AppleSiliconPkg/RAMDisk/WinPE.iso
+Platform/MacStudio2022Pkg/DeviceTree/t6002-j375d.dtb
+Silicon/Apple/AppleSiliconPkg/RAMDisk/BOOTAA64.EFI
+Silicon/Apple/AppleSiliconPkg/RAMDisk/WinPE.iso
