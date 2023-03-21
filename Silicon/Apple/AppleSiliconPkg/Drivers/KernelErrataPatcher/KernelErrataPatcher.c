@@ -3,6 +3,8 @@
   Patches BootMGFW to not attempt a read from or write to standard ARM PMC registers when running in EL2
   (TODO: redirect writes to a helper that will configure the equivalent Apple register)
 
+  Patches NTOSKRNL/HVAA64 (when virtualization is enabled) to accept a HAL Extension servicing non-standard IRQ chips
+
   Based on https://github.com/SamuelTulach/rainbow
 
   Copyright (c) 2021 Samuel Tulach

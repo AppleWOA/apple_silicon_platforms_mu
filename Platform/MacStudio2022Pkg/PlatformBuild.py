@@ -35,7 +35,7 @@ class CommonPlatform():
     TargetsSupported = ("DEBUG", "RELEASE", "NOOPT")
     Scopes = ('MacStudio2021', 'edk2-build', 'cibuild')
     WorkspaceRoot = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    PackagesPath = ("Platform", "MU_BASECORE", "Common/MU", "Common/TIANO", "Common/MU_OEM_SAMPLE", "Silicon/ARM/TIANO", "Common/MU_DFCI", "Silicon/Apple/AppleSiliconPkg", "Silicon/Apple/T600XPkg")
+    PackagesPath = ("Platform", "MU_BASECORE", "Common/MU", "Common/TIANO", "Common/MU_OEM_SAMPLE", "Silicon/ARM/TIANO", "Common/MU_DFCI", "Silicon/Apple/AppleSiliconPkg", "Silicon/Apple/T600XFamilyPkg")
 
 
     # ####################################################################################### #

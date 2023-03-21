@@ -413,7 +413,6 @@
   #ARM architectural services
 
   ArmPkg/Drivers/CpuDxe/CpuDxe.inf
-  #TODO: Timers are FIQs, *not* IRQs, fixup FIQ handling, ditto for IPIs on AICv2
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !if $(AIC_BUILD) == FALSE
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf

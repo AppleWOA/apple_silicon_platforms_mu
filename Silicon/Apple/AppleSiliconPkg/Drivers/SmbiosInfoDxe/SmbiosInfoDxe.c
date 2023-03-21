@@ -1,6 +1,6 @@
 /** @file
   SMBIOS Table for Apple Silicon ARM platforms
-  Derived from EmulatorPkg package
+  Derived from the SurfaceDuoPkg version of the package
 
   Note SMBIOS 2.7.1 Required structures:
     BIOS Information (Type 0)
@@ -171,8 +171,8 @@ SMBIOS_TABLE_TYPE1 mSysInfoType1 = {
     6, // Family String
 };
 CHAR8 *mSysInfoType1Strings[] = {
-    "Apple Inc", "MacBook Air (2020, M1)", "v1", "Not Specified",
-    "A2337",      "MacBook Air",        NULL};
+    "Apple Inc", "Not Specified", "Not Specified", "Not Specified",
+    "Not Specified",      "Not Specified",        NULL};
 
 /***********************************************************************
         SMBIOS data definition  TYPE2  Board Information
@@ -200,7 +200,7 @@ SMBIOS_TABLE_TYPE2 mBoardInfoType2 = {
     {0}                       // ContainedObjectHandles[1];
 };
 CHAR8 *mBoardInfoType2Strings[] = {
-    "Apple Inc.", "MacBook Air (2020, M1)", "Not Specified", "Not Specified", "Not Specified", "Not Specified", NULL};
+    "Apple Inc.", "Not Specified", "Not Specified", "Not Specified", "Not Specified", "Not Specified", NULL};
 
 /***********************************************************************
         SMBIOS data definition  TYPE3  Enclosure Information
@@ -316,8 +316,8 @@ SMBIOS_TABLE_TYPE4 mProcessorInfoType4 = {
 };
 
 CHAR8 *mProcessorInfoType4Strings[] = {
-    "Apple", "Apple Inc.", "Apple (R) M1 @ 3.2 GHz (Performance)/2.0 GHz (Efficiency)",
-    "T8103", NULL};
+    "Apple", "Apple Inc.", "Not Specified",
+    "Not Specified", NULL};
 
 /***********************************************************************
         SMBIOS data definition  TYPE7  Cache Information

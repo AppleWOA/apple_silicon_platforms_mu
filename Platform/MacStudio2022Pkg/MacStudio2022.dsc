@@ -26,15 +26,13 @@
   PLATFORM_GUID                  = d7d529ec-4827-494a-85e7-5900d9841a9e
   PLATFORM_VERSION               = 1.0
   DSC_SPECIFICATION              = 0x00010005
-  OUTPUT_DIRECTORY               = Build/M1V2UEFI-$(ARCH)
+  OUTPUT_DIRECTORY               = Build/MacStudio2022UEFI-$(ARCH)
   SUPPORTED_ARCHITECTURES        = AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
-  FLASH_DEFINITION               = M1v2Pkg/M1v2.fdf
-
-  
-  DEFINE SECURE_BOOT_ENABLE      = FALSE #disable secure boot for now
-  DEFINE AIC_BUILD               = TRUE #AIC build disabled by default, change to true if you want AIC support
+  FLASH_DEFINITION               = MacStudio2022Pkg/MacStudio2022.fdf
+  SECURE_BOOT_ENABLE             = FALSE #disable secure boot for now
+  AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
 
 
 [BuildOptions.common]
@@ -54,6 +52,17 @@
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
   
+[PcdsDynamicDefault.common]
+  #borrowed from SurfaceDuoPkg
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|1920
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1080
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|300
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
+
 
 [LibraryClasses.common]
   #TODO: put stuff here

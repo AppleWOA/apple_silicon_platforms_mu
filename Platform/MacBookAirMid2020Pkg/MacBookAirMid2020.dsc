@@ -29,15 +29,24 @@
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = MacBookAirMid2020Pkg/MacBookAirMid2020.fdf
-
-  #disable secure boot for now
-  DEFINE SECURE_BOOT_ENABLE      = FALSE
-  DEFINE AIC_BUILD               = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
+  SECURE_BOOT_ENABLE             = FALSE
+  AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
 
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=8103
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
+
+[PcdsDynamicDefault.common]
+  #borrowed from SurfaceDuoPkg
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|1920
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1080
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|300
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
 
 
 !include M1Pkg/M1Pkg.dsc.inc
