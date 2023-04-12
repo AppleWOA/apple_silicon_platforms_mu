@@ -174,7 +174,7 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
     def GetName(self):
         ''' Get the name of the repo, platform, or product being build '''
         ''' Used for naming the log file, among others '''
-        return "M1Pkg"
+        return "MacBookAirMid2020Pkg"
 
     def GetLoggingLevel(self, loggerType):
         ''' Get the logging level for a given type

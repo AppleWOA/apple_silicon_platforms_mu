@@ -42,7 +42,7 @@
 [FixedPcd]
   gArmTokenSpaceGuid.PcdFdSize
 
-  gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
+  gT810XFamilyPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
 
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiACPIReclaimMemory
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiACPIMemoryNVS

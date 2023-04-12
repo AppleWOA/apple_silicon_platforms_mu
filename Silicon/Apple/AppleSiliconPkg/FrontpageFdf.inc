@@ -49,6 +49,3 @@
   FILE FREEFORM = PCD(gOemPkgTokenSpaceGuid.PcdBootFailIndicatorFile) {
     SECTION RAW = OemPkg/FrontPage/Resources/NoBoot.bmp
   }
-#  FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
-#    SECTION RAW = M1Pkg/Include/Resources/RegulatoryLogos.png
-#  }

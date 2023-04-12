@@ -105,7 +105,7 @@ READ_STATUS        = TRUE
 READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
 
-  !include AppleSiliconPkg/Include/DXEApriori.fdf.inc
+!include AppleSiliconPkg/Include/DXEApriori.fdf.inc
 
   #Main DXE core
   INF MdeModulePkg/Core/Dxe/DxeMain.inf
@@ -139,7 +139,7 @@ READ_LOCK_STATUS   = TRUE
   INF ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
   INF ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !else 
-  INF M1Pkg/Drivers/AppleAicDxe/AppleAicDxe.inf
+  INF AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicDxe.inf
 !endif
   INF MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
 
@@ -152,7 +152,7 @@ READ_LOCK_STATUS   = TRUE
 
   #NVMe Support
   #TODO: ANS2/SART driver
-  #INF M1Pkg/Drivers/AppleANS2Dxe/AppleANS2Dxe.inf
+  #INF AppleSiliconPkg/Drivers/AppleANS2Dxe/AppleANS2Dxe.inf
   #INF MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
 
   #
@@ -208,11 +208,11 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
   INF MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
   #Uncomment once ACPI tables exist
-  #INF RuleOverride=ACPITABLE M1Pkg/AcpiTables/AcpiTables.inf
+  #INF RuleOverride=ACPITABLE T810XFamilyPkg/AcpiTables/AcpiTables.inf
   #
   # SMBIOS Support
   #
-  INF M1Pkg/Library/SmbiosInfoDxe/SmbiosInfoDxe.inf
+  INF AppleSiliconPkg/Library/SmbiosInfoDxe/SmbiosInfoDxe.inf
   INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
 
   #
@@ -235,6 +235,9 @@ READ_LOCK_STATUS   = TRUE
 
   # DT
   INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+  FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
+    SECTION RAW = MacBookAirMid2020Pkg/Include/Resources/RegulatoryLogos.png
+  }
   
 !include AppleSiliconPkg/FrontpageFdf.inc
 
@@ -256,7 +259,7 @@ READ_STATUS        = TRUE
 READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
 
-  INF RuleOverride = SELF_RELOC M1Pkg/PrePi/PrePi.inf
+  INF RuleOverride = SELF_RELOC AppleSiliconPkg/PrePi/PrePi.inf
 
   FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
     SECTION GUIDED EE4E5898-3914-4259-9D6E-DC7BD79403CF PROCESSING_REQUIRED = TRUE {

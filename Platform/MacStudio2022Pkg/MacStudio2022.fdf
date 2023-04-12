@@ -218,7 +218,7 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   #
   # SMBIOS Support
   #
-  INF M1v2Pkg/Library/SmbiosInfoDxe/SmbiosInfoDxe.inf
+  INF AppleSiliconPkg/Library/SmbiosInfoDxe/SmbiosInfoDxe.inf
   INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
 
   #
@@ -243,18 +243,18 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   # DT
   INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
   FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
-	SECTION RAW = M1v2Pkg/DeviceTree/t6002-j375d.dtb
+	SECTION RAW = MacStudio2022Pkg/DeviceTree/t6002-j375d.dtb
 	SECTION UI = "FirmwareDeviceTree"
 }
 
   # Embedded RAMDisk (ISO format)
   #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
-  #SECTION RAW = M1v2Pkg/RAMDisk/WinPE.iso
+  #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.iso
   #SECTION UI = "Embedded RAMDisk"  
 #}
 
   FILE APPLICATION = C57AD6B7-0515-40A8-9D21-551652854E37 {
-  SECTION PE32 = M1v2Pkg/RAMDisk/BOOTAA64.EFI
+  SECTION PE32 = AppleSiliconPkg/RAMDisk/BOOTAA64.EFI
   SECTION UI = "EdkShell"
 }
   

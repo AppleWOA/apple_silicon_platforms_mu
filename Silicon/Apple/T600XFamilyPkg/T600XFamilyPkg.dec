@@ -18,12 +18,13 @@
   #Fallback stack base in case ModuleEntryPoint setup won't work.
   gT600XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000|UINT64|0x0000440b
 
-  #Number of Cores (this is static per SoC) (however this must be gated by a compile-time switch for multi-die systems)
-  gT600XFamilyPkgTokenSpaceGuid.PcdCoreCount|20|UINT32|0x00004406
-
 [PcdsPatchableInModule.common]
 
   #Framebuffer (this will be filled in by the loader)
   gT600XFamilyPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0|UINT64|0x00004400
+  #number of cores
+  gT600XFamilyPkgTokenSpaceGuid.PcdCoreCount|10|UINT32|0x00004406
+  #all Jade chips have three clusters, "boot", P-core/E-core clusters
+  gT600XFamilyPkgTokenSpaceGuid.PcdClusterCount|3|UINT32|0x00004407
 
   

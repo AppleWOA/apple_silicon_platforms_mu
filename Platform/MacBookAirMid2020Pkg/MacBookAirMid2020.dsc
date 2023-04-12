@@ -24,30 +24,46 @@
   PLATFORM_GUID                  = 482c40bb-f36c-4c25-bc04-2c05e75542ef
   PLATFORM_VERSION               = 1.0
   DSC_SPECIFICATION              = 0x00010005
-  OUTPUT_DIRECTORY               = Build/MacBookAirMid2020UEFI-$(ARCH)
+  OUTPUT_DIRECTORY               = Build/MacBookAirMid2020-$(ARCH)
   SUPPORTED_ARCHITECTURES        = AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = MacBookAirMid2020Pkg/MacBookAirMid2020.fdf
   SECURE_BOOT_ENABLE             = FALSE
   AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
+  USES_MAC_CPU                   = TRUE # a futureproofing switch, changes SoC identifier in SMBIOS
 
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=8103
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
 
+[PcdsFixedAtBuild.common]
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"MacBook Air (Mid 2020)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"MacBookAir10,1"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook Air (MacBookAir10,1)"
+  gT810XFamilyPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
+
+
+
+[PcdsPatchableInModule.common]
+
+  #will be changed later on, default values
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
+
+
 [PcdsDynamicDefault.common]
-  #borrowed from SurfaceDuoPkg
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|1920
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1080
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|300
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
-  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
-  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
+  #screen resolution settings
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|2560
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1600
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|2560
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1600
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|150
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|150
 
 
-!include M1Pkg/M1Pkg.dsc.inc
+!include T810XFamilyPkg/T810XFamilyPkg.dsc.inc
+!include AppleSiliconPkg/AppleSiliconPkg.dsc.inc
 !include AppleSiliconPkg/FrontpageDsc.inc

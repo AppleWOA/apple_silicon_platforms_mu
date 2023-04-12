@@ -39,18 +39,12 @@
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=6000
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
 
-[PcdsFixedAtBuild.common]
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
-  gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
 
-[PcdsPatchableInModule.common]
-  #These will get overriden by the FDT settings
-  gArmTokenSpaceGuid.PcdSystemMemoryBase|0x10000000000
-  gArmTokenSpaceGuid.PcdSystemMemorySize|0x400000000 #16GB RAM space by default
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000
-  gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
-  gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
+[PcdsFixedAtBuild.common]
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"Mac Studio (2022)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac13,1/Mac13,2"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"Mac Studio (Mac13,1/Mac13,2)"
+  gT810XFamilyPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
   
 [PcdsDynamicDefault.common]
   #borrowed from SurfaceDuoPkg
@@ -64,5 +58,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
 
 
-[LibraryClasses.common]
-  #TODO: put stuff here
+!include T810XFamilyPkg/T810XFamilyPkg.dsc.inc
+!include AppleSiliconPkg/AppleSiliconPkg.dsc.inc
+!include AppleSiliconPkg/FrontpageDsc.inc

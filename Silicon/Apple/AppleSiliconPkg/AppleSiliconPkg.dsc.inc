@@ -1,27 +1,19 @@
-# M1 DSC include file
+## @file
+#
 #  Copyright (c) 2011-2015, ARM Limited. All rights reserved.
 #  Copyright (c) 2014, Linaro Limited. All rights reserved.
 #  Copyright (c) 2015 - 2016, Intel Corporation. All rights reserved.
 #  Copyright (c) 2018 - 2019, Bingxing Wang. All rights reserved.
 #
-#  This program and the accompanying materials
-#  are licensed and made available under the terms and conditions of the BSD License
-#  which accompanies this distribution.  The full text of the license may be found at
-#  http://opensource.org/licenses/bsd-license.php
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
-#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-#
-#
-# SPDX-License-Identifier: BSD-2-Clause
-
-
+##
 
 [BuildOptions.common]
   # use Clang to compile, try to use GCC5 otherwise
   *_CLANG38_AARCH64_CC_FLAGS = -Wno-unused-const-variable -Wno-sometimes-uninitialized -D CLANG
   *_GCC5_AARCH64_CC_FLAGS = -Wno-unused-const-variable -Wno-sometimes-uninitialized -D GCC
-  *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS  
+  *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS -march=armv8.2-a+crypto+rcpc
 
 [PcdsFeatureFlag.common]
 
@@ -30,31 +22,17 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|TRUE
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportUpdateCapsuleReset|TRUE
 
-  
-
   gEmbeddedTokenSpaceGuid.PcdPrePiProduceMemoryTypeInformationHob|TRUE
 
 [PcdsFixedAtBuild.common]
-  #ARM architectural fixed build-time settings
-  gArmTokenSpaceGuid.PcdSystemMemoryBase|0x800000000
-  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
-  gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x8FF000000 #fair warning this location is *totally random*
-  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|17 #FIQ timer INTID (needed because Apple timers fire FIQs)
-  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18 #IRQ timer INTID
-#AIC/GIC configuration settings
-!if $(AIC_BUILD) == FALSE
-  #On all M1 and M2 models, these addresses are completely unmapped and point to nowhere
-  #m1n1 will trap accesses to these addresses, which will emulate the vGIC dist/redist
-  gArmTokenSpaceGuid.PcdGicDistributorBase|0xf00000000
-  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xf10000000
-!else
-  #this is MMIO space where the AIC lives
-  gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase|0x23b100000
 
-!endif
   #MdeModulePkg build time fixed settings.
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVendor|L"Apple Silicon Windows Project Dev"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVendor|L"AppleWOA Developer"
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"1.0" 
+  #MdeModulePkg ACPI default settings
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId|"APPLE"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x494645454c505041
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision|0x00000001
 
   #MdePkg fixed build-time settings
   gEfiMdePkgTokenSpaceGuid.PcdMaximumUnicodeStringLength|1000000
@@ -62,37 +40,14 @@
   gEfiMdePkgTokenSpaceGuid.PcdMaximumLinkedListLength|1000000
   gEfiMdePkgTokenSpaceGuid.PcdDefaultTerminalType|4 #use TTYTERM mode as the default
 
-  #MdeModulePkg ACPI default settings
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId|"APPLE"
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x494645454c505041
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision|0x00008103
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision|0x00000001
-
-!if $(SECURE_BOOT_ENABLE) == TRUE
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesData|600
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesCode|400
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesCode|1500
-!else
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesData|300
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesCode|150
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesCode|1000
-!endif
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesData|800
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode|10
-  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData|0
-  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|36
-  
-  #PCIe settings
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|FALSE
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAriSupport|FALSE
-  gEfiMdeModulePkgTokenSpaceGuid.PcdMrIovSupport|FALSE
-
   #OEM Sample FrontPage
   gEfiMdeModulePkgTokenSpaceGuid.PcdBootManagerMenuFile|{ 0x8A, 0x70, 0x42, 0x40, 0x2D, 0x0F, 0x23, 0x48, 0xAC, 0x60, 0x0D, 0x77, 0xB3, 0x11, 0x18, 0x89 }
+  gAppleSiliconPkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x8A, 0x70, 0x42, 0x40, 0x2D, 0x0F, 0x23, 0x48, 0xAC, 0x60, 0x0D, 0x77, 0xB3, 0x11, 0x18, 0x89 }
 
   #EFI debug settings
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0xFFFFFFFF
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0xFFFFFF4F
+  #gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000002
 
   #variable size
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x2000
@@ -106,29 +61,23 @@
   gEfiSecurityPkgTokenSpaceGuid.PcdUserPhysicalPresence|TRUE
 !endif
 
-  gM1PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
-
-
 [PcdsDynamicDefault.common]
-  #screen resolution settings
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|2560
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1600
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|2560
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1600
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|150
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|150
+  #color bar default settings
+  gMsCorePkgTokenSpaceGuid.PcdDeviceStateBitmask|0x0000001F
 
 
-## Libraries that will be linked into the project
-## Most of these are intrinsic to Mu, platform specific things will be noted
+## Platform-independent libraries
+## Most of these are intrinsic to Mu
 ## SurfaceDuoPkg/OnePlus6TPkg used as basis for included libraries
 
 [LibraryClasses.common]
 
   #basic UEFI services
   ArmLib    |ArmPkg/Library/ArmLib/ArmBaseLib.inf
-  ArmMmuLib |ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
-  ArmGenericTimerCounterLib  |ArmPkg/Library/ArmGenericTimerPhyCounterLib/ArmGenericTimerPhyCounterLib.inf
+  ArmMmuLib |AppleSiliconPkg/Library/AppleArmMmuLib/ArmMmuBaseLib.inf
+  #need our own generic timer counter libraries for a build meant to run under the hypervisor (note: not tested on bare metal boot)
+  #ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerPhyCounterLib/AppleArmGenericTimerPhyCounterLib.inf
+  ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerVirtCounterLib/AppleArmGenericTimerVirtCounterLib.inf
   ArmDisassemblerLib|ArmPkg/Library/ArmDisassemblerLib/ArmDisassemblerLib.inf
 !if $(AIC_BUILD) == FALSE
   ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
@@ -138,7 +87,8 @@
   ArmHvcLib  |ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
   ArmSmcLib  |ArmPkg/Library/ArmSmcLibNull/ArmSmcLibNull.inf
   AppleArmGxfHvcLib  |AppleSiliconPkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
-  ArmGicArchLib  |ArmPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
+  #needs to be pulled from AppleSiliconPkg and not ArmPkg due to required workaround for GICv3 detection/selection logic
+  ArmGicArchLib  |AppleSiliconPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
   TimerLib  |ArmPkg/Library/ArmArchTimerLib/ArmArchTimerLib.inf
   BaseLib  |MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib  |MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
@@ -211,8 +161,6 @@
 !else
   AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
 !endif
-
-  MemoryInitPeiLib|M1Pkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
   PlatformPeiLib|AppleSiliconPkg/Library/PlatformPeiLib/PlatformPeiLib.inf
 
   BaseBinSecurityLib  |MdePkg/Library/BaseBinSecurityLibNull/BaseBinSecurityLibNull.inf
@@ -223,7 +171,7 @@
   SecurityLockAuditLib  |MdeModulePkg/Library/SecurityLockAuditLibNull/SecurityLockAuditLibNull.inf
   ResetSystemLib  |AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
 
-  SerialPortLib|M1Pkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
+  SerialPortLib|AppleSiliconPkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
   #Platform specific drivers
   HwResetSystemLib|AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
@@ -259,7 +207,6 @@
   FmpAuthenticationLib  |SecurityPkg/Library/FmpAuthenticationLibPkcs7/FmpAuthenticationLibPkcs7.inf
   HttpLib  |NetworkPkg/Library/DxeHttpLib/DxeHttpLib.inf
   JsonLiteParserLib  |MsCorePkg/Library/JsonLiteParser/JsonLiteParser.inf
-  MsPlatformDevicesLib  |M1Pkg/Library/MsPlatformDevicesLib/MsPlatformDevicesLib.inf
   MsSecureBootModeSettingLib  |OemPkg/Library/MsSecureBootModeSettingLib/MsSecureBootModeSettingLib.inf
   MuTelemetryHelperLib  |MsWheaPkg/Library/MuTelemetryHelperLib/MuTelemetryHelperLib.inf
   NonDiscoverableDeviceRegistrationLib  |MdeModulePkg/Library/NonDiscoverableDeviceRegistrationLib/NonDiscoverableDeviceRegistrationLib.inf
@@ -268,7 +215,7 @@
   PlatformBootManagerLib  |MsCorePkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
-  SecureBootKeyStoreLib  |M1Pkg/Library/SecureBootKeyStoreLib/SecureBootKeyStoreLib.inf
+  SecureBootKeyStoreLib  |AppleSiliconPkg/Library/SecureBootKeyStoreLib/SecureBootKeyStoreLib.inf
 !else
   SecureBootKeyStoreLib  |MsCorePkg/Library/SecureBootKeyStoreLibNull/SecureBootKeyStoreLibNull.inf
 !endif
@@ -388,7 +335,7 @@
 [Components.common]
 
   #SEC phase
-  M1Pkg/PrePi/PrePi.inf {
+  AppleSiliconPkg/PrePi/PrePi.inf {
     <LibraryClasses>
     SerialPortLib|AppleSiliconPkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
   }
@@ -413,12 +360,16 @@
   #ARM architectural services
 
   ArmPkg/Drivers/CpuDxe/CpuDxe.inf
+  #TODO: Timers are FIQs, *not* IRQs, fixup FIQ handling, ditto for IPIs on AICv2
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !if $(AIC_BUILD) == FALSE
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
 !else
   AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicDxe.inf
 !endif
+
+  AppleSiliconPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
+
   MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
@@ -445,7 +396,7 @@
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
-  #M1Pkg/Driver/SecureBootProvisioningDxe/SecureBootProvisioningDxe.inf
+  #AppleSiliconPkg/Driver/SecureBootProvisioningDxe/SecureBootProvisioningDxe.inf
 !endif
 
   MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
@@ -456,7 +407,7 @@
 
 
   # Disk IO
-  #M1Pkg TODO: ANS2/SART drivers 
+  #TODO: ANS2/SART drivers 
   MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
   MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
   MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
@@ -465,16 +416,18 @@
   MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
   MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
   #MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
+  MdeModulePkg/Universal/Disk/RamDiskDxe/RamDiskDxe.inf
+  AppleSiliconPkg/Drivers/BootRamdiskHelperDxe/BootRamdiskHelperDxe.inf
 
-  # USB 2.0/3.0 support (this should be OOB working since Apple uses a Synopsys controller)
+  # USB 2.0/3.0 support
   # required for booting off USB mass storage devices
   MdeModulePkg/Bus/Usb/UsbMouseAbsolutePointerDxe/UsbMouseAbsolutePointerDxe.inf
   MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
   MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
   MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
-  #MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
-  #MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
-  #MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
+  MdeModulePkg/Bus/Pci/UhciDxe/UhciDxe.inf
+  MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
+  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
 
   # DT
   EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
@@ -501,7 +454,7 @@
   MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
 
   #SMBIOS information
-  M1Pkg/Library/SmbiosInfoDxe/SmbiosInfoDxe.inf
+  #framebufferheightAppleSiliconPkg/Library/SmbiosInfoDxe/SmbiosInfoDxe.inf
 
   #Miscellaneous
   MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe.inf
@@ -509,6 +462,7 @@
   MsCorePkg/Universal/StatusCodeHandler/Serial/Dxe/SerialStatusCodeHandlerDxe.inf
   EmbeddedPkg/SimpleTextInOutSerial/SimpleTextInOutSerial.inf
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
+  AppleSiliconPkg/Drivers/ColorbarsDxe/ColorbarsDxe.inf
 !if $(SECURE_BOOT_ENABLE) == TRUE
   MsCorePkg/MuCryptoDxe/MuCryptoDxe.inf
   CryptoPkg/Driver/CryptoDxe.inf
