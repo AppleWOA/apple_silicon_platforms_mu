@@ -26,7 +26,7 @@
 #include <Library/IoLib.h>
 
 //Device memory map configuration file for UEFI (this is to help with pagetable initialization)
-#include <Library/M1v2VirtualMemoryMapDefines.h>
+#include <Library/T600XFamilyVirtualMemoryMapDefines.h>
 
 #define MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS 37
 

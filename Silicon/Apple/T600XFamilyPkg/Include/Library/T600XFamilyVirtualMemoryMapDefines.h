@@ -2,7 +2,7 @@
  * @file AppleVirtualMemoryMapDefines.h
  * @author amarioguy (Arminder Singh)
  * 
- * Defines used in configuring the virtual memory map for M1 Pro/Max/Ultra.
+ * Defines used in configuring the virtual memory map for M1 Pro/Max/Ultra (Jade/T600x).
  * 
  * @version 0.1
  * @date 2022-08-22

@@ -15,9 +15,6 @@
 
 [PcdsFixedAtBuild.common]
 
-  # RAM reservation (128 MB reserved for EFI FD image)
-  gT810XFamilyPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000|UINT32|0x00004404
-
   # Stack stuff (128k stack by default)
   gT810XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackSize|0x20000|UINT32|0x00004405
   #Fallback stack base in case ModuleEntryPoint setup won't work.
@@ -28,7 +25,7 @@
   #Framebuffer (this will be filled in by the loader)
   gT810XFamilyPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0|UINT64|0x00004400
   
-  #Number of Cores (this is static per SoC)
+  #Number of Cores
   gT810XFamilyPkgTokenSpaceGuid.PcdCoreCount|8|UINT32|0x00004406
 
   #Tonga/Sicily have two clusters, P/E-core clusters

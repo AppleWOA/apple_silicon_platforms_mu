@@ -35,7 +35,7 @@ class CommonPlatform():
     TargetsSupported = ("DEBUG", "RELEASE", "NOOPT")
     Scopes = ('MacBookPro', 'edk2-build', 'cibuild')
     WorkspaceRoot = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    PackagesPath = ("Platform", "MU_BASECORE", "Common/MU", "Common/TIANO", "Common/MU_OEM_SAMPLE", "Silicon/ARM/TIANO", "Common/MU_DFCI", "Silicon/Apple/AppleSiliconPkg", "Silicon/Apple/T602XPkg")
+    PackagesPath = ("Platform", "MU_BASECORE", "Common/MU", "Common/TIANO", "Common/MU_OEM_SAMPLE", "Silicon/ARM/TIANO", "Common/MU_DFCI", "Silicon/Apple/AppleSiliconPkg", "Silicon/Apple/T602XFamilyPkg")
 
 
     # ####################################################################################### #
@@ -131,7 +131,7 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
         return ("MacBookProEarly2023Pkg/MacBookProEarly2023.dsc", {})
 
     def GetName(self):
-        return "MacBookProEarly2023"
+        return "MacBookProEarly2023Pkg"
 
     def GetPackagesPath(self):
         ''' Return a list of paths that should be mapped as edk2 PackagesPath '''

@@ -1,5 +1,5 @@
 # @file
-# Script to Build M1v2 (Pro/Max/Ultra) Mu UEFI firmware 
+# Script to Build Mac Studio (2022) Mu UEFI firmware 
 # (this script is based off WOA-Project/SurfaceDuoPkg PlatformBuild.py)
 #
 # Copyright (c) Microsoft Corporation.

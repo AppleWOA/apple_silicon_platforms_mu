@@ -128,7 +128,7 @@
   #
   # Library that is attached BdsDxe to implement Microsoft extensions to UefiBootManagerLib.
   #
-  MsBootOptionsLib|M1v2Pkg/Library/MsBootOptionsLib/MsBootOptionsLib.inf
+  MsBootOptionsLib|AppleSiliconPkg/Library/MsBootOptionsLib/MsBootOptionsLib.inf
   #
   # A shared place for all colors used in this package
   #
@@ -164,7 +164,7 @@
   #
   # Library that platform implemented to determine boot type
   #
-  MsBootPolicyLib|M1Pkg/Library/MsBootPolicyLib/MsBootPolicyLib.inf
+  MsBootPolicyLib|AppleSiliconPkg/Library/MsBootPolicyLib/MsBootPolicyLib.inf
   BmpSupportLib|MdeModulePkg/Library/BaseBmpSupportLib/BaseBmpSupportLib.inf
   #
   # Supplies the theme for this platform to the UEFI settings UI

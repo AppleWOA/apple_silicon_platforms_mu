@@ -574,12 +574,12 @@ ArmConfigureMmu (
 
     if((ArmReadHcr() & HCR_EL2_E2H) != 0) {
       switch(MaxAddressBits) {
-        //this is a 36 bit platform (Base model M1, M2, etc.)
+        //this is a 36 bit platform (T810x/T811x (Tonga/Sicily/Ellis/Staten))
         case 36:
           TCR |= (1UL << 32);
           break;
 
-        //this is a 42 bit platform (M1v2, almost certainly M2v2 as well)
+        //this is a 42 bit platform (T600x/T602x (Jade/Rhodes) chips)
         case 42:
           TCR |= (3UL << 32);
           break;

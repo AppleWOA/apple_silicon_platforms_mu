@@ -25,6 +25,9 @@
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = MacBookProEarly2023Pkg/MacBookProEarly2023.fdf
+  SECURE_BOOT_ENABLE             = FALSE #disable secure boot for now
+  AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
+
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=6020
@@ -33,10 +36,10 @@
 
 
 [PcdsFixedAtBuild.common]
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"Mac Studio (2022)"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac13,1/Mac13,2"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"Mac Studio (Mac13,1/Mac13,2)"
-  gT810XFamilyPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"MacBook Pro (Early 2023)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac14,5/Mac14,6/Mac14,9/Mac14,10"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook Pro (Early 2023) (Mac14,5/Mac14,6/Mac14,9/Mac14,10)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
 
 [PcdsPatchableInModule.common]
   #will be changed later on, default values

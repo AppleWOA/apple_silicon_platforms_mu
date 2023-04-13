@@ -2,12 +2,12 @@
  * @file AppleVirtualMemoryMapDefines.h
  * @author amarioguy (Arminder Singh)
  * 
- * Defines used in configuring the virtual memory map for M1 chips (assuming this also holds for other T810x SoCs for now).
+ * Defines used in configuring the virtual memory map for T810x family chips (M1/A14).
  * 
  * @version 0.1
  * @date 2022-08-22
  * 
- * @copyright Copyright (c) amarioguy (Arminder Singh) 2022.
+ * @copyright Copyright (c) amarioguy (Arminder Singh) 2022-2023.
  * 
  * SPDX-License-Identiifer: BSD-2-Clause-Patent
  * 

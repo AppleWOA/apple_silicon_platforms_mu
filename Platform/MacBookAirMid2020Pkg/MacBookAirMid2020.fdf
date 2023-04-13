@@ -1,4 +1,4 @@
-#UEFI Flash Description File for M1 platforms
+#UEFI Flash Description File for MacBook Air, 2020 M1 model.
 #based on OnePlus6TPkg/OnePlus6TPkg.fdf
 #
 #  Copyright (c) 2018, Linaro Limited. All rights reserved.
@@ -26,13 +26,11 @@
 #
 ################################################################################
 
-# always prefer loading at 0x830000000 (this is totally arbitrary btw)
+
 [FD.J313MacBookAirMid2020_EFI]
 BaseAddress   = 0x830000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired address of firmware (will always be loaded from RAM)
 Size          = 0x000400000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 ErasePolarity = 1
-
-
 BlockSize     = 0x1000
 NumBlocks     = 0x400
 
@@ -54,7 +52,7 @@ NumBlocks     = 0x400
 
 # from ArmVirtPkg/ArmVirtQemuKernel.fdf
 #
-# Implement the Linux kernel header layout so that the loader will identify
+# Implement the Linux kernel header layout so that the loader (m1n1) will identify
 # it as something bootable, and execute it with a FDT pointer in x0 or r2.
 0x000000000|0x000008000
 DATA = {

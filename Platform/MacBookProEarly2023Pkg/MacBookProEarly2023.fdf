@@ -1,16 +1,12 @@
-#UEFI Flash Description File for Mac Studio platforms
-#based on OnePlus6TPkg/OnePlus6TPkg.fdf
+#UEFI Flash Description File for MacBook Pro, 2023 M2 Pro ("Rhodes") model
+## @file
 #
 #  Copyright (c) 2018, Linaro Limited. All rights reserved.
 #
-#  This program and the accompanying materials
-#  are licensed and made available under the terms and conditions of the BSD License
-#  which accompanies this distribution.  The full text of the license may be found at
-#  http://opensource.org/licenses/bsd-license.php
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
-#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-#
+##
+
 
 ################################################################################
 #
@@ -26,12 +22,11 @@
 #
 ################################################################################
 
-[FD.J375MacStudio2022_EFI]
+
+[FD.MacBookProEarly2023_EFI]
 BaseAddress   = 0x10030000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired address of firmware (will always be loaded from RAM)
 Size          = 0x00001E00000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 ErasePolarity = 1
-
-
 BlockSize     = 0x1000
 NumBlocks     = 0x1e00
 
@@ -86,7 +81,7 @@ FV = FVMAIN_COMPACT
 ################################################################################
 
 [FV.FvMain]
-BlockSize          = 0x40
+BlockSize          = 0x1000
 FvAlignment        = 8         # FV alignment and FV attributes setting.
 ERASE_POLARITY     = 1
 MEMORY_MAPPED      = TRUE
@@ -241,17 +236,21 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
 
   # DT
-  INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
-  FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
-	SECTION RAW = MacStudio2022Pkg/DeviceTree/t6002-j375d.dtb
-	SECTION UI = "FirmwareDeviceTree"
-}
+  # commented out because ACPI is being done now.
+  #INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+  #FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
+	#SECTION RAW = MacBookProEarly2023Pkg/DeviceTree/t6002-j375d.dtb
+	#SECTION UI = "FirmwareDeviceTree"
+#}
 
   # Embedded RAMDisk (ISO format)
   #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
   #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.iso
   #SECTION UI = "Embedded RAMDisk"  
 #}
+  FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
+    SECTION RAW = MacBookProEarly2023Pkg/Include/Resources/RegulatoryLogos.png
+  }
 
   FILE APPLICATION = C57AD6B7-0515-40A8-9D21-551652854E37 {
   SECTION PE32 = AppleSiliconPkg/RAMDisk/BOOTAA64.EFI
@@ -259,33 +258,3 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 }
   
 !include AppleSiliconPkg/FrontpageFdf.inc
-
-[FV.FVMAIN_COMPACT]
-FvAlignment        = 8
-ERASE_POLARITY     = 1
-MEMORY_MAPPED      = TRUE
-STICKY_WRITE       = TRUE
-LOCK_CAP           = TRUE
-LOCK_STATUS        = TRUE
-WRITE_DISABLED_CAP = TRUE
-WRITE_ENABLED_CAP  = TRUE
-WRITE_STATUS       = TRUE
-WRITE_LOCK_CAP     = TRUE
-WRITE_LOCK_STATUS  = TRUE
-READ_DISABLED_CAP  = TRUE
-READ_ENABLED_CAP   = TRUE
-READ_STATUS        = TRUE
-READ_LOCK_CAP      = TRUE
-READ_LOCK_STATUS   = TRUE
-
-  INF RuleOverride = SELF_RELOC AppleSiliconPkg/PrePi/PrePi.inf
-
-  FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
-    SECTION GUIDED EE4E5898-3914-4259-9D6E-DC7BD79403CF PROCESSING_REQUIRED = TRUE {
-      SECTION FV_IMAGE = FVMAIN
-    }
-  }
-
-!include AppleSiliconPkg/AppleSiliconFdfRules.fdf.inc
-
-

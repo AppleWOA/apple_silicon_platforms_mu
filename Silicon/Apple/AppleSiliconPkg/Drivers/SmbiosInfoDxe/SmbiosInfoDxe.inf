@@ -15,7 +15,7 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
 
 [FixedPcd]
-  gM1v2PkgTokenSpaceGuid.PcdCoreCount
+  gT600XFamilyPkgTokenSpaceGuid.PcdCoreCount
   
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -23,7 +23,7 @@
   MdePkg/MdePkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  M1v2Pkg/M1v2Pkg.dec
+  T600XFamilyPkg/T600XFamilyPkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]

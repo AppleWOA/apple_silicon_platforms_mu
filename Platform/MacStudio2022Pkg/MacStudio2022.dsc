@@ -26,7 +26,7 @@
   PLATFORM_GUID                  = d7d529ec-4827-494a-85e7-5900d9841a9e
   PLATFORM_VERSION               = 1.0
   DSC_SPECIFICATION              = 0x00010005
-  OUTPUT_DIRECTORY               = Build/MacStudio2022UEFI-$(ARCH)
+  OUTPUT_DIRECTORY               = Build/MacStudio2022-$(ARCH)
   SUPPORTED_ARCHITECTURES        = AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
@@ -44,7 +44,7 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"Mac Studio (2022)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac13,1/Mac13,2"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"Mac Studio (Mac13,1/Mac13,2)"
-  gT810XFamilyPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
   
 [PcdsDynamicDefault.common]
   #borrowed from SurfaceDuoPkg
@@ -58,6 +58,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
 
 
-!include T810XFamilyPkg/T810XFamilyPkg.dsc.inc
+!include T600XFamilyPkg/T600XFamilyPkg.dsc.inc
 !include AppleSiliconPkg/AppleSiliconPkg.dsc.inc
 !include AppleSiliconPkg/FrontpageDsc.inc

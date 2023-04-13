@@ -26,7 +26,7 @@
 #include <Library/IoLib.h>
 
 //Device memory map configuration file for UEFI (this is to help with pagetable initialization)
-#include <Library/AppleVirtualMemoryMapDefines.h>
+#include <Library/T810XFamilyVirtualMemoryMapDefines.h>
 
 #define MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS 15
 

@@ -26,7 +26,7 @@
   EmbeddedPkg/EmbeddedPkg.dec
   ArmPkg/ArmPkg.dec
   ArmPlatformPkg/ArmPlatformPkg.dec
-  M1v2Pkg/M1v2Pkg.dec
+  T600XFamilyPkg/T600XFamilyPkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
@@ -43,7 +43,7 @@
 [FixedPcd]
   gArmTokenSpaceGuid.PcdFdSize
 
-  gM1v2PkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
+  gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
 
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiACPIReclaimMemory
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiACPIMemoryNVS
@@ -59,7 +59,7 @@
   gArmTokenSpaceGuid.PcdFdBaseAddress
   gArmTokenSpaceGuid.PcdSystemMemorySize
   gArmTokenSpaceGuid.PcdSystemMemoryBase
-  gM1v2PkgTokenSpaceGuid.PcdFrameBufferAddress
+  gT600XFamilyPkgTokenSpaceGuid.PcdFrameBufferAddress
 
 [Depex]
   TRUE
