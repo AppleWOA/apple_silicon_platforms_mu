@@ -4,8 +4,8 @@
 [submodule "Common/MU"]
 	path = Common/MU
 	url = https://github.com/Microsoft/mu_plus.git
-[submodule "Common/MU_TIANO"]
-	path = Common/MU_TIANO
+[submodule "Common/TIANO"]
+	path = Common/TIANO
 	url = https://github.com/Microsoft/mu_tiano_plus.git
 [submodule "Common/MU_OEM_SAMPLE"]
 	path = Common/MU_OEM_SAMPLE
