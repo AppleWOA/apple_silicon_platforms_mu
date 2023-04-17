@@ -227,7 +227,7 @@
   UefiScsiLib  |MdePkg/Library/UefiScsiLib/UefiScsiLib.inf
   ZeroTouchSettingsLib  |ZeroTouchPkg/Library/ZeroTouchSettings/ZeroTouchSettings.inf
   MuSecureBootKeySelectorLib  |MsCorePkg/Library/MuSecureBootKeySelectorLib/MuSecureBootKeySelectorLib.inf
-  UpdateFacsHardwareSignatureLib  |PcBdsPkg/Library/UpdateFacsHardwareSignatureLib/UpdateFacsHardwareSignatureLib.inf
+  #UpdateFacsHardwareSignatureLib  |PcBdsPkg/Library/UpdateFacsHardwareSignatureLib/UpdateFacsHardwareSignatureLib.inf
 
 
 [LibraryClasses.common.SEC]
