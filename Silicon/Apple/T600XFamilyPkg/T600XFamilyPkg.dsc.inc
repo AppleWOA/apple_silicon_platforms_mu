@@ -23,6 +23,7 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
+  gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
 
 [PcdsFixedAtBuild.common]
   #ARM architectural fixed build-time settings

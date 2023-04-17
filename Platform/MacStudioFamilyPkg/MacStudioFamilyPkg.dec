@@ -1,0 +1,12 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = MacStudioFamilyPkg
+  PACKAGE_GUID                   = 15102d91-6116-4d98-9834-e2077251d903
+  PACKAGE_VERSION                = 1.0
+
+[Includes.common]
+  Include
+
+[Guids.common]
+  gMacStudioFamilyPkgTokenSpaceGuid = { 0xa1f2f852, 0xf807, 0x4622, { 0x9d, 0x1e, 0x5a, 0x9b, 0x9a, 0x99, 0x57, 0x33 } }
+

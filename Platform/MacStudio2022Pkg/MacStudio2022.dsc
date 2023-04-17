@@ -47,6 +47,10 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
   
 [PcdsDynamicDefault.common]
+  #will be changed later on, default values
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
   #borrowed from SurfaceDuoPkg
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080

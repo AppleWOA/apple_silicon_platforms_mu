@@ -43,8 +43,8 @@
 
 [PcdsPatchableInModule.common]
   #will be changed later on, default values
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|3456
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|2234
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
 [PcdsDynamicDefault.common]
   #borrowed from SurfaceDuoPkg

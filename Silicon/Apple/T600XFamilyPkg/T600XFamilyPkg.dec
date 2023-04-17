@@ -16,7 +16,7 @@
 [PcdsFixedAtBuild.common]
 
   #Fallback stack base in case ModuleEntryPoint setup won't work.
-  gT600XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000|UINT64|0x0000440b
+  #gT600XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000|UINT64|0x0000440b
 
 [PcdsPatchableInModule.common]
 

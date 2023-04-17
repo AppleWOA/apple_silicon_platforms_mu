@@ -49,8 +49,8 @@
 [PcdsPatchableInModule.common]
 
   #will be changed later on, default values
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|2560
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1600
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
 
 

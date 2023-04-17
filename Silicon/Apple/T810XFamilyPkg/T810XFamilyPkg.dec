@@ -16,9 +16,9 @@
 [PcdsFixedAtBuild.common]
 
   # Stack stuff (128k stack by default)
-  gT810XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackSize|0x20000|UINT32|0x00004405
+  #gT810XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackSize|0x20000|UINT32|0x00004405
   #Fallback stack base in case ModuleEntryPoint setup won't work.
-  gT810XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x900000000|UINT64|0x0000440b
+  #gT810XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x900000000|UINT64|0x0000440b
 
 [PcdsPatchableInModule.common]
 

@@ -5,6 +5,7 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x840000000
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
+  gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x900000000
 
 [PcdsFixedAtBuild.common]
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
