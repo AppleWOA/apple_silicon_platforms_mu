@@ -1,0 +1,12 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = MacStudio2022Pkg
+  PACKAGE_GUID                   = a711eb2c-accc-41ac-aa53-1cfd6aa1170a
+  PACKAGE_VERSION                = 1.0
+
+[Includes.common]
+  Include
+
+[Guids.common]
+  gMacStudio2022PkgTokenSpaceGuid = { 0x0d1fa988, 0x0510, 0x4329, { 0x9a, 0x3a, 0x56, 0x01, 0x47, 0x73, 0x95, 0xc3 } }
+
