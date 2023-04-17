@@ -43,15 +43,14 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"MacBookAir10,1"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook Air (MacBookAir10,1)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
-
-
-
-[PcdsPatchableInModule.common]
-
   #will be changed later on, default values
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|2560
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1600
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
+
+
+[PcdsPatchableInModule.common]
+
 
 
 [PcdsDynamicDefault.common]

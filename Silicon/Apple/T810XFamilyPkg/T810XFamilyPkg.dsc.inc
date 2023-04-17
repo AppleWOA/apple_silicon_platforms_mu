@@ -5,7 +5,6 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x840000000
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
-  gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x900000000
 
 [PcdsFixedAtBuild.common]
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
@@ -22,6 +21,7 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x235200000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x8103
   gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
+  gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x900000000
 
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE

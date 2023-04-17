@@ -14,8 +14,8 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
 
-[FixedPcd]
-  gT600XFamilyPkgTokenSpaceGuid.PcdCoreCount
+[PatchPcd]
+  gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount
   
 [Packages]
   ArmPkg/ArmPkg.dec

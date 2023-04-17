@@ -40,12 +40,13 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac14,5/Mac14,6/Mac14,9/Mac14,10"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook Pro (Early 2023) (Mac14,5/Mac14,6/Mac14,9/Mac14,10)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
-
-[PcdsPatchableInModule.common]
   #will be changed later on, default values
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|3456
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|2234
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
+
+[PcdsPatchableInModule.common]
+
 [PcdsDynamicDefault.common]
   #borrowed from SurfaceDuoPkg
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|3456

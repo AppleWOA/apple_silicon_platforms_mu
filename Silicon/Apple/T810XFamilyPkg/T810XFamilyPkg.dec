@@ -23,7 +23,7 @@
 [PcdsPatchableInModule.common]
 
   #Framebuffer (this will be filled in by the loader)
-  gT810XFamilyPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0|UINT64|0x00004400
+  #gT810XFamilyPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0|UINT64|0x00004400
   
   #Number of Cores
   gT810XFamilyPkgTokenSpaceGuid.PcdCoreCount|8|UINT32|0x00004406

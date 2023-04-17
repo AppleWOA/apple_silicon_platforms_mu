@@ -37,7 +37,7 @@
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=6000
-  *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
+  *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS -Wno-error=unaligned-access
 
 
 [PcdsFixedAtBuild.common]
@@ -45,12 +45,12 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac13,1/Mac13,2"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"Mac Studio (Mac13,1/Mac13,2)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
-  
-[PcdsDynamicDefault.common]
   #will be changed later on, default values
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
+  
+[PcdsDynamicDefault.common]
   #borrowed from SurfaceDuoPkg
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080

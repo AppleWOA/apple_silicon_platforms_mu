@@ -23,7 +23,6 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
-  gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
 
 [PcdsFixedAtBuild.common]
   #ARM architectural fixed build-time settings
@@ -39,6 +38,7 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T6000"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1 Pro/Max/Ultra"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #On M1v2, this is a lot easier to pick as most of the 40 bit address space is reserved for MMIO and a lot goes unused

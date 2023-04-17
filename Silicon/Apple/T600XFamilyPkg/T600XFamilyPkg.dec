@@ -20,8 +20,6 @@
 
 [PcdsPatchableInModule.common]
 
-  #Framebuffer (this will be filled in by the loader)
-  gT600XFamilyPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0|UINT64|0x00004400
   #number of cores
   gT600XFamilyPkgTokenSpaceGuid.PcdCoreCount|10|UINT32|0x00004406
   #all Jade chips have three clusters, "boot", P-core/E-core clusters

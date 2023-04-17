@@ -29,9 +29,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MsBootManagerSettingsLib.h>
 #include <Library/MsBootOptionsLib.h>
-#include <Library/SdBootOptionsLib.h>
+//#include <Library/SdBootOptionsLib.h>
 #include <Library/MsBootPolicyLib.h>
-#include <Library/SdBootPolicyLib.h>
+//#include <Library/SdBootPolicyLib.h>
 #include <Library/BootGraphicsLib.h>
 #include <Library/GraphicsConsoleHelperLib.h>
 #include <Library/MsPlatformDevicesLib.h>
@@ -918,7 +918,7 @@ DeviceBootManagerPriorityBoot (
   EFI_STATUS  Status;
 
   FrontPageBoot = MsBootPolicyLibIsSettingsBoot ();
-  UFPBoot = SdBootPolicyLibIsUFPBoot ();
+  UFPBoot = FALSE;
   AltDeviceBoot = MsBootPolicyLibIsAltBoot ();
   MsBootPolicyLibClearBootRequests ();
 
@@ -931,8 +931,8 @@ DeviceBootManagerPriorityBoot (
 
   if (UFPBoot) {
     // Front Page Boot Option
-    DEBUG ((DEBUG_INFO, "[Bds] enter UFP\n"));
-    Status = SdBootOptionsLibGetUFPMenu (BootOption, "VOL-");
+    //DEBUG ((DEBUG_INFO, "[Bds] enter UFP\n"));
+    //Status = SdBootOptionsLibGetUFPMenu (BootOption, "VOL-");
   } else if (AltDeviceBoot) {
     // Alternate boot or Network Unlock option
     if (FrontPageBoot) {
