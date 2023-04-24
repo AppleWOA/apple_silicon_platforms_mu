@@ -1,0 +1,24 @@
+/**
+ * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * 
+ * Module Name:
+ *     CSRT.aslc
+ * 
+ * Abstract:
+ *     Core System Resource Table. This source file implements the CSRT table for
+ *     "Jade" (M1 Pro/Max/Ultra) SoCs.
+ * 
+ * Environment:
+ *     UEFI firmware/runtime services.
+ * 
+ * License:
+ *     SPDX-License-Identifier: BSD-2-Clause-Patent OR MIT
+ * 
+*/
+
+
+/**
+ * Why do we need a CSRT?
+ * 
+ * Apple platforms implement 
+*/

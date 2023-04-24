@@ -1,0 +1,39 @@
+/**
+ * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * 
+ * Module Name:
+ *     DBG2.aslc
+ * 
+ * Abstract:
+ *     Debug Port Table. This source file implements the DBG2 table
+ *     for the Mac Studio (2022) platform.
+ * 
+ * Environment:
+ *     UEFI firmware/runtime services.
+ * 
+ * License:
+ *     SPDX-License-Identifier: BSD-2-Clause-Patent OR MIT
+ * 
+*/
+
+#include <Library/AcpiLib.h>
+#include <IndustryStandard/Acpi64.h>
+#include <Acpi/AcpiHeader.h>
+
+/**
+ * The Mac Studio (2022) has 4 USB-C ports in the back, two on the front.
+ * In addition, it has two USB-A ports on the back.
+ * 
+ * Declare all the rear USB ports (Type-C and Type-A) as debugging ports.
+ * Front USB-C ports will not be debug ports for now.
+ * 
+ * Debugging Windows will be done via KDNET-over-USB, UEFI debugging will be over EXDI.
+*/
+
+
+
+//
+// Reference the table being generated to prevent the optimizer from removing
+// the data structure from the executable
+//
+VOID* CONST ReferenceAcpiTable = &Dbg2;

@@ -1,0 +1,36 @@
+/**
+ * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * 
+ * Module Name:
+ *     GTDT.aslc
+ * 
+ * Abstract:
+ *     Generic Timer Description Table. This source file implements the GTDT table for
+ *     "Jade" (M1 Pro/Max/Ultra) SoCs.
+ * 
+ * Environment:
+ *     UEFI firmware/runtime services.
+ * 
+ * License:
+ *     SPDX-License-Identifier: BSD-2-Clause-Patent OR MIT
+ * 
+*/
+
+#include <Library/PcdLib.h>
+#include <Library/AcpiLib.h>
+#include <IndustryStandard/Acpi64.h>
+#include <AcpiHeader.h>
+
+
+/**
+ * Apple platforms basically just implement the standard ARM timer, with the only major distinction
+ * being that the timer interrupts (and most things considered a "PPI" on GIC systems) are using
+ * FIQs and not IRQs.
+*/
+
+
+
+
+// Reference the table being generated to prevent the optimizer from removing the
+// data structure from the executable
+VOID* CONST ReferenceAcpiTable = &Gtdt;
