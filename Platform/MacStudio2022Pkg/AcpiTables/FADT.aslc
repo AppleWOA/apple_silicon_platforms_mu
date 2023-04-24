@@ -5,12 +5,12 @@
  *     FADT.aslc
  * 
  * Abstract:
- *     Fixed ACPI Descriptor Table. This source file implements the FADT table
+ *     Fixed ACPI Descripton Table. This source file implements the FADT table
  *     for use on the Mac Studio (2022) platform.
  *     TODO: consider making this SoC-specific instead of device specific.
  * 
  * Environment:
- *     UEFI firmware.
+ *     UEFI firmware/runtime services.
  * 
  * License:
  *     SPDX-License-Identifier: BSD-2-Clause-Patent OR MIT
@@ -20,3 +20,38 @@
 #include <Library/AcpiLib.h>
 #include <IndustryStandard/Acpi64.h>
 #include <Acpi/AcpiHeader.h>
+
+/**
+ * Note: Most of these fields are zero, as for now we are using "hardware-reduced" ACPI mode
+ * which removes the assumption or need for most of the FADT variables.
+ * 
+ * PSCI for now will be an SMC event despite not being implemented on Apple, as we can trap SMCs to EL2 anyways.
+ * (Directly handled by m1n1 hypervisor for hypervisor-assisted booting, 
+ * may have to patch SMC instructions to "genter" equivalents for bare-metal booting)
+ * 
+*/
+EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE Fadt = {
+    __ACPI_HEADER(EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE, EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE, EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE_REVISION),
+    0, //FIRMWARE_CTRL (UINT32)
+    0, //DSDT (UINT32)
+    EFI_ACPI_RESERVED_BYTE, //Reserved0
+    EFI_ACPI_6_3_PM_PROFILE_WORKSTATION, //preferred power management profile
+    0, //SCI interrupt num (UINT16)
+    0, //SMI Command (UINT32)
+    0, //ACPI enable (UINT8)
+    0, //ACPI disable (UINT8)
+    0, //S4 bios state (UINT8)
+    0, //PState counter (UINT8)
+    0, //PM1A_EVT_BLK port address (UINT32)
+    0, //PM1B_EVT_BLK port address (UINT32)
+    0, //PM1A_CNT_BLK port address (UINT32)
+    0, //PM1B_CNT_BLK port address (UINT32)
+    0, //PM2_CNT_BLK port address (UINT32)
+    0, //PM_TMR_BLK port address (UINT32)
+    0, //GPE0_BLK port address (UINT32)
+    0, //GPE1_BLK port address (UINT32)
+    0, //PM1_EVT_LEN (bytes decoded/supported by PM1A/B EVT BLK) (UINT8)
+    0, //PM1_CNT_LEN (bytes supported by PM1A/B_CNT_BLK) (UINT8)
+    0, //PM2_CNT_LEN (bytes supported by PM2_CNT_BLK) (UINT8)
+    0, //
+};

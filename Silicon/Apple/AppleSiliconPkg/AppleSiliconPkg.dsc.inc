@@ -30,7 +30,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVendor|L"AppleWOA Developer"
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"1.0" 
   #MdeModulePkg ACPI default settings
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId|"APPLE"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId|"Apple"
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x494645454c505041
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision|0x00000001
 
