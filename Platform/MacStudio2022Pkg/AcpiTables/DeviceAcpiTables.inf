@@ -18,11 +18,11 @@
 
 [Sources]
   #Bert.asl
-  DBG2.aslc
+  #DBG2.aslc
   #EINJ.asl
   FADT.aslc
   #DSDT.asl
-  CSRT.aslc
+  #CSRT.aslc
 
 [Packages]
   ArmPkg/ArmPkg.dec
