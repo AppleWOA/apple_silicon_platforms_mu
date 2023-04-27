@@ -17,10 +17,9 @@
   VERSION_STRING                 = 1.0
 
 [Sources]
-  ##GTDT.aslc
-  FADT.aslc
+  GTDT.aslc
   #CSRT.aslc
-  
+
 
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -29,3 +28,14 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
+
+[FixedPcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorId          ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision    ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId              ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId         ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision        ## CONSUMES
+  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum                    ## CONSUMES
+  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum                       ## CONSUMES
+  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum                    ## CONSUMES
+  gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum                   ## CONSUMES
