@@ -33,6 +33,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId|"Apple"
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x494645454c505041
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision|0x00000001
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorId|0x4C505041 #APPL
 
   #MdePkg fixed build-time settings
   gEfiMdePkgTokenSpaceGuid.PcdMaximumUnicodeStringLength|1000000
@@ -452,7 +453,7 @@
   MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
 
 
-  #ACPI (note: only the essentials for now, ASL tables in progress)
+  #ACPI
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
   MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
   MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
