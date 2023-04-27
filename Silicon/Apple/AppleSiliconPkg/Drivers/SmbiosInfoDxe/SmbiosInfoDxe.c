@@ -308,9 +308,9 @@ SMBIOS_TABLE_TYPE4 mProcessorInfoType4 = {
     0,                     // SerialNumber;
     0,                     // AssetTag;
     4,                     // PartNumber;
-    FixedPcdGet32(PcdCoreCount), // CoreCount;
-    FixedPcdGet32(PcdCoreCount), // EnabledCoreCount;
-    FixedPcdGet32(PcdCoreCount), // ThreadCount;
+    6, // CoreCount; (note - for Apple platforms, on all we will default to 6 cores, this will get changed by the code to the right value)
+    6, // EnabledCoreCount;
+    6, // ThreadCount;
     0xAC,                        // ProcessorCharacteristics;
     ProcessorFamilyARM,          // ARM Processor Family;
 };
