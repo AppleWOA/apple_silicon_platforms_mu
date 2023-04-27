@@ -20,7 +20,7 @@
   #Bert.asl
   #DBG2.aslc
   #EINJ.asl
-  #FADT.aslc
+  FADT.aslc
   #DSDT.asl
   #CSRT.aslc
 
