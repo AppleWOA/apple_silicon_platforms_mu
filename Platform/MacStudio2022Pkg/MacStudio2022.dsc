@@ -61,6 +61,10 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
 
+[Components.common]
+
+  MacStudio2022Pkg/AcpiTables/DeviceAcpiTables.inf
+
 
 !include T600XFamilyPkg/T600XFamilyPkg.dsc.inc
 !include AppleSiliconPkg/AppleSiliconPkg.dsc.inc
