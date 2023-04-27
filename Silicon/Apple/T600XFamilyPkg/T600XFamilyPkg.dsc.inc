@@ -31,7 +31,7 @@
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x100FF000000 #fair warning this location is *totally random*
   gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|19 # placeholder 
   gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|17 # phys timer IRQ number (this is arbitrary because per-cpu fiq)
-  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|0 #this disables the HV timer
+  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|20 #this disables the HV timer
   gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|18 #virt timer
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
@@ -79,3 +79,7 @@
 [LibraryClasses.common]
   MemoryInitPeiLib|T600XFamilyPkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
   MsPlatformDevicesLib  |T600XFamilyPkg/Library/MsPlatformDevicesLib/MsPlatformDevicesLib.inf
+
+[Components.common]
+
+  T600XFamilyPkg/AcpiTables/CPUAcpiTables.inf
