@@ -11,18 +11,16 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = DeviceAcpiTables
-  FILE_GUID                      = 05a70fde-18f6-4076-bd0c-b89781afa083
+  BASE_NAME                      = CPUAcpiTables
+  FILE_GUID                      = beeb2a33-ef3b-4a45-8e58-e93209ef0a72
   MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
 
 [Sources]
-  #Bert.asl
-  #DBG2.aslc
-  #EINJ.asl
-  #FADT.aslc
-  #DSDT.asl
+  ##GTDT.aslc
+  FADT.aslc
   #CSRT.aslc
+  
 
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -31,4 +29,3 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
-

@@ -20,5 +20,7 @@
 /**
  * Why do we need a CSRT?
  * 
- * Apple platforms implement 
+ * Apple platforms implement some non-standard core sytem resources, namely the interrupt controller and IOMMU. This ACPI
+ * table is to indicate to the OS that these things are present so that it can handle these cases correctly.
 */
+
