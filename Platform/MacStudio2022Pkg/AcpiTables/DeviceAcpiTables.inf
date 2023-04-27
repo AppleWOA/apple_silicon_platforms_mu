@@ -32,3 +32,9 @@
   MdeModulePkg/MdeModulePkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
 
+[FixedPcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorId          ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision    ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId              ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId         ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision        ## CONSUMES
