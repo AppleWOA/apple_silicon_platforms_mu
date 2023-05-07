@@ -66,6 +66,11 @@
   #color bar default settings
   gMsCorePkgTokenSpaceGuid.PcdDeviceStateBitmask|0x0000001F
 
+[PcdsFeatureFlag.AARCH64]
+  #
+  # Activate AcpiSdtProtocol
+  #
+  gEfiMdeModulePkgTokenSpaceGuid.PcdInstallAcpiSdtProtocol|TRUE
 
 ## Platform-independent libraries
 ## Most of these are intrinsic to Mu
@@ -90,6 +95,7 @@
   AppleArmGxfHvcLib  |AppleSiliconPkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
   #needs to be pulled from AppleSiliconPkg and not ArmPkg due to required workaround for GICv3 detection/selection logic
   ArmGicArchLib  |AppleSiliconPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
+  AcpiLib  |EmbeddedPkg/Library/AcpiLib/AcpiLib.inf
   TimerLib  |ArmPkg/Library/ArmArchTimerLib/ArmArchTimerLib.inf
   BaseLib  |MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib  |MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
@@ -455,7 +461,7 @@
 
   #ACPI
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
-  MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  AppleSiliconPkg/Drivers/AcpiPlatformDxe/AcpiPlatformDxe.inf
   MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
 
   #SMBIOS information

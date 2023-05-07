@@ -211,7 +211,7 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   # ACPI Support
   #
   INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
-  INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  INF AppleSiliconPkg/Drivers/AcpiPlatformDxe/AcpiPlatformDxe.inf
   INF MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
   INF RuleOverride=ACPITABLE MacStudio2022Pkg/AcpiTables/DeviceAcpiTables.inf
   INF RuleOverride=ACPITABLE T600XFamilyPkg/AcpiTables/CPUAcpiTables.inf
@@ -248,10 +248,10 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 #}
 
   # Embedded RAMDisk (ISO format)
-  #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
-  #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.iso
-  #SECTION UI = "Embedded RAMDisk"  
-#}
+  FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
+  SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.iso
+  SECTION UI = "Embedded RAMDisk"  
+}
 
   #FILE APPLICATION = C57AD6B7-0515-40A8-9D21-551652854E37 {
   #SECTION PE32 = AppleSiliconPkg/RAMDisk/BOOTAA64.EFI

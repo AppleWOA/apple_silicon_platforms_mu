@@ -12,7 +12,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = CPUAcpiTables
-  FILE_GUID                      = beeb2a33-ef3b-4a45-8e58-e93209ef0a72
+  FILE_GUID                      = d1430d86-24a4-4c2f-8f22-d24376e2e888
   MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
 

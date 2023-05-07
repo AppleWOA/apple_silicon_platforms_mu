@@ -146,11 +146,13 @@ STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
     //needed for devicetree calculations
     UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
     INT32 Length;
-    INT32 InterruptControllerNode = fdt_path_offset((VOID *)FdtBlob, "/soc/die0/interrupt-controller");
+    INT32 InterruptControllerNode = fdt_path_offset((VOID *)FdtBlob, "/soc/interrupt-controller");
     CONST INT32 *InterruptControllerRegs = fdt_getprop((VOID *)FdtBlob, InterruptControllerNode, "reg", &Length);
     UINT64 EventRegisterValue = 0;
     UINT64 StartOffset;
     UINT64 CurrentOffset;
+
+    DEBUG((DEBUG_ERROR, "FDT pointer: 0x%llx\n", FdtBlob));
 
     if (fdt_check_header ((VOID *)FdtBlob) != 0) {
     //DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "no FDT supplied, exiting\n"));
