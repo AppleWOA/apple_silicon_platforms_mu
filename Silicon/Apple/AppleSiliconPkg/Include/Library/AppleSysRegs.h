@@ -44,14 +44,12 @@
  * Note: could eventually be moved to AICv2 ASM file if it's only needed there.
  * 
  */
-#define APPLE_IRQ_FIQ_OPT_OUT_REG S3_4_C15_C10_4
+#define APPLE_SYSTEM_INTERRUPT_CFG_EL1 S3_4_C15_C10_4
 #define IRQ_OPT_OUT_VALUE 0x3 // BIT(1) | BIT(0)
 
 
 /**
  * Standard PMC registers/defines
- * 
- * Note: unused for now, but we need to ack it whenever the IRQ fires.
  * 
  */
 
