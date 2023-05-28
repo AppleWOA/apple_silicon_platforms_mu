@@ -10,6 +10,7 @@
 **/
 
 #include <Uefi.h>
+#include <Pi/PiMultiPhase.h>
 #include <Chipset/AArch64.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/CacheMaintenanceLib.h>
@@ -18,7 +19,17 @@
 #include <Library/ArmMmuLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/HobLib.h>
 
+STATIC
+VOID (
+  EFIAPI  *mReplaceLiveEntryFunc
+  )(
+    IN  UINT64  *Entry,
+    IN  UINT64  Value,
+    IN  UINT64  RegionStart,
+    IN  BOOLEAN DisableMmu
+    ) = ArmReplaceLiveTranslationEntry;
 
 #define HCR_EL2_E2H BIT34
 
@@ -87,14 +98,40 @@ ReplaceTableEntry (
   IN  UINT64   *Entry,
   IN  UINT64   Value,
   IN  UINT64   RegionStart,
+  IN  UINT64   BlockMask,
   IN  BOOLEAN  IsLiveBlockMapping
   )
 {
-  if (!ArmMmuEnabled () || !IsLiveBlockMapping) {
+  BOOLEAN  DisableMmu;
+
+  //
+  // Replacing a live block entry with a table entry (or vice versa) requires a
+  // break-before-make sequence as per the architecture. This means the mapping
+  // must be made invalid and cleaned from the TLBs first, and this is a bit of
+  // a hassle if the mapping in question covers the code that is actually doing
+  // the mapping and the unmapping, and so we only bother with this if actually
+  // necessary.
+  //
+
+  if (!IsLiveBlockMapping || !ArmMmuEnabled ()) {
+    // If the mapping is not a live block mapping, or the MMU is not on yet, we
+    // can simply overwrite the entry.
     *Entry = Value;
     ArmUpdateTranslationTableEntry (Entry, (VOID *)(UINTN)RegionStart);
   } else {
-    ArmReplaceLiveTranslationEntry (Entry, Value, RegionStart);
+    // If the mapping in question does not cover the code that updates the
+    // entry in memory, or the entry that we are intending to update, we can
+    // use an ordinary break before make. Otherwise, we will need to
+    // temporarily disable the MMU.
+    DisableMmu = FALSE;
+    if ((((RegionStart ^ (UINTN)mReplaceLiveEntryFunc) & ~BlockMask) == 0) ||
+        (((RegionStart ^ (UINTN)Entry) & ~BlockMask) == 0))
+    {
+      DisableMmu = TRUE;
+      DEBUG ((DEBUG_WARN, "%a: splitting block entry with MMU disabled\n", __FUNCTION__));
+    }
+
+    mReplaceLiveEntryFunc (Entry, Value, RegionStart, DisableMmu);
   }
 }
 
@@ -164,7 +201,8 @@ UpdateRegionMappingRecursive (
   IN  UINT64  AttributeSetMask,
   IN  UINT64  AttributeClearMask,
   IN  UINT64  *PageTable,
-  IN  UINTN   Level
+  IN  UINTN   Level,
+  IN  BOOLEAN  TableIsLive
   )
 {
   UINTN       BlockShift;
@@ -174,6 +212,7 @@ UpdateRegionMappingRecursive (
   UINT64      EntryValue;
   VOID        *TranslationTable;
   EFI_STATUS  Status;
+  BOOLEAN     NextTableIsLive;
 
   ASSERT (((RegionStart | RegionEnd) & EFI_PAGE_MASK) == 0);
 
@@ -201,17 +240,20 @@ UpdateRegionMappingRecursive (
     // than a block, and recurse to create the block or page entries at
     // the next level. No block mappings are allowed at all at level 0,
     // so in that case, we have to recurse unconditionally.
-    // If we are changing a table entry and the AttributeClearMask is non-zero,
-    // we cannot replace it with a block entry without potentially losing
-    // attribute information, so keep the table entry in that case.
+    //
+    // One special case to take into account is any region that covers the page
+    // table itself: if we'd cover such a region with block mappings, we are
+    // more likely to end up in the situation later where we need to disable
+    // the MMU in order to update page table entries safely, so prefer page
+    // mappings in that particular case.
     //
     if ((Level == 0) || (((RegionStart | BlockEnd) & BlockMask) != 0) ||
-        (IsTableEntry (*Entry, Level) && (AttributeClearMask != 0)))
+        ((Level < 3) && (((UINT64)PageTable & ~BlockMask) == RegionStart)) ||
+        IsTableEntry (*Entry, Level))
     {
       ASSERT (Level < 3);
 
       if (!IsTableEntry (*Entry, Level)) {
-
         //
         // If the region we are trying to map is already covered by a block
         // entry with the right attributes, don't bother splitting it up.
@@ -222,7 +264,6 @@ UpdateRegionMappingRecursive (
           continue;
         }
 
-        //
         //
         // No table entry exists yet, so we need to allocate a page table
         // for the next level.
@@ -253,7 +294,8 @@ UpdateRegionMappingRecursive (
                      *Entry & TT_ATTRIBUTES_MASK,
                      0,
                      TranslationTable,
-                     Level + 1
+                     Level + 1,
+                     FALSE
                      );
           if (EFI_ERROR (Status)) {
             //
@@ -265,8 +307,11 @@ UpdateRegionMappingRecursive (
             return Status;
           }
         }
+
+        NextTableIsLive = FALSE;
       } else {
         TranslationTable = (VOID *)(UINTN)(*Entry & TT_ADDRESS_MASK_BLOCK_ENTRY);
+        NextTableIsLive  = TableIsLive;
       }
 
       //
@@ -278,7 +323,8 @@ UpdateRegionMappingRecursive (
                  AttributeSetMask,
                  AttributeClearMask,
                  TranslationTable,
-                 Level + 1
+                 Level + 1,
+                 NextTableIsLive
                  );
       if (EFI_ERROR (Status)) {
         if (!IsTableEntry (*Entry, Level)) {
@@ -301,7 +347,8 @@ UpdateRegionMappingRecursive (
           Entry,
           EntryValue,
           RegionStart,
-          IsBlockEntry (*Entry, Level)
+          BlockMask,
+          TableIsLive && IsBlockEntry (*Entry, Level)
           );
       }
     } else {
@@ -310,20 +357,7 @@ UpdateRegionMappingRecursive (
       EntryValue |= (Level == 3) ? TT_TYPE_BLOCK_ENTRY_LEVEL3
                                  : TT_TYPE_BLOCK_ENTRY;
 
-      if (IsTableEntry (*Entry, Level)) {
-        //
-        // We are replacing a table entry with a block entry. This is only
-        // possible if we are keeping none of the original attributes.
-        // We can free the table entry's page table, and all the ones below
-        // it, since we are dropping the only possible reference to it.
-        //
-        ASSERT (AttributeClearMask == 0);
-        TranslationTable = (VOID *)(UINTN)(*Entry & TT_ADDRESS_MASK_BLOCK_ENTRY);
-        ReplaceTableEntry (Entry, EntryValue, RegionStart, TRUE);
-        FreePageTablesRecursive (TranslationTable, Level + 1);
-      } else {
-        ReplaceTableEntry (Entry, EntryValue, RegionStart, FALSE);
-      }
+      ReplaceTableEntry (Entry, EntryValue, RegionStart, BlockMask, FALSE);
     }
   }
 
@@ -336,7 +370,9 @@ UpdateRegionMapping (
   IN  UINT64  RegionStart,
   IN  UINT64  RegionLength,
   IN  UINT64  AttributeSetMask,
-  IN  UINT64  AttributeClearMask
+  IN  UINT64  AttributeClearMask,
+  IN  UINT64   *RootTable,
+  IN  BOOLEAN  TableIsLive
   )
 {
   UINTN  T0SZ;
@@ -352,8 +388,9 @@ UpdateRegionMapping (
            RegionStart + RegionLength,
            AttributeSetMask,
            AttributeClearMask,
-           ArmGetTTBR0BaseAddress (),
-           GetRootTableLevel (T0SZ)
+           RootTable,
+           GetRootTableLevel (T0SZ),
+           TableIsLive
            );
 }
 
@@ -368,7 +405,9 @@ FillTranslationTable (
            MemoryRegion->VirtualBase,
            MemoryRegion->Length,
            ArmMemoryAttributeToPageAttribute (MemoryRegion->Attributes) | TT_AF,
-           0
+           0,
+           RootTable,
+           FALSE
            );
 }
 
@@ -446,7 +485,9 @@ ArmSetMemoryAttributes (
            BaseAddress,
            Length,
            PageAttributes,
-           PageAttributeMask
+           PageAttributeMask,
+           ArmGetTTBR0BaseAddress (),
+           TRUE
            );
 }
 
@@ -459,7 +500,14 @@ SetMemoryRegionAttribute (
   IN  UINT64                BlockEntryMask
   )
 {
-  return UpdateRegionMapping (BaseAddress, Length, Attributes, BlockEntryMask);
+  return UpdateRegionMapping (
+           BaseAddress,
+           Length,
+           Attributes,
+           BlockEntryMask,
+           ArmGetTTBR0BaseAddress (),
+           TRUE
+           );
 }
 
 EFI_STATUS
@@ -731,14 +779,6 @@ ArmConfigureMmu (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  //
-  // We set TTBR0 just after allocating the table to retrieve its location from
-  // the subsequent functions without needing to pass this value across the
-  // functions. The MMU is only enabled after the translation tables are
-  // populated.
-  //
-  ArmSetTTBR0 (TranslationTable);
-
   if (TranslationTableBase != NULL) {
     *TranslationTableBase = TranslationTable;
   }
@@ -747,14 +787,16 @@ ArmConfigureMmu (
     *TranslationTableSize = RootTableEntryCount * sizeof (UINT64);
   }
 
-  //
-  // Make sure we are not inadvertently hitting in the caches
-  // when populating the page tables.
-  //
-  InvalidateDataCacheRange (
-    TranslationTable,
-    RootTableEntryCount * sizeof (UINT64)
-    );
+  if (!ArmMmuEnabled ()) {
+    //
+    // Make sure we are not inadvertently hitting in the caches
+    // when populating the page tables.
+    //
+    InvalidateDataCacheRange (
+      TranslationTable,
+      RootTableEntryCount * sizeof (UINT64)
+      );
+  }
   ZeroMem (TranslationTable, RootTableEntryCount * sizeof (UINT64));
 
   while (MemoryTable->Length != 0) {
@@ -779,12 +821,17 @@ ArmConfigureMmu (
     MAIR_ATTR (TT_ATTR_INDX_MEMORY_WRITE_BACK, MAIR_ATTR_NORMAL_MEMORY_WRITE_BACK)
     );
 
-  ArmDisableAlignmentCheck ();
-  ArmEnableStackAlignmentCheck ();
-  ArmEnableInstructionCache ();
-  ArmEnableDataCache ();
+  ArmSetTTBR0 (TranslationTable);
 
-  ArmEnableMmu ();
+  if (!ArmMmuEnabled ()) {
+    ArmDisableAlignmentCheck ();
+    ArmEnableStackAlignmentCheck ();
+    ArmEnableInstructionCache ();
+    ArmEnableDataCache ();
+
+    ArmEnableMmu ();
+  }
+
   return EFI_SUCCESS;
 
 FreeTranslationTable:
@@ -799,15 +846,21 @@ ArmMmuBaseLibConstructor (
   )
 {
   extern UINT32  ArmReplaceLiveTranslationEntrySize;
+  VOID           *Hob;
 
-  //
-  // The ArmReplaceLiveTranslationEntry () helper function may be invoked
-  // with the MMU off so we have to ensure that it gets cleaned to the PoC
-  //
-  WriteBackDataCacheRange (
-    (VOID *)(UINTN)ArmReplaceLiveTranslationEntry,
-    ArmReplaceLiveTranslationEntrySize
-    );
+  Hob = GetFirstGuidHob (&gArmMmuReplaceLiveTranslationEntryFuncGuid);
+  if (Hob != NULL) {
+    mReplaceLiveEntryFunc = *(VOID **)GET_GUID_HOB_DATA (Hob);
+  } else {
+    //
+    // The ArmReplaceLiveTranslationEntry () helper function may be invoked
+    // with the MMU off so we have to ensure that it gets cleaned to the PoC
+    //
+    WriteBackDataCacheRange (
+      (VOID *)(UINTN)ArmReplaceLiveTranslationEntry,
+      ArmReplaceLiveTranslationEntrySize
+      );
+  }
 
   return RETURN_SUCCESS;
 }
