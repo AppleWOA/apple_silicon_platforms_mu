@@ -28,12 +28,13 @@
 
 [FD.J375MacStudio2022_EFI]
 BaseAddress   = 0x10030000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired address of firmware (will always be loaded from RAM)
+#Size          = 0x00014000000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 Size          = 0x00001E00000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 ErasePolarity = 1
 
 
 BlockSize     = 0x1000
-NumBlocks     = 0x1e00
+NumBlocks     = 0x1E00
 
 ################################################################################
 #
@@ -56,6 +57,19 @@ NumBlocks     = 0x1e00
 # Implement the Linux kernel header layout so that the loader (m1n1) will identify
 # it as something bootable, and execute it with a FDT pointer in x0 or r2.
 0x000000000|0x000008000
+#DATA = {
+#  0x01, 0x00, 0x00, 0x10,                         # code0: adr x1, .
+#  0xff, 0x1f, 0x00, 0x14,                         # code1: b 0x8000
+#  0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, # text_offset: 512 KB
+#  0x00, 0x00, 0x00, 0x41, 0x00, 0x00, 0x00, 0x00, # image_size: ~300 MB
+#  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, # flags
+#  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, # res2
+#  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, # res3
+#  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, # res4
+#  0x41, 0x52, 0x4d, 0x64,                         # magic: "ARM\x64"
+#  0x00, 0x00, 0x00, 0x00                          # res5
+#}
+
 DATA = {
   0x01, 0x00, 0x00, 0x10,                         # code0: adr x1, .
   0xff, 0x1f, 0x00, 0x14,                         # code1: b 0x8000
@@ -69,6 +83,7 @@ DATA = {
   0x00, 0x00, 0x00, 0x00                          # res5
 }
 
+#0x000008000|0x0013F80000
 0x000008000|0x001D80000
 gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
 FV = FVMAIN_COMPACT
@@ -248,8 +263,14 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 #}
 
   # Embedded RAMDisk (ISO format)
+  #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
+  #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.iso
+  #SECTION UI = "Embedded RAMDisk"  
+#}
+
+  # Embedded RAMDisk (IMG format)
   FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
-  SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.iso
+  SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
   SECTION UI = "Embedded RAMDisk"  
 }
 

@@ -41,6 +41,7 @@
 [Guids]
   gMsBootPolicyFileGuid
   gEfiVirtualCdGuid
+  gEfiVirtualDiskGuid
 
 [Protocols]
   gEfiFirmwareVolume2ProtocolGuid

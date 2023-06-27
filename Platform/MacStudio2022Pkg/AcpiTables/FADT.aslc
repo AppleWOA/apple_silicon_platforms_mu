@@ -21,12 +21,12 @@
 #include <Acpi/AcpiHeader.h>
 
 /**
- * Note: Most of these fields are zero, as for now we are using "hardware-reduced" ACPI mode
+ * Note: Most of these fields are zero, as per Arm SBBR/SBSA specs we are using "hardware-reduced" ACPI mode
  * which removes the need for most of the FADT variables.
  * 
  * PSCI for now will be an SMC event despite not being implemented on Apple, as we can trap SMCs to EL2 anyways.
  * (Directly handled by m1n1 hypervisor for hypervisor-assisted booting, 
- * may have to patch SMC instructions to "genter" equivalents for bare-metal booting)
+ * may have to patch or trap SMC instructions to "genter" equivalents for bare-metal booting)
  * 
 */
 EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE Fadt = {

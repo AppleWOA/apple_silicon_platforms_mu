@@ -30,3 +30,4 @@ BuildConfig.conf
 Platform/MacStudio2022Pkg/DeviceTree/t6002-j375d.dtb
 Silicon/Apple/AppleSiliconPkg/RAMDisk/BOOTAA64.EFI
 Silicon/Apple/AppleSiliconPkg/RAMDisk/WinPE.iso
+Silicon/Apple/AppleSiliconPkg/RAMDisk/WinPE.img

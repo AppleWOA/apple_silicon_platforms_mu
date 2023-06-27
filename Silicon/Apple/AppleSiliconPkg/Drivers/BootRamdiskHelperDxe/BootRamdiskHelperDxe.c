@@ -42,7 +42,7 @@ BootRamdiskHelperDxeInitialize (
     VOID *OriginalRamDiskPtr;
     VOID *DestinationRamdiskPtr;
     UINTN RamDiskSize;
-    EFI_GUID *RamDiskRegisterType = &gEfiVirtualCdGuid; //hardcode to ISO image for now
+    EFI_GUID *RamDiskRegisterType = &gEfiVirtualDiskGuid; //hardcode to IMG image for now
     EFI_RAM_DISK_PROTOCOL *RamdiskProtocol;
     EFI_DEVICE_PATH_PROTOCOL *DevicePath;
 
