@@ -13,8 +13,6 @@
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
-
-[PatchPcd]
   gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount
   
 [Packages]

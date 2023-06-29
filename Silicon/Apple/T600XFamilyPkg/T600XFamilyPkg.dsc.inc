@@ -20,13 +20,14 @@
   #These will get overriden by the FDT settings
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x10000000000
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x400000000 #16GB RAM space by default
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize|0x0
 
 [PcdsFixedAtBuild.common]
   #ARM architectural fixed build-time settings
-  gArmTokenSpaceGuid.PcdSystemMemoryBase|0x10000000000
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x100FF000000 #fair warning this location is *totally random*
   gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|19 # placeholder 

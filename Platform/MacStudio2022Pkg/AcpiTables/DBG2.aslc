@@ -21,6 +21,7 @@
 #include <Acpi/AcpiHeader.h>
 
 /**
+ * 
  * The Mac Studio (2022) has 4 USB-C ports in the back, two on the front.
  * In addition, it has two USB-A ports on the back.
  * 
@@ -28,6 +29,7 @@
  * Front USB-C ports will not be debug ports for now.
  * 
  * Debugging Windows will be done via KDNET-over-USB, UEFI debugging will be over EXDI.
+ * 
 */
 
 

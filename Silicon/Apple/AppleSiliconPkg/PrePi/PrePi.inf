@@ -54,13 +54,18 @@
   gEfiSystemNvDataFvGuid
   gEfiVariableGuid
 
+[Pcd]
+
+
 [PatchPcd]
   #System RAM
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
   gArmTokenSpaceGuid.PcdFvBaseAddress
   gArmTokenSpaceGuid.PcdFdBaseAddress
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize
 
 [FixedPcd]
   #CPU exception vectors

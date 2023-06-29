@@ -84,6 +84,33 @@ FindMemnode (
   if (SizeCells > 1) {
     *SystemMemorySize = (*SystemMemorySize << 32) | fdt32_to_cpu (Prop[1]);
   }
+  
+  //
+  // Get the framebuffer information here too.
+  //
+  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "loading framebuffer info\n"));
+  INT32 FramebufferNode = fdt_path_offset(DeviceTreeBlob, "/chosen/framebuffer");
+  if (FramebufferNode <= 0) {
+    DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "cannot find /chosen/framebuffer node in FDT, exiting\n"));
+    return FALSE;
+  }
+  INT32 FramebufferLength;
+  CONST INT32 *FramebufferProp = fdt_getprop(DeviceTreeBlob, FramebufferNode, "reg", &FramebufferLength);
+  UINT64 FramebufferBase;
+  UINT64 FramebufferSize;
+
+  FramebufferBase = fdt32_to_cpu(FramebufferProp[0]);
+  FramebufferBase = ((FramebufferBase << 32) | fdt32_to_cpu(FramebufferProp[1]));
+  FramebufferProp += 2;
+  FramebufferSize = fdt32_to_cpu(FramebufferProp[0]);
+  FramebufferSize = ((FramebufferSize << 32) | fdt32_to_cpu(FramebufferProp[1]));
+
+  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "Framebuffer address in FDT: 0x%llx (size 0x%llx)\n", FramebufferBase, FramebufferSize));
+
+  PatchPcdSet64(PcdFrameBufferAddress, FramebufferBase);
+  PatchPcdSet64(PcdFrameBufferSize, FramebufferSize);
+
+  DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "Framebuffer address loaded to PCDs: 0x%llx (size 0x%llx)\n", PcdGet64(PcdFrameBufferAddress), PcdGet64(PcdFrameBufferSize)));
 
   return TRUE;
 }

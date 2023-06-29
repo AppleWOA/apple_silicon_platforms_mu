@@ -60,6 +60,7 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize
 
 [Depex]
   TRUE

@@ -12,6 +12,7 @@
 #include <Library/PcdLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
+#include <Include/libfdt.h>
 
 #include <Protocol/GraphicsOutput.h>
 
@@ -168,10 +169,21 @@ SimpleFbDxeInitialize(
   /* Retrieve simple frame buffer from pre-SEC bootloader */
   DEBUG(
       (EFI_D_INFO,
-       "SimpleFbDxe: Getting framebuffer parameters from PCD\n"));
-  UINT64 FramebufferAddr   = PcdGet64(PcdFrameBufferAddress);
+       "SimpleFbDxe: Getting framebuffer parameters from PCD and FDT\n"));
+  UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
+  INT32 FramebufferNode = fdt_path_offset((VOID *)FdtBlob, "/chosen/framebuffer");
+  if (FramebufferNode <= 0) {
+    DEBUG((EFI_D_ERROR, "cannot find /chosen/framebuffer node in FDT, exiting\n"));
+    return EFI_DEVICE_ERROR;
+  }
+  INT32 FramebufferLength;
+  CONST INT32 *FramebufferProp = fdt_getprop((VOID *)FdtBlob, FramebufferNode, "reg", &FramebufferLength);
+  UINT64 FramebufferAddr   = fdt32_to_cpu(FramebufferProp[0]);
+  FramebufferAddr = ((FramebufferAddr << 32) | fdt32_to_cpu(FramebufferProp[1]));
   UINT32 FramebufferWidth  = FixedPcdGet32(PcdFrameBufferWidth);
   UINT32 FramebufferHeight = FixedPcdGet32(PcdFrameBufferHeight);
+
+  DEBUG((EFI_D_INFO, "SimpleFbDxe: Framebuffer parameters, Base: 0x%llx, Width, %d, Height %d\n", FramebufferAddr, FramebufferWidth, FramebufferHeight));
 
   /* Sanity check */
   if (FramebufferAddr == 0 || FramebufferWidth == 0 ||

@@ -93,7 +93,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
             );
         DEBUG(
             (DEBUG_ERROR | DEBUG_INFO | DEBUG_LOAD,
-            "Issue reboot command through m1n1 hypervisor shell or send VDM command to reboot\n")
+            "Issue reboot command through hypervisor shell, JTAG interface, or send VDM command to reboot\n")
             );
         CpuDeadLoop();
     }

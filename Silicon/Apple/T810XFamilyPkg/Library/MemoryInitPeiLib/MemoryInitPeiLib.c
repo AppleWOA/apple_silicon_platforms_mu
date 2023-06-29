@@ -317,7 +317,7 @@ VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
   //Framebuffer
   VirtualMemoryTable[++Index].PhysicalBase = PcdGet64(PcdFrameBufferAddress);
   VirtualMemoryTable[Index].VirtualBase    = PcdGet64(PcdFrameBufferAddress);
-  VirtualMemoryTable[Index].Length         = 0x2D5C000;
+  VirtualMemoryTable[Index].Length         = PcdGet64(PcdFrameBufferSize);
   VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED;
 
   // End of Table

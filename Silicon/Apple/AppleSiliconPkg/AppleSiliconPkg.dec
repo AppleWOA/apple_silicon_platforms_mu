@@ -38,7 +38,6 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920|UINT32|0x00004401
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080|UINT32|0x00004402
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30|UINT32|0x00004403
-
   #File name GUID for frontpage app
   gAppleSiliconPkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }|VOID*|0x00004408
 
@@ -48,10 +47,13 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSocAcpiTableStorageFile|{ 0x86, 0x0d, 0x43, 0xd1, 0xa4, 0x24, 0x2f, 0x4c, 0x8f, 0x22, 0xd2, 0x43, 0x76, 0xe2, 0xe8, 0x88 }|VOID*|0x00004501
 
 
+[PcdsDynamic.common]
+
 [PcdsPatchableInModule.common]
   #FDT pointer
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0|UINT64|0x00003901
   #Framebuffer (this will be filled in by the loader)
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0|UINT64|0x00004400
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize|0x0|UINT64|0x00004410
   #number of cores (note, this is global, copied from the per-SoC PCD later on)
   gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount|6|UINT32|0x00004406

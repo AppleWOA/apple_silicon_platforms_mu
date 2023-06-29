@@ -83,7 +83,8 @@
   ArmMmuLib |AppleSiliconPkg/Library/AppleArmMmuLib/ArmMmuBaseLib.inf
   #need our own generic timer counter libraries for a build meant to run under the hypervisor (note: not tested on bare metal boot)
   #ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerPhyCounterLib/AppleArmGenericTimerPhyCounterLib.inf
-  ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerVirtCounterLib/AppleArmGenericTimerVirtCounterLib.inf
+  #ArmGenericTimerCounterLib  |AppleSiliconPkg/Library/AppleArmGenericTimerVirtCounterLib/AppleArmGenericTimerVirtCounterLib.inf
+  ArmGenericTimerCounterLib|ArmPkg/Library/ArmGenericTimerVirtCounterLib/ArmGenericTimerVirtCounterLib.inf
   ArmDisassemblerLib|ArmPkg/Library/ArmDisassemblerLib/ArmDisassemblerLib.inf
 !if $(AIC_BUILD) == FALSE
   ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
@@ -91,7 +92,7 @@
   AppleAicLib  |AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicLib.inf
 !endif
   ArmHvcLib  |ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
-  ArmSmcLib  |ArmPkg/Library/ArmSmcLibNull/ArmSmcLibNull.inf
+  ArmSmcLib  |ArmPkg/Library/ArmSmcLib/ArmSmcLib.inf
   AppleArmGxfHvcLib  |AppleSiliconPkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
   #needs to be pulled from AppleSiliconPkg and not ArmPkg due to required workaround for GICv3 detection/selection logic
   ArmGicArchLib  |AppleSiliconPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
@@ -176,13 +177,13 @@
   RealTimeClockLib  |EmbeddedPkg/Library/VirtualRealTimeClockLib/VirtualRealTimeClockLib.inf
   ResetUtilityLib  |MdeModulePkg/Library/ResetUtilityLib/ResetUtilityLib.inf
   SecurityLockAuditLib  |MdeModulePkg/Library/SecurityLockAuditLibNull/SecurityLockAuditLibNull.inf
-  ResetSystemLib  |AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
+  ResetSystemLib|ArmPkg/Library/ArmSmcPsciResetSystemLib/ArmSmcPsciResetSystemLib.inf
 
   SerialPortLib|AppleSiliconPkg/Library/AppleUartSerialPortLib/AppleUartSerialPortLib.inf
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
   #Platform specific drivers
-  HwResetSystemLib|AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
-
+  #HwResetSystemLib|AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
+  HwResetSystemLib|ArmPkg/Library/ArmSmcPsciResetSystemLib/ArmSmcPsciResetSystemLib.inf
 
   MemoryTypeInfoSecVarCheckLib|MdeModulePkg/Library/MemoryTypeInfoSecVarCheckLib/MemoryTypeInfoSecVarCheckLib.inf
   FltUsedLib|MdePkg/Library/FltUsedLib/FltUsedLib.inf
@@ -326,12 +327,12 @@
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
   ArmHvcLib|ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
-  AppleArmGxfHvcLib|AppleSiliconPkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
+  #AppleArmGxfHvcLib|AppleSiliconPkg/Library/AppleArmGxfHvcLib/AppleArmGxfHvcLib.inf
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
 
   # System Reset
-  HwResetSystemLib|AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
-
+  #HwResetSystemLib|AppleSiliconPkg/Library/AppleArmPsciHvcResetLib/AppleArmPsciHvcResetSystem.inf
+  HwResetSystemLib|ArmPkg/Library/ArmSmcPsciResetSystemLib/ArmSmcPsciResetSystemLib.inf
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
