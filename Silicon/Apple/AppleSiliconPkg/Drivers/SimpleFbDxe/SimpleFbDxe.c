@@ -231,7 +231,7 @@ SimpleFbDxeInitialize(
   EFI_PHYSICAL_ADDRESS FrameBufferAddress = FramebufferAddr;
 
   mDisplay.Mode->Info->PixelsPerScanLine = FramebufferWidth;
-  mDisplay.Mode->Info->PixelFormat = PixelRedGreenBlueReserved8BitPerColor;
+  mDisplay.Mode->Info->PixelFormat = PixelBlueGreenRedReserved8BitPerColor;
   mDisplay.Mode->SizeOfInfo      = sizeof(EFI_GRAPHICS_OUTPUT_MODE_INFORMATION);
   mDisplay.Mode->FrameBufferBase = FrameBufferAddress;
   mDisplay.Mode->FrameBufferSize = FrameBufferSize;
