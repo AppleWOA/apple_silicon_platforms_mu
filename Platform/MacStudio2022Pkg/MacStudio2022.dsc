@@ -33,6 +33,7 @@
   FLASH_DEFINITION               = MacStudio2022Pkg/MacStudio2022.fdf
   SECURE_BOOT_ENABLE             = FALSE #disable secure boot for now
   AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
+  NETWORK_TLS_ENABLE             = TRUE
 
 
 [BuildOptions.common]

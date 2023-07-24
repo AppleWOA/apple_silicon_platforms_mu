@@ -444,6 +444,20 @@ VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
   VirtualMemoryTable[Index].Length         = PcdGet64(PcdFrameBufferSize);
   VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED;
 
+  DEBUG ((
+    DEBUG_ERROR,
+    "%a: Dumping Framebuffer Memory Map:\n"
+    "\tPhysicalBase: 0x%lX\n"
+    "\tVirtualBase: 0x%lX\n"
+    "\tLength: 0x%lX\n"
+    "\tTop of framebuffer RAM: 0x%lX\n",
+    __FUNCTION__,
+    VirtualMemoryTable[Index].PhysicalBase,
+    VirtualMemoryTable[Index].VirtualBase,
+    VirtualMemoryTable[Index].Length,
+    VirtualMemoryTable[Index].PhysicalBase + VirtualMemoryTable[Index].Length
+    ));
+
   //TODO: add other NC regions here?
 
   // End of Table

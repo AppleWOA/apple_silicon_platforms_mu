@@ -37,12 +37,14 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
   gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T6000"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1 Pro/Max/Ultra"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T600x"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1 Pro/Max/Ultra (Jade)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
-  #On M1v2, this is a lot easier to pick as most of the 40 bit address space is reserved for MMIO and a lot goes unused
+  #
+  # if GIC is used, it's expected to be virtualized by trusted firmware as Jade/T600x has no onboard GIC.
+  #
   gArmTokenSpaceGuid.PcdGicDistributorBase|0x5000000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x5100000000
 !else
@@ -51,11 +53,6 @@
 
 !endif
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision|0x00006000
-
-  #
-  # Make VariableRuntimeDxe work at emulated non-volatile variable mode.
-  #
-  gEfiMdeModulePkgTokenSpaceGuid.PcdEmuVariableNvModeEnable|TRUE
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesData|600

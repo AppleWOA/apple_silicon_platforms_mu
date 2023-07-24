@@ -256,11 +256,11 @@
   #
   # Produces EfiGraphicsOutputProtocol to draw graphics to the screen.
   #
-  MsGraphicsPkg/RenderingEngineDxe/RenderingEngineDxe.inf
+  #MsGraphicsPkg/RenderingEngineDxe/RenderingEngineDxe.inf
   #
   # Finds and takes ownership of gEfiGraphicsOutputProtocolGuid so RenderingEngine can use it.
   #
-  MsGraphicsPkg/GopOverrideDxe/GopOverrideDxe.inf
+  #MsGraphicsPkg/GopOverrideDxe/GopOverrideDxe.inf
   #
   # Driver for On Screen Keyboard.
   #
