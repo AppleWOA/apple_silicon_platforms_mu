@@ -8,7 +8,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = MsPlatformDevicesLib
-  FILE_GUID                      = ec510a5b-1038-4c6e-a1f7-b987ff3594bd
+  FILE_GUID                      = 875a58e9-6dc2-4c9c-b919-10296e6cf7f8
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = MsPlatformDevicesLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_APPLICATION

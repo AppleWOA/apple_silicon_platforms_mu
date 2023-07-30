@@ -32,7 +32,7 @@
   SECURE_BOOT_ENABLE             = FALSE
   AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
   USES_MAC_CPU                   = TRUE # a futureproofing switch, changes SoC identifier in SMBIOS
-
+  NETWORK_TLS_ENABLE             = TRUE
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=8103
@@ -61,7 +61,12 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1600
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|150
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|150
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|150
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|150
 
+[Components.common]
+
+  MacBookAirMid2020Pkg/AcpiTables/DeviceAcpiTables.inf
 
 !include T810XFamilyPkg/T810XFamilyPkg.dsc.inc
 !include AppleSiliconPkg/AppleSiliconPkg.dsc.inc

@@ -11,13 +11,15 @@
 [PcdsFixedAtBuild.common]
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x8FF000000 #fair warning this location is *totally random*
-  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|17 #FIQ timer INTID (needed because Apple timers fire FIQs)
-  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|18 #IRQ timer INTID
+  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|19 # placeholder 
+  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|17 # phys timer IRQ number (this is arbitrary because per-cpu fiq)
+  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|20 #this disables the HV timer
+  gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|18 #virt timer
 !if $(USES_MAC_CPU) == TRUE
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T8103"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1"
 !else
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T810X"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T8101"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple A14-compatible CPU"
   #Serial port base addr
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x235200000
@@ -27,8 +29,9 @@
 
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
-  #On all M1 and M2 models, these addresses are completely unmapped and point to nowhere
-  #m1n1 will trap accesses to these addresses, which will emulate the vGIC dist/redist
+  #
+  # if GIC is used, it's expected to be virtualized by trusted firmware as Tonga/T8103 and Sicily/T8101 has no onboard GIC.
+  #
   gArmTokenSpaceGuid.PcdGicDistributorBase|0xf00000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xf10000000
 !else
@@ -37,3 +40,30 @@
 
 !endif
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision|0x00008103
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesData|600
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesCode|400
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesCode|1500
+!else
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesData|300
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiRuntimeServicesCode|150
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesCode|1000
+!endif
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiBootServicesData|800
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode|10
+  gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData|0
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|40
+  
+  #PCIe settings
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAriSupport|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMrIovSupport|FALSE
+
+[LibraryClasses.common]
+  MemoryInitPeiLib|T810XFamilyPkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
+  MsPlatformDevicesLib  |T810XFamilyPkg/Library/MsPlatformDevicesLib/MsPlatformDevicesLib.inf
+
+[Components.common]
+
+  T810XFamilyPkg/AcpiTables/CPUAcpiTables.inf

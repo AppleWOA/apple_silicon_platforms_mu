@@ -6,7 +6,7 @@
  * 
  * Abstract:
  *     Debug Port Table. This source file implements the DBG2 table
- *     for the Mac Studio (2022) platform.
+ *     for the MacBook Air (2020) platform.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -21,12 +21,9 @@
 #include <Acpi/AcpiHeader.h>
 
 /**
+ * The MacBook Air (2020) has two USB ports on the left side of the machine.
  * 
- * The Mac Studio (2022) has 4 USB-C ports in the back, two on the front.
- * In addition, it has two USB-A ports on the back.
- * 
- * Declare all the USB ports (Type-C and Type-A) as debugging ports, except the DFU port.
- * 
+ * Both ports will be declared debug ports.
  * 
 */
 

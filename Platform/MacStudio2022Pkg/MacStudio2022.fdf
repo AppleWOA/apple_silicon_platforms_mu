@@ -257,10 +257,6 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 
   # DT
   #INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
-  #FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
-	#SECTION RAW = MacStudio2022Pkg/DeviceTree/t6002-j375d.dtb
-	#SECTION UI = "FirmwareDeviceTree"
-#}
 
   # Embedded RAMDisk (ISO format)
   #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {

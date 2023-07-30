@@ -27,7 +27,7 @@
   FLASH_DEFINITION               = MacBookProEarly2023Pkg/MacBookProEarly2023.fdf
   SECURE_BOOT_ENABLE             = FALSE #disable secure boot for now
   AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
-
+  NETWORK_TLS_ENABLE             = TRUE
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=6020
@@ -57,6 +57,10 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
+
+[Components.common]
+
+  MacBookProEarly2023Pkg/AcpiTables/DeviceAcpiTables.inf
 
 
 !include T602XFamilyPkg/T602XFamilyPkg.dsc.inc

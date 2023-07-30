@@ -233,8 +233,12 @@ VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
   CacheAttributes = DDR_ATTRIBUTES_CACHED;
 
   /**
-   * NOTE - On Apple silicon platforms, non PCIe MMIO regions *must* use nGnRnE mappings, while all PCIe regions *must* use nGnRE mappings.
-   * m1n1 sets up MAIR_EL1 correctly but not sure if that's preserved during BDS -> OS transition, nor if EFI reconfigures it.
+   * NOTE - On Apple silicon platforms, non PCIe MMIO regions *must* use nGnRnE mappings, 
+   * while all PCIe regions *must* use nGnRE mappings.
+   * by default EDK2 sets up the MMIO as nGnRnE, good for core system devices
+   * though we will need to add an attribute for nGnRE mappings at some point.
+   * 
+   * TODO: add ARM_MEMORY_REGION_ATTRIBUTE_DEVICE_POSTED_WRITE
    **/
 
   //MMIO - PMGR/AIC/Core System Peripherals and PCIe

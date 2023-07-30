@@ -6,7 +6,7 @@
  * 
  * Abstract:
  *     Debug Port Table. This source file implements the DBG2 table
- *     for the Mac Studio (2022) platform.
+ *     for the MacBook Pro (Early 2023) platform.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -22,11 +22,11 @@
 
 /**
  * 
- * The Mac Studio (2022) has 4 USB-C ports in the back, two on the front.
- * In addition, it has two USB-A ports on the back.
+ * The early 2023 MacBook Pro models (in addition to the 2021 models) have two USB-C ports
+ * on the left, one on the right.
  * 
- * Declare all the USB ports (Type-C and Type-A) as debugging ports, except the DFU port.
- * 
+ * All ports except the DFU port will be set as USB debugging ports (over KDNET via USB) since UART debugging
+ * officially does not support Samsung UARTs
  * 
 */
 

@@ -15,15 +15,10 @@
 
 [PcdsFixedAtBuild.common]
 
-  # Stack stuff (128k stack by default)
-  #gT810XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackSize|0x20000|UINT32|0x00004405
   #Fallback stack base in case ModuleEntryPoint setup won't work.
   #gT810XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x900000000|UINT64|0x0000440b
 
 [PcdsPatchableInModule.common]
-
-  #Framebuffer (this will be filled in by the loader)
-  #gT810XFamilyPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0|UINT64|0x00004400
   
   #Number of Cores
   gT810XFamilyPkgTokenSpaceGuid.PcdCoreCount|8|UINT32|0x00004406
