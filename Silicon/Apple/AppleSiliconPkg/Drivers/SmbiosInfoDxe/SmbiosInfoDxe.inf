@@ -22,12 +22,14 @@
   EmbeddedPkg/EmbeddedPkg.dec
   MdeModulePkg/MdeModulePkg.dec
   T600XFamilyPkg/T600XFamilyPkg.dec
+  PcBdsPkg/PcBdsPkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
   BaseLib
   ReportStatusCodeLib
   UefiLib
+  MuUefiVersionLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
   BaseMemoryLib

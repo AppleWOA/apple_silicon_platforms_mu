@@ -21,6 +21,7 @@
 !else
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T8101"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple A14-compatible CPU"
+!endif
   #Serial port base addr
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x235200000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x8103
@@ -59,6 +60,9 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdAriSupport|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdMrIovSupport|FALSE
+  #placeholder settings
+  gArmTokenSpaceGuid.PcdPciBusMin|0x0
+  gArmTokenSpaceGuid.PcdPciBusMax|0xFF
 
 [LibraryClasses.common]
   MemoryInitPeiLib|T810XFamilyPkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf

@@ -239,7 +239,7 @@ READ_LOCK_STATUS   = TRUE
   # DT
   #INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
   FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
-    SECTION RAW = MacBookAirMid2020Pkg/Include/Resources/RegulatoryLogos.png
+    SECTION RAW = MacBookAirMid2020Pkg/Resources/RegulatoryLogos.png
   }
 
   # Embedded RAMDisk (IMG format)

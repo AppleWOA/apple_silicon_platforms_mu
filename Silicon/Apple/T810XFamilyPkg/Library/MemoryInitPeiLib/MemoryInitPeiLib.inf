@@ -26,6 +26,7 @@
   EmbeddedPkg/EmbeddedPkg.dec
   ArmPkg/ArmPkg.dec
   ArmPlatformPkg/ArmPlatformPkg.dec
+  T810XFamilyPkg/T810XFamilyPkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
@@ -42,7 +43,7 @@
 [FixedPcd]
   gArmTokenSpaceGuid.PcdFdSize
 
-  gT810XFamilyPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
+  gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize
 
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiACPIReclaimMemory
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiACPIMemoryNVS
@@ -59,6 +60,6 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress
-
+  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize
 [Depex]
   TRUE

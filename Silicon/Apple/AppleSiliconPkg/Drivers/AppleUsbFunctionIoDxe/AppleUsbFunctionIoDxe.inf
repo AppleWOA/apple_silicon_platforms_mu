@@ -1,0 +1,58 @@
+#
+#  Copyright (c) 2023, AppleWOA authors. All rights reserved.
+#
+#  Module Name:
+#    AppleUsbFunctionIoDxe.inf
+#  
+#  Abstract:
+#    USB Function IO driver for Apple Silicon platforms.
+#
+#  License:
+#    SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+
+[Defines]
+  INF_VERSION                    = 0x0001001c
+  BASE_NAME                      = AppleUsbFunctionIoDxe
+  FILE_GUID                      = acda0196-4589-4e4f-b71d-e9f9c2b2ea3d
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AppleUsbFunctionIoDxeInitialize
+
+#
+# The following information is for reference only and not required by the build
+# tools.
+#
+#  VALID_ARCHITECTURES           = AARCH64
+#
+
+[Sources]
+  AppleUsbFunctionIoDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  ArmPkg/ArmPkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseLib
+  UefiLib
+  DevicePathLib
+  DxeServicesLib
+  DebugLib
+  HiiLib
+  PrintLib
+  UefiHiiServicesLib
+  UefiBootManagerLib
+
+[Protocols]
+  gEfiUsbFunctionIoProtocolGuid
+
+[Depex]
+  gEfiUsbFunctionIoProtocolGuid

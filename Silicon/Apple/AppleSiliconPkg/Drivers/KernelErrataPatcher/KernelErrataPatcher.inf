@@ -1,10 +1,11 @@
 /** @file
 
-  Patches BootMGFW to not attempt a read from or write to standard ARM PMC registers when running in EL2
-  (TODO: redirect writes to a helper that will configure the equivalent Apple register)
+  Patches NTOSKRNL to not cause a SError when reading/writing ACTLR_EL1
+  Patches NTOSKRNL to not cause a SError when reading/writing AMCNTENSET0_EL0
+  Patches NTOSKRNL to not cause a bugcheck when attempting to use
+  PSCI_MEMPROTECT Due to an issue in QHEE
 
-  Copyright (c) 2022 DuoWoA authors (original KernelErrataPatcher)
-  Copyright (c) 2022-2023 amarioguy (for Apple changes)
+  Copyright (c) 2022-2023 DuoWoA authors
 
   SPDX-License-Identifier: MIT
 
@@ -19,18 +20,21 @@
 
 [Sources]
   KernelErrataPatcher.c
+  Mmu.c
   Utilities.c
 
 [Sources.AARCH64]
   OsLoaderHelper.S | GCC
 
 [Packages]
+  ArmPkg/ArmPkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
+  ArmLib
+  ArmMmuLib
   BaseMemoryLib
   DebugLib
   MemoryAllocationLib
@@ -38,8 +42,11 @@
   UefiDriverEntryPoint
   UefiLib
 
+[Protocols]
+  gEfiMemoryAttributeProtocolGuid
+
 [Guids]
   gEfiEventExitBootServicesGuid       ## CONSUMES
 
 [Depex]
-  TRUE
+  gEfiMemoryAttributeProtocolGuid

@@ -1,10 +1,11 @@
 /** @file
 
-  Patches BootMGFW to not attempt a read from or write to standard ARM PMC registers when running in EL2
-  (TODO: redirect writes to a helper that will configure the equivalent Apple register)
+  Patches NTOSKRNL to not cause a SError when reading/writing ACTLR_EL1
+  Patches NTOSKRNL to not cause a SError when reading/writing AMCNTENSET0_EL0
+  Patches NTOSKRNL to not cause a bugcheck when attempting to use
+  PSCI_MEMPROTECT Due to an issue in QHEE
 
-  Copyright (c) 2022 DuoWoA authors (for original KernelErrataPatcher)
-  Copyright (c) 2022-2023 amarioguy (for Apple changes)
+  Copyright (c) 2022-2023 DuoWoA authors
 
   SPDX-License-Identifier: MIT
 
@@ -22,6 +23,7 @@ GCC_ASM_EXPORT (ExitBootServicesWrapper)
 //  IN EFI_HANDLE ImageHandle, IN UINTN MapKey
 //  );
 ExitBootServicesWrapper:
+#if LEGACY == 1
         // winload's OslFwpKernelSetupPhase1 seems to
         // always save the OsLoaderBlock parameter into
         // the x19 register right after stack frame setup
@@ -35,11 +37,10 @@ ExitBootServicesWrapper:
 
         // the x30 register contains the last return addr
         mov x5, x30
+#else
+        // the x30 register contains the last return addr
+        mov x2, x30
+#endif
 
         // Go for it
         b KernelErrataPatcherExitBootServices
-
-
-LoadImageWrapper:
-        //patch bootmgr to redirect PMC accesses to the Apple regs
-        b KernelErrataPatcherLoadImage

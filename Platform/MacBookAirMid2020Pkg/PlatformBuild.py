@@ -119,10 +119,10 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
 
         The tuple should be (<workspace relative path to dsc file>, <input dictionary of dsc key value pairs>)
         '''
-        return ("MacBookProMid2020Pkg/MacBookProMid2020.dsc", {})
+        return ("MacBookAirMid2020Pkg/MacBookAirMid2020.dsc", {})
 
     def GetName(self):
-        return "MacBookProMid2020"
+        return "MacBookAirMid2020"
 
     def GetPackagesPath(self):
         ''' Return a list of paths that should be mapped as edk2 PackagesPath '''
@@ -154,7 +154,7 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
             "TARGET_ARCH", args.build_arch.upper(), "From CmdLine")
 
         shell_environment.GetBuildVars().SetValue(
-            "ACTIVE_PLATFORM", "MacBookProMid2020Pkg/MacBookProMid2020.dsc", "From CmdLine")
+            "ACTIVE_PLATFORM", "MacBookAirMid2020Pkg/MacBookAirMid2020.dsc", "From CmdLine")
 
 
     def GetWorkspaceRoot(self):
@@ -177,7 +177,7 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
     def GetName(self):
         ''' Get the name of the repo, platform, or product being build '''
         ''' Used for naming the log file, among others '''
-        return "MacBookProMid2020Pkg"
+        return "MacBookAirMid2020Pkg"
 
     def GetLoggingLevel(self, loggerType):
         ''' Get the logging level for a given type
@@ -191,8 +191,8 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
 
     def SetPlatformEnv(self):
         logging.debug("PlatformBuilder SetPlatformEnv")
-        self.env.SetValue("PRODUCT_NAME", "MacBookProMid2020", "Platform Hardcoded")
-        self.env.SetValue("ACTIVE_PLATFORM", "MacBookProMid2020Pkg/MacBookProMid2020.dsc", "Platform Hardcoded")
+        self.env.SetValue("PRODUCT_NAME", "MacBookAirMid2020", "Platform Hardcoded")
+        self.env.SetValue("ACTIVE_PLATFORM", "MacBookAirMid2020Pkg/MacBookAirMid2020.dsc", "Platform Hardcoded")
         self.env.SetValue("TARGET_ARCH", "AARCH64", "Platform Hardcoded")
         self.env.SetValue("TOOL_CHAIN_TAG", "CLANG38", "set default to clang38")
         # self.env.SetValue("EMPTY_DRIVE", "FALSE", "Default to false")

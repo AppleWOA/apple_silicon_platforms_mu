@@ -72,6 +72,26 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSrIovSupport|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdAriSupport|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdMrIovSupport|FALSE
+  #
+  # Host Bridge Library settings.
+  # 
+  gArmTokenSpaceGuid.PcdPciBusMin|0x0
+  gArmTokenSpaceGuid.PcdPciBusMax|0xFF
+  #
+  # Apple chips don't seem to use "x86-style" I/O accesses, so use placeholder values here, and don't reference them in the host bridge driver.
+  #
+  gArmTokenSpaceGuid.PcdPciIoBase|0x0
+  gArmTokenSpaceGuid.PcdPciIoSize|0x00010000
+  #
+  # The 32 bit PCIe MMIO is not prefetchable.
+  #
+  gArmTokenSpaceGuid.PcdPciMmio32Base|0xc0000000
+  gArmTokenSpaceGuid.PcdPciMmio32Size|0x40000000
+  #
+  # 64 bit PCIe MMIO *is* prefetchable.
+  #
+  gArmTokenSpaceGuid.PcdPciMmio64Base|0x5A0000000
+  gArmTokenSpaceGuid.PcdPciMmio64Size|0x20000000
 
 
 [LibraryClasses.common]
