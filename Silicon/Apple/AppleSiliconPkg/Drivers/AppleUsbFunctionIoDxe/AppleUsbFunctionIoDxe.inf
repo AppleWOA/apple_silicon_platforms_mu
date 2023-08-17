@@ -55,4 +55,4 @@
   gEfiUsbFunctionIoProtocolGuid
 
 [Depex]
-  gEfiUsbFunctionIoProtocolGuid
+  TRUE
