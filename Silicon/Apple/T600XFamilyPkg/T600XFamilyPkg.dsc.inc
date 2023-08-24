@@ -36,7 +36,7 @@
   gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|18 #virt timer
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
-  gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
+  gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|FALSE
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T600x"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1 Pro/Max/Ultra (Jade)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
@@ -92,6 +92,12 @@
   #
   gArmTokenSpaceGuid.PcdPciMmio64Base|0x5A0000000
   gArmTokenSpaceGuid.PcdPciMmio64Size|0x20000000
+
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0x590000000
+  #
+  # This shouldn't get used.
+  #
+  gEfiMdePkgTokenSpaceGuid.PcdPciIoTranslation|0x0
 
 
 [LibraryClasses.common]
