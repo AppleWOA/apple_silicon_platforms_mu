@@ -47,3 +47,6 @@
   MemoryAllocationLib
   UefiBootServicesTableLib
   DebugLib
+
+[FixedPcd]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion
