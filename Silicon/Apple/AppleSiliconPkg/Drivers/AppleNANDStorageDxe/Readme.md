@@ -13,10 +13,6 @@ do not use a discrete storage controller on the device itself unlike most PC NVM
 
 There are several benefits to this design, chiefly it enables Apple NVMe drives and the data at rest on them to be protected via a technology called "Data Protection" due to the ability to work in tandem with other SoC blocks such as the AES engines.
 
-## Design philosophy
-
-The driver is
-
 ## Dependencies
 
 ANS2/ANS3 require the hardware SARTs to be working, hence AppleSARTLib is a prerequisite for this driver to build.

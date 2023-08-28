@@ -1,0 +1,34 @@
+#
+#  Copyright (c) 2023, AppleWOA authors. All rights reserved.
+#
+#  Module Name:
+#    AppleNANDStorageDxe.inf
+#  
+#  Abstract:
+#    Apple NAND Storage controller driver for Apple Silicon platforms.
+#
+#  Environment:
+#    UEFI Driver Execution Environment (DXE)
+#
+#  License:
+#    SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+
+[Defines]
+  INF_VERSION                    = 0x0001001c
+  BASE_NAME                      = AppleNANDStorageDxe
+  FILE_GUID                      = acda0196-4589-4e4f-b71d-e9f9c2b2ea3d
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AppleNANDStorageDxeInitialize
+
+
+[Sources]
+  AppleNANDStorageDxe.c
+
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
