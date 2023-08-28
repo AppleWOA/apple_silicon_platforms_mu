@@ -9,12 +9,14 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize|0x0
 
 [PcdsFixedAtBuild.common]
-  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
+  # Setting timer frequency to 0 means "read from CNTFRQ_EL0"
+  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|0
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x8FF000000 #fair warning this location is *totally random*
   gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|19 # placeholder 
   gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|17 # phys timer IRQ number (this is arbitrary because per-cpu fiq)
   gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|20 #this disables the HV timer
   gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|18 #virt timer
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion|2
 !if $(USES_MAC_CPU) == TRUE
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T8103"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1"
@@ -31,7 +33,8 @@
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #
-  # if GIC is used, it's expected to be virtualized by trusted firmware as Tonga/T8103 and Sicily/T8101 has no onboard GIC.
+  # if GIC is used, it's expected to be virtualized by trusted firmware at the following addresses.
+  # as Tonga/T8103 and Sicily/T8101 has no onboard GIC. (but do contain the MSRs necessary for accelerated virt)
   #
   gArmTokenSpaceGuid.PcdGicDistributorBase|0xf00000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xf10000000

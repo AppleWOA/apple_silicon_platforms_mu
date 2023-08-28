@@ -28,7 +28,8 @@
 
 [PcdsFixedAtBuild.common]
   #ARM architectural fixed build-time settings
-  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|24000000
+  # Setting timer frequency to 0 means "read from CNTFRQ_EL0"
+  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|0
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x100FF000000 #fair warning this location is *totally random*
   gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|19 # placeholder 
   gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|17 # phys timer IRQ number (this is arbitrary because per-cpu fiq)
@@ -40,10 +41,12 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T600x"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1 Pro/Max/Ultra (Jade)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion|3
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #
-  # if GIC is used, it's expected to be virtualized by trusted firmware as Jade/T600x has no onboard GIC.
+  # if GIC is used, it's expected to be virtualized by trusted firmware at the below addresses 
+  # as Jade/T600x has no onboard GIC. (but does contain the MSRs to do accelerated virt)
   #
   gArmTokenSpaceGuid.PcdGicDistributorBase|0x5000000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x5100000000
