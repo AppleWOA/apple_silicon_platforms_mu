@@ -276,6 +276,11 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   #SECTION UI = "EdkShell"
 #}
   
+  # Embedded USB firmware blob (for testing only!)
+  #FILE FREEFORM = d730ab59-670e-4a92-8475-b31939d05bb4 {
+  #SECTION RAW = AppleSiliconPkg/FirmwareBlobs/ASMedia_PCI_USB_Controller.bin
+#}
+  
 !include AppleSiliconPkg/FrontpageFdf.inc
 
 [FV.FVMAIN_COMPACT]
