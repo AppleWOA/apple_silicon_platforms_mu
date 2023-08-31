@@ -1,0 +1,50 @@
+#
+#  Copyright (c) 2023, AppleWOA authors. All rights reserved.
+#
+#  Module Name:
+#    AppleAsmediaUsbPciFirmwareLoaderLib.inf
+#  
+#  Abstract:
+#     Helper driver library for Apple silicon platforms to load the Asmedia USB
+#     controller firmware (if applicable to the platform)
+#
+# 
+#  Environment:
+#     UEFI DXE (Driver Execution Environment).
+#
+#  License:
+#    SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+
+[Defines]
+  INF_VERSION                    = 0x0001001c
+  BASE_NAME                      = AppleAsmediaUsbPciFirmwareLoaderLib
+  FILE_GUID                      = 836e0bf5-68aa-41bb-8eb7-acf3c5dec6cf
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AppleAsmediaUsbPciFirmwareLoaderLib
+
+
+[Sources]
+  AppleAsmediaUsbPciFirmwareLoaderLib.c
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+
+[LibraryClasses]
+  ArmLib
+  PcdLib
+  IoLib
+  HobLib
+  CompilerIntrinsicsLib
+  FdtLib
+  UefiLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  DebugLib
+  BaseLib
+  PciLib
+  PciExpressLib

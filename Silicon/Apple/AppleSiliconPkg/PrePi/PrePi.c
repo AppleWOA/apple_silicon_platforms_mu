@@ -145,7 +145,7 @@ UINT32 InitializeUART(VOID)
     SerialPortInitialize();
     DEBUG(
         (EFI_D_INFO | EFI_D_LOAD, 
-        "M1 Project Mu Firmware (arm64e), version 1.0-alpha\n")
+        "Apple Silicon Project Mu Firmware (arm64/arm64e)\n")
         );
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "If you can see this message, UART works\n"));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "FD Base Address - 0x%llx\n", PcdGet64(PcdFdBaseAddress)));

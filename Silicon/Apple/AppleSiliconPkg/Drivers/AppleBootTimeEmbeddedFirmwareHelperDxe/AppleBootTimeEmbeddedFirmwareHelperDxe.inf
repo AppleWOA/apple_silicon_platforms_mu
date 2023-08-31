@@ -1,0 +1,58 @@
+#
+#  Copyright (c) 2023, AppleWOA authors. All rights reserved.
+#
+#  Module Name:
+#    AppleBootTimeEmbeddedFirmwareHelperDxe.inf
+#  
+#  Abstract:
+#    Helper driver for Apple Silicon platforms to load firmware blobs required for PCIe or
+#    platform devices.
+#
+#  Environment:
+#    UEFI Driver Execution Environment (DXE)
+#
+#  License:
+#    SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+
+[Defines]
+  INF_VERSION                    = 0x0001001c
+  BASE_NAME                      = AppleBootTimeEmbeddedFirmwareHelperDxe
+  FILE_GUID                      = 28ea026e-d47b-4d6e-a992-eae5df6aa638
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AppleBootTimeEmbeddedFirmwareHelperDxeInitialize
+
+[Sources]
+  AppleBootTimeEmbeddedFirmwareHelperDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  ArmPkg/ArmPkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+
+#
+# fair warning, these libraries are probably not all necessary...
+#
+[LibraryClasses]
+  BaseLib
+  UefiLib
+  UefiBootServicesTableLib
+  DebugLib
+  PrintLib
+  MemoryAllocationLib
+  UefiDriverEntryPoint
+  IoLib
+  PcdLib
+  UefiLib
+  FdtLib
+  ArmLib
+
+[Protocols]
+  gEfiLoadFileProtocolGuid
+
+[Guids]
+  gAppleSiliconPkgEmbeddedUsbFirmwareGuid
