@@ -20,7 +20,7 @@
   INF_VERSION                    = 0x0001001c
   BASE_NAME                      = AppleBootTimeEmbeddedFirmwareHelperDxe
   FILE_GUID                      = 28ea026e-d47b-4d6e-a992-eae5df6aa638
-  MODULE_TYPE                    = DXE_DRIVER
+  MODULE_TYPE                    = UEFI_DRIVER
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = AppleBootTimeEmbeddedFirmwareHelperDxeInitialize
 
@@ -30,9 +30,9 @@
 [Packages]
   MdePkg/MdePkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   ArmPkg/ArmPkg.dec
   AppleSiliconPkg/AppleSiliconPkg.dec
-  EmbeddedPkg/EmbeddedPkg.dec
 
 #
 # fair warning, these libraries are probably not all necessary...
@@ -45,14 +45,23 @@
   PrintLib
   MemoryAllocationLib
   UefiDriverEntryPoint
+  DxeServicesLib
   IoLib
   PcdLib
   UefiLib
   FdtLib
   ArmLib
+  PciLib
+  PciSegmentLib
+  PciExpressLib
+  TimerLib
 
 [Protocols]
   gEfiLoadFileProtocolGuid
+  gEfiPciIoProtocolGuid
+
+[FixedPcd]
+  gAppleSiliconPkgTokenSpaceGuid.PcdXhciPcieDeviceNumber
 
 [Guids]
   gAppleSiliconPkgEmbeddedUsbFirmwareGuid

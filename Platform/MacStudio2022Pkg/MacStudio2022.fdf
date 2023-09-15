@@ -165,9 +165,11 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   # PCIe Support (required to bring up USB-A among other fun stuff)
   #
   INF ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
-  INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
   INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
   INF MdeModulePkg/Bus/Pci/NonDiscoverablePciDeviceDxe/NonDiscoverablePciDeviceDxe.inf
+
+  INF AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
 
   #NVMe Support
   #TODO: ANS2/SART driver
@@ -270,16 +272,11 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
   #SECTION UI = "Embedded RAMDisk"  
 #}
-
-  #FILE APPLICATION = C57AD6B7-0515-40A8-9D21-551652854E37 {
-  #SECTION PE32 = AppleSiliconPkg/RAMDisk/BOOTAA64.EFI
-  #SECTION UI = "EdkShell"
-#}
   
   # Embedded USB firmware blob (for testing only!)
-  #FILE FREEFORM = d730ab59-670e-4a92-8475-b31939d05bb4 {
-  #SECTION RAW = AppleSiliconPkg/FirmwareBlobs/ASM2214A_PCI_XHCI_Controller.bin
-#}
+  FILE FREEFORM = d730ab59-670e-4a92-8475-b31939d05bb4 {
+  SECTION RAW = AppleSiliconPkg/FirmwareBlobs/ASM2214A_PCI_XHCI_Controller.bin
+}
   
 !include AppleSiliconPkg/FrontpageFdf.inc
 

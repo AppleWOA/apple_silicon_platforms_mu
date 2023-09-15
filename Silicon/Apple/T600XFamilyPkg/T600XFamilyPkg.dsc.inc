@@ -42,6 +42,7 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1 Pro/Max/Ultra (Jade)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion|3
+  gAppleSiliconPkgTokenSpaceGuid.PcdXhciPcieDeviceNumber|3
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #

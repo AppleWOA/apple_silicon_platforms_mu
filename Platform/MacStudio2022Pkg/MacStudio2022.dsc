@@ -65,6 +65,7 @@
 [Components.common]
 
   MacStudio2022Pkg/AcpiTables/DeviceAcpiTables.inf
+  AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
 
 
 !include T600XFamilyPkg/T600XFamilyPkg.dsc.inc
