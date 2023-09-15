@@ -423,11 +423,11 @@ MsBootOptionsLibRegisterDefaultBootOptions (
   VOID
   )
 {
-  RegisterFvBootOption (&gMsBootPolicyFileGuid, INTERNAL_WINPE_RAMDISK_NAME, (UINTN)-1, LOAD_OPTION_ACTIVE, NULL, 0);
+  RegisterFvBootOption (&gMsBootPolicyFileGuid, MS_USB_BOOT, (UINTN)-1, LOAD_OPTION_ACTIVE, (UINT8 *)MS_USB_BOOT_PARM, sizeof (MS_USB_BOOT_PARM));
   RegisterFvBootOption (&gMsBootPolicyFileGuid, MS_SDD_BOOT, (UINTN)-1, LOAD_OPTION_ACTIVE, (UINT8 *)MS_SDD_BOOT_PARM, sizeof (MS_SDD_BOOT_PARM));
   RegisterFvBootOption (PcdGetPtr (PcdShellFile), INTERNAL_UEFI_SHELL_NAME, (UINTN)-1, LOAD_OPTION_ACTIVE, NULL, 0);
-  RegisterFvBootOption (&gMsBootPolicyFileGuid, MS_USB_BOOT, (UINTN)-1, LOAD_OPTION_ACTIVE, (UINT8 *)MS_USB_BOOT_PARM, sizeof (MS_USB_BOOT_PARM));
   RegisterFvBootOption (&gMsBootPolicyFileGuid, MS_PXE_BOOT, (UINTN)-1, LOAD_OPTION_ACTIVE, (UINT8 *)MS_PXE_BOOT_PARM, sizeof (MS_PXE_BOOT_PARM));
+  RegisterFvBootOption (&gMsBootPolicyFileGuid, INTERNAL_WINPE_RAMDISK_NAME, (UINTN)-1, LOAD_OPTION_ACTIVE, NULL, 0);
   RegisterFvBootOption (PcdGetPtr (PcdUIApplicationFile), INTERNAL_UEFI_FP_NAME, (UINTN)-1, LOAD_OPTION_ACTIVE, NULL, 0);
 }
 
@@ -455,11 +455,9 @@ MsBootOptionsLibGetDefaultOptions (
     *OptionCount = 0;
     return NULL;
   }
-  
-  Status = CreateFvBootOption (&gMsBootPolicyFileGuid, MS_SDD_BOOT, &Option[0], LOAD_OPTION_ACTIVE, (UINT8 *)MS_SDD_BOOT_PARM, sizeof (MS_SDD_BOOT_PARM));
-  //DEBUG((DEBUG_INFO, "%a - Creating CDBoot.efi boot option\n", __FUNCTION__));
+  Status = CreateFvBootOption (&gMsBootPolicyFileGuid, MS_USB_BOOT, &Option[2], LOAD_OPTION_ACTIVE, (UINT8 *)MS_USB_BOOT_PARM, sizeof (MS_USB_BOOT_PARM));
+  Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, MS_SDD_BOOT, &Option[0], LOAD_OPTION_ACTIVE, (UINT8 *)MS_SDD_BOOT_PARM, sizeof (MS_SDD_BOOT_PARM));
   Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, INTERNAL_WINPE_RAMDISK_NAME, &Option[1], LOAD_OPTION_ACTIVE, NULL, 0);
-  Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, MS_USB_BOOT, &Option[2], LOAD_OPTION_ACTIVE, (UINT8 *)MS_USB_BOOT_PARM, sizeof (MS_USB_BOOT_PARM));
   Status |= CreateFvBootOption (&gMsBootPolicyFileGuid, MS_PXE_BOOT, &Option[3], LOAD_OPTION_ACTIVE, (UINT8 *)MS_PXE_BOOT_PARM, sizeof (MS_PXE_BOOT_PARM));
 
   Status2 = CreateFvBootOption (PcdGetPtr (PcdShellFile), INTERNAL_UEFI_SHELL_NAME, &Option[4], LOAD_OPTION_ACTIVE, NULL, 0);

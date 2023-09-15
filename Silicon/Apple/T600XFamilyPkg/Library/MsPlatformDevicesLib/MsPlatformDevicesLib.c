@@ -87,7 +87,7 @@ PlatformIsDevicePathUsb (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  return FALSE;
+  return TRUE;
 }
 
 /**

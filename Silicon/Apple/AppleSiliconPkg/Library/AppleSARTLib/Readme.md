@@ -7,4 +7,4 @@ This library implements support for the SART on Apple platforms. This is a prere
 
 ## Design philosophy
 
-This is being implemented as a driver library so that other drivers can use the SART library in case other peripherals on future chips need it.
+This is being implemented as a driver library so that the ANS driver can simply take a dependency on this library instead of having to implement that code in the ANS driver itself.
