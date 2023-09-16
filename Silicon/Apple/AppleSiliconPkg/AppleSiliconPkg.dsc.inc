@@ -49,7 +49,7 @@
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0xFFFFFF4F
   gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|320
-  gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x07
+  gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0xff
   #gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000002
 
   #variable size

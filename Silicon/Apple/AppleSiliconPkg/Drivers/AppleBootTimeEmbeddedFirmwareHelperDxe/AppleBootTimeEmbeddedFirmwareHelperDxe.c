@@ -437,7 +437,7 @@ STATIC EFI_STATUS EFIAPI AppleBootTimeEmbeddedFirmwareDriverBindingSupported(
 {
   EFI_STATUS Status;
   EFI_PCI_IO_PROTOCOL *PciIoProtocol;
-  EFI_PCI_IO_PROTOCOL *XhciPciIoProtocol;
+  // EFI_PCI_IO_PROTOCOL *XhciPciIoProtocol;
   UINT32 PciID;
   BOOLEAN IsAsmediaFirmwareLoaded = FALSE;
   BOOLEAN UsbFirmwareLoadSuccessful = FALSE;
@@ -458,9 +458,17 @@ STATIC EFI_STATUS EFIAPI AppleBootTimeEmbeddedFirmwareDriverBindingSupported(
       __FUNCTION__, Status));
     goto CloseProtocolAndExit;
   }
+  Status = PciIoProtocol->GetLocation(PciIoProtocol, &Segment, &Bus, &Device, &Function);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((EFI_D_ERROR,
+      "%a: Pci->GetLocation() of bus/device/function failed (Status == %r)\n",
+      __FUNCTION__, Status));
+    goto CloseProtocolAndExit;
+  }
   if ((PciID & PCI_VENDOR_ID_BITMASK) != PCI_VENDOR_ID_ASMEDIA || ((PciID >> 16)) != PCI_DEVICE_ID_ASMEDIA_2214A) {
-    DEBUG((DEBUG_INFO, "%a - failed to find Apple PCI-PCI bridge\n", __FUNCTION__));
+    DEBUG((DEBUG_INFO, "%a - failed to find ASMedia XHCI controller\n", __FUNCTION__));
     DEBUG((DEBUG_INFO, "%a - Expected: 0x%04x:0x%04x, actual 0x%04x:0x%04x\n", __FUNCTION__, PCI_VENDOR_ID_ASMEDIA, PCI_DEVICE_ID_ASMEDIA_2214A, (PciID & PCI_VENDOR_ID_BITMASK), (PciID >> 16)));
+    DEBUG((DEBUG_INFO, "%a - PCI segment %llu, bus %llu, device %llu, function %llu\n", Segment, Bus, Device, Function));
     goto CloseProtocolAndExit;
   }
 
@@ -468,13 +476,6 @@ STATIC EFI_STATUS EFIAPI AppleBootTimeEmbeddedFirmwareDriverBindingSupported(
   // We have a Apple PCI-PCI bridge at this point, check that the one we have is on the right device number for the XHCI controller.
   // (Note this is compared to a fixed PCD per SoC)
   //
-  // Status = PciIoProtocol->GetLocation(PciIoProtocol, &Segment, &Bus, &Device, &Function);
-  // if (EFI_ERROR (Status)) {
-  //   DEBUG ((EFI_D_ERROR,
-  //     "%a: Pci->GetLocation() of bus/device/function failed (Status == %r)\n",
-  //     __FUNCTION__, Status));
-  //   goto CloseProtocolAndExit;
-  // }
 
   //
   // on Apple platforms, all devices on bus 0 are the PCI to PCI bridges.
