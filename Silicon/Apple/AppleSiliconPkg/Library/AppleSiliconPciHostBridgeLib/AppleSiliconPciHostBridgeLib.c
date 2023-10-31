@@ -93,11 +93,7 @@ STATIC PCI_ROOT_BRIDGE  mRootBridge = {
   },
 
   /* PCI_ROOT_BRIDGE_APERTURE Io; IO aperture which can be used by the root
-     bridge 
-     
-     For Apple chips, this doesn't seem to exist to my knowledge, so this will be a placeholder and never used.
-     Seems to be the x86-style IO accessor.
-     */
+     bridge. */
   // {
   //   FixedPcdGet64 (PcdPciIoBase),
   //   FixedPcdGet64 (PcdPciIoBase) + FixedPcdGet64 (PcdPciIoSize) - 1

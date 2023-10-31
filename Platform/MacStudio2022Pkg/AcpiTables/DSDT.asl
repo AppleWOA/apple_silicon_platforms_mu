@@ -106,6 +106,14 @@
             },
         })
 
+        // Device(PCI0) {
+        //     Name (_HID, EISAID ("PNP0A08")) // PCI Express Root Bridge
+        //     Name (_CID, EISAID ("PNP0A03")) // Compatible PCI Root Bridge
+        //     Name (_SEG, Zero) // PCI Segment Group number
+        //     Name (_BBN, Zero) // PCI Base Bus Number
+        //     Name (_ADR, Zero)
+        //     Name (_UID, "PCI0")
+        // }
         Device(COM0) {
             Name(_HID, "APPL8900") // naming it APPL8900 since the Samsung based UART was used since the 8900
             Name(_UID, Zero)

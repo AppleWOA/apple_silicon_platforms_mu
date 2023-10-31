@@ -465,30 +465,34 @@ STATIC EFI_STATUS EFIAPI AppleBootTimeEmbeddedFirmwareDriverBindingSupported(
       __FUNCTION__, Status));
     goto CloseProtocolAndExit;
   }
-  if ((PciID & PCI_VENDOR_ID_BITMASK) != PCI_VENDOR_ID_ASMEDIA || ((PciID >> 16)) != PCI_DEVICE_ID_ASMEDIA_2214A) {
+  if ((PciID & PCI_VENDOR_ID_BITMASK) != PCI_VENDOR_ID_APPLE || ((PciID >> 16)) != PCI_DEVICE_ID_APPLE_SILICON_P2P_BRIDGE) {
     DEBUG((DEBUG_INFO, "%a - failed to find ASMedia XHCI controller\n", __FUNCTION__));
     DEBUG((DEBUG_INFO, "%a - Expected: 0x%04x:0x%04x, actual 0x%04x:0x%04x\n", __FUNCTION__, PCI_VENDOR_ID_ASMEDIA, PCI_DEVICE_ID_ASMEDIA_2214A, (PciID & PCI_VENDOR_ID_BITMASK), (PciID >> 16)));
-    DEBUG((DEBUG_INFO, "%a - PCI segment %llu, bus %llu, device %llu, function %llu\n", Segment, Bus, Device, Function));
     goto CloseProtocolAndExit;
   }
-
+  DEBUG((DEBUG_INFO, "%a - PCI segment %llu, bus %llu, device %llu, function %llu\n", __FUNCTION__, Segment, Bus, Device, Function));
   //
   // We have a Apple PCI-PCI bridge at this point, check that the one we have is on the right device number for the XHCI controller.
   // (Note this is compared to a fixed PCD per SoC)
   //
-
   //
   // on Apple platforms, all devices on bus 0 are the PCI to PCI bridges.
   // therefore we only need to verify the device number (since no P2P bridge has sub functions)
   //
-  // if((UINT32)Device != FixedPcdGet32(PcdXhciPcieDeviceNumber)) {
-  //   DEBUG((DEBUG_INFO, "%a - skipping PCI-PCI bridge as it is not the one for the XHCI controller\n", __FUNCTION__));
-  //   goto CloseProtocolAndExit;
-  // }
+  if((UINT32)Device != FixedPcdGet32(PcdXhciPcieDeviceNumber)) {
+    DEBUG((DEBUG_INFO, "%a - skipping PCI-PCI bridge as it is not the one for the XHCI controller\n", __FUNCTION__));
+    goto CloseProtocolAndExit;
+  }
 
   //
   // Now, we need to get a handle to the real XHCI controller.
   //
+  UINT64 AttributeResult1 = 0;
+  UINT64 AttributeResult2 = 0;
+  PciIoProtocol->Attributes(PciIoProtocol, EfiPciIoAttributeOperationGet, 0, &AttributeResult1);
+  PciIoProtocol->Attributes(PciIoProtocol, EfiPciIoAttributeOperationSupported, 0, &AttributeResult2);
+  DEBUG((DEBUG_INFO, "%a - Attributes set 0x%llx, Attributes supported 0x%llx\n", __FUNCTION__, AttributeResult1, AttributeResult2));
+  ASSERT(FALSE);
 
   //
   // If we're at this point, we have the right XHCI controller, proceed to upload the firmware.

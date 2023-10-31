@@ -80,7 +80,7 @@
   # Host Bridge Library settings.
   # 
   gArmTokenSpaceGuid.PcdPciBusMin|0x0
-  gArmTokenSpaceGuid.PcdPciBusMax|0xFF
+  gArmTokenSpaceGuid.PcdPciBusMax|0x4
   #
   # Apple chips don't seem to use "x86-style" I/O accesses, so use placeholder values here, and don't reference them in the host bridge driver.
   #
@@ -91,6 +91,8 @@
   #
   gArmTokenSpaceGuid.PcdPciMmio32Base|0xc0000000
   gArmTokenSpaceGuid.PcdPciMmio32Size|0x40000000
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio32Translation|0x500000000
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio64Translation|0x0
   #
   # 64 bit PCIe MMIO *is* prefetchable.
   #

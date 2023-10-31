@@ -1,0 +1,55 @@
+#
+#  Copyright (c) 2023, AppleWOA authors. All rights reserved.
+#
+#  Module Name:
+#    AppleSiliconPciPlatformDxe.inf
+#  
+#  Abstract:
+#    Helper driver for Apple Silicon platforms to load firmware blobs required for PCIe or
+#    platform devices.
+#
+#  Environment:
+#    UEFI Driver Execution Environment (DXE)
+#
+#  License:
+#    SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+
+[Defines]
+  INF_VERSION                    = 0x0001001c
+  BASE_NAME                      = AppleSiliconPciPlatformDxe
+  FILE_GUID                      = 1d0fc441-75eb-4464-8f11-beab628581d1
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AppleSiliconPciPlatformDxeInitialize
+
+[Sources]
+  AppleSiliconPciPlatformDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ArmPkg/ArmPkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  UefiLib
+  UefiBootServicesTableLib
+  DebugLib
+  PrintLib
+  MemoryAllocationLib
+  UefiDriverEntryPoint
+  DxeServicesLib
+  IoLib
+  PcdLib
+  UefiLib
+  FdtLib
+  ArmLib
+  PciLib
+  PciSegmentLib
+  PciExpressLib
+  TimerLib
+
