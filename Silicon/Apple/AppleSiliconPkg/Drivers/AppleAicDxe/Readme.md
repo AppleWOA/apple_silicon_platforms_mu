@@ -6,6 +6,8 @@ This DXE driver/library implements the required functionality to enable AIC (bot
 
 Please note this driver is a work in progress, and as such bugs are expected to be present.
 
+TODO: Add AICv3 support, seen in T8122 and T8130 SoCs, check what's different between v2 and v3
+
 ## How does AIC differ from GIC?
 
 The primary and most critical difference between the two is that the AIC has no conception of distributors or redistributors. All interrupt routing is performed by the controller itself, and most acknowledgement, masking and clearing of IPIs is done via MMIO operations or implementation defined system registers and *not* a "CPU interface" by the definition in the GIC standard. IPIs on AICv2 additionally are primarily FIQs, with implementation defined system registers to acknowledge/clear the IPI.
