@@ -22,7 +22,7 @@ STATIC APPLE_AIC_VERSION mAicVersion;
 /**
  * @brief Returns the version of AIC on the platform.
  * 
- * @return APPLE_AIC_VERSION_1 if using AICv1, else APPLE_AIC_VERSION_2 for AICv2.
+ * @return APPLE_AIC_VERSION_1 if using AICv1, APPLE_AIC_VERSION_2 for AICv2, APPLE_AIC_VERSION_3 for AICv3.
  */
 APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
 {
@@ -34,6 +34,10 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
         //if we need to support platforms beyond desktop Apple silicon platforms, this behavior must change
         //(haven't figured out if there's an MSR or MMIO address that will give us this information)
         //default to AICv1 if the platform doesn't explicitly specify it's for AICv2
+
+        //
+        // TODO: remove the HACK, instead infer this information from ADT or FDT.
+        //
         if ((FixedPcdGet32(PcdAppleSocIdentifier) == 0x6000) || (FixedPcdGet32(PcdAppleSocIdentifier) == 0x8112))
         {
             mAicVersion = APPLE_AIC_VERSION_2;
