@@ -204,9 +204,8 @@ STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
      * where the value is stored, it cannot be read from MMIO.
      * 
      */
-    EventRegisterValue = fdt32_to_cpu(InterruptControllerRegs[4]);
-    EventRegisterValue = (EventRegisterValue << 32) | fdt32_to_cpu (InterruptControllerRegs[5]);
-    mAicV2EventReg = EventRegisterValue;
+    mAicV2EventReg = fdt32_to_cpu(InterruptControllerRegs[4]);
+    mAicV2EventReg = (mAicV2EventReg << 32) | fdt32_to_cpu (InterruptControllerRegs[5]);
 
     /**
      * From IRQ_CFG + sizeof(UINT32) * MaxIrqs, the AIC registers are separated
