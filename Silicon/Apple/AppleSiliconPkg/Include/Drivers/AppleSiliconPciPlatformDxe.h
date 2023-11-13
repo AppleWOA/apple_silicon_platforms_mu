@@ -132,4 +132,19 @@
 
 #define MAX_RID2SID			512
 
+//
+// Type definitions
+//
+
+typedef struct ApplePcieComplexInfo {
+  UINT64 EcamCfgRegionBase; // base address for ECAM region, pull from DT
+  UINT32 EcamCfgRegionSize; // Size of ECAM region
+  UINT64 RcRegionBase; // base address for "rc" region
+} APPLE_PCIE_COMPLEX_INFO;
+
+typedef struct ApplePcieDevicePortInfo {
+  UINT64 DeviceBaseAddress; // base address for the device port in the PCIe complex, pull from DT
+} APPLE_PCIE_DEVICE_PORT_INFO;
+
+
 #endif //APPLE_SILICON_PCI_PLATFORM_DXE_H

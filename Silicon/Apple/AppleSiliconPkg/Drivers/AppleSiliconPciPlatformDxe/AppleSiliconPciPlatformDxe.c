@@ -40,6 +40,7 @@
 #include <Library/PciExpressLib.h>
 #include <IndustryStandard/Pci.h>
 #include <Library/TimerLib.h>
+#include <Include/libfdt.h>
 #include <Drivers/AppleSiliconPciPlatformDxe.h>
 
 //
@@ -53,12 +54,10 @@
 // especially on later versions or later hardware.
 //
 
-typedef struct ApplePcieComplexInfo {
-  UINT64 EcamCfgRegionBase, // base address for ECAM region, pull from DT
-};
-
-typedef struct ApplePcieDevicePortInfo {
-  UINT64 DeviceBaseAddress // base address for the device port in the PCIe complex, pull from DT
+STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_INFO *PcieComplex, INT32 SubNode) {
+  APPLE_PCIE_DEVICE_PORT_INFO *PciePortInfo = AllocateZeroPool(sizeof(APPLE_PCIE_DEVICE_PORT_INFO));
+  
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -68,9 +67,41 @@ AppleSiliconPciPlatformDxeInitialize(
   IN EFI_SYSTEM_TABLE  *SystemTable
 ) 
 {
+    UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
+    INT32 Length;
+    INT32 PcieNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pcie");
+    CONST INT32 *PcieRegs = fdt_getprop((VOID *)FdtBlob, PcieNode, "reg", &Length);
+    APPLE_PCIE_COMPLEX_INFO *PcieComplexInfoStruct = AllocateZeroPool(sizeof(APPLE_PCIE_COMPLEX_INFO));
+    CHAR8 *PortStatus;
+    INT32 PortStatusLength;
+    INT32 PcieSubNode;
+    EFI_STATUS Status;
     //
     // The PCIe controller itself seems to be brought up by m1n1 itself, including tunables,
     // so we just need to bring up root ports here so that DXE can detect the devices on the ports, including the XHCI controller.
     //
-    for(UINT32 i = 0)
+
+    //
+    // Pull the ECAM base address from the FDT. Ditto for "rc" base address.
+    // With the Asahi Linux FDTs, we can usually safely assume this to be the first reg entry,
+    // but if this ever changes, this approach will need to change too.
+    // TODO: see how to do this with ADT on embedded.
+    //
+    PcieComplexInfoStruct->EcamCfgRegionBase = fdt32_to_cpu(PcieRegs[0]);
+    PcieComplexInfoStruct->EcamCfgRegionBase = ((PcieComplexInfoStruct->EcamCfgRegionBase) << 32) | (fdt32_to_cpu(PcieRegs[1]));
+    PcieComplexInfoStruct->EcamCfgRegionSize = fdt32_to_cpu(PcieRegs[3]);
+    PcieComplexInfoStruct->RcRegionBase = fdt32_to_cpu(PcieRegs[4]);
+    PcieComplexInfoStruct->RcRegionBase = ((PcieComplexInfoStruct->RcRegionBase) << 32) | (fdt32_to_cpu(PcieRegs[5]));
+
+    //
+    // NOTE: the following does NOT account for APCIe-GE devices such as the Mac Pros.
+    //
+    fdt_for_each_subnode(PcieSubNode, (VOID *)FdtBlob, PcieNode) {
+      PortStatus = fdt_getprop((VOID *)FdtBlob, PcieSubNode, "status", &PortStatusLength);
+      if(!strcmp(PortStatus, "disabled")) {
+        DEBUG((DEBUG_INFO, "PCIe port disabled, continuing\n"));
+        continue;
+      }
+      Status = AppleSiliconPciePlatformDxeSetupPciePort(PcieComplexInfoStruct, PcieSubNode);
+    }
 }

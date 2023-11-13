@@ -68,9 +68,11 @@ InitializeColorbars(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
   State |= DEVICE_STATE_DEVELOPMENT_BUILD_ENABLED;
   State |= DEVICE_STATE_MANUFACTURING_MODE;
 
-#if USE_MEMORY_FOR_SERIAL_OUTPUT == 1 || USE_SCREEN_FOR_SERIAL_OUTPUT == 1
+  //
+  // TODO: should we check device fuse status here?
+  //
   State |= DEVICE_STATE_UNIT_TEST_MODE;
-#endif
+
 
   AddDeviceState(State);
 
