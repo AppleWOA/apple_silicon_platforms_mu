@@ -71,7 +71,6 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
 
   PciePortInfo->Complex = PcieComplex;
   PciePortInfo->DevicePortIndex = Index >> 11;
-  PciePortInfo->
 
 
   return EFI_SUCCESS;
