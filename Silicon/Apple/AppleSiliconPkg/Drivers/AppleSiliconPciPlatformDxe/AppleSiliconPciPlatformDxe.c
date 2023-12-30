@@ -56,7 +56,24 @@
 
 STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_INFO *PcieComplex, INT32 SubNode) {
   APPLE_PCIE_DEVICE_PORT_INFO *PciePortInfo = AllocateZeroPool(sizeof(APPLE_PCIE_DEVICE_PORT_INFO));
+  EFI_STATUS Status;
+  UINT32 *IndexPtr;
+  UINT32 Index;
+  UINT32 IndexLength;
+  UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
   
+  //
+  // TODO: GPIO setup
+  //
+
+  IndexPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reg", &IndexLength);
+  Index = IndexPtr[0];
+
+  PciePortInfo->Complex = PcieComplex;
+  PciePortInfo->DevicePortIndex = Index >> 11;
+  PciePortInfo->
+
+
   return EFI_SUCCESS;
 }
 
@@ -76,6 +93,7 @@ AppleSiliconPciPlatformDxeInitialize(
     INT32 PortStatusLength;
     INT32 PcieSubNode;
     EFI_STATUS Status;
+
     //
     // The PCIe controller itself seems to be brought up by m1n1 itself, including tunables,
     // so we just need to bring up root ports here so that DXE can detect the devices on the ports, including the XHCI controller.
@@ -84,8 +102,8 @@ AppleSiliconPciPlatformDxeInitialize(
     //
     // Pull the ECAM base address from the FDT. Ditto for "rc" base address.
     // With the Asahi Linux FDTs, we can usually safely assume this to be the first reg entry,
-    // but if this ever changes, this approach will need to change too.
-    // TODO: see how to do this with ADT on embedded.
+    // but if this ever changes (as will be the case when booting right from iBoot using ADT), this approach will need to change too.
+    // TODO: see how to do this with ADT on embedded or non-m1n1 case.
     //
     PcieComplexInfoStruct->EcamCfgRegionBase = fdt32_to_cpu(PcieRegs[0]);
     PcieComplexInfoStruct->EcamCfgRegionBase = ((PcieComplexInfoStruct->EcamCfgRegionBase) << 32) | (fdt32_to_cpu(PcieRegs[1]));
@@ -103,5 +121,11 @@ AppleSiliconPciPlatformDxeInitialize(
         continue;
       }
       Status = AppleSiliconPciePlatformDxeSetupPciePort(PcieComplexInfoStruct, PcieSubNode);
+      if(EFI_ERROR(Status)) {
+        DEBUG((DEBUG_ERROR, "%a - Port setup failed: %r\n", __FUNCTION__, Status));
+        ASSERT_EFI_ERROR(Status);
+      }
     }
+
+    return EFI_SUCCESS;
 }

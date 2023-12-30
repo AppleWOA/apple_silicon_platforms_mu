@@ -35,7 +35,7 @@
 
 //
 // Definitions taken from AsahiLinux/linux/drivers/pci/controller/pcie-apple.c
-// is
+//
 
 #define CORE_RC_PHYIF_CTL		0x00024
 #define   CORE_RC_PHYIF_CTL_RUN		BIT(0)
@@ -144,7 +144,10 @@ typedef struct ApplePcieComplexInfo {
 
 typedef struct ApplePcieDevicePortInfo {
   UINT64 DeviceBaseAddress; // base address for the device port in the PCIe complex, pull from DT
+  UINT32 DevicePortIndex;
+  APPLE_PCIE_COMPLEX_INFO *Complex;
 } APPLE_PCIE_DEVICE_PORT_INFO;
+
 
 
 #endif //APPLE_SILICON_PCI_PLATFORM_DXE_H

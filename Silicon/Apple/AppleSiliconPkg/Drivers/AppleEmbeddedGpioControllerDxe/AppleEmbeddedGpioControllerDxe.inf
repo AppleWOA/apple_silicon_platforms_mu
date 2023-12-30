@@ -2,7 +2,7 @@
 #  Copyright (c) 2023, AppleWOA authors. All rights reserved.
 #
 #  Module Name:
-#    AppleSiliconPciPlatformDxe.inf
+#    AppleEmbeddedGpioControllerDxe.inf
 #  
 #  Abstract:
 #    Helper driver for Apple Silicon platforms to load firmware blobs required for PCIe or
@@ -17,15 +17,15 @@
 #
 
 [Defines]
-  INF_VERSION                    = 0x0001001c
-  BASE_NAME                      = AppleSiliconPciPlatformDxe
-  FILE_GUID                      = 1d0fc441-75eb-4464-8f11-beab628581d1
+  INF_VERSION                    = 0x0001000c
+  BASE_NAME                      = AppleEmbeddedGpioControllerDxe
+  FILE_GUID                      = 15d3c0d1-346b-462d-a40c-ecc01f8299fa
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  ENTRY_POINT                    = AppleSiliconPciPlatformDxeInitialize
-
-[Sources]
-  AppleSiliconPciPlatformDxe.c
+  ENTRY_POINT                    = AppleEmbeddedGpioControllerDxeInitialize
+[Sources.common]
+  AppleEmbeddedGpioControllerDxe.c
+  AppleEmbeddedGpioControllerDxe.h
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -36,26 +36,21 @@
 
 [LibraryClasses]
   BaseLib
-  UefiLib
-  UefiBootServicesTableLib
+  BaseMemoryLib
   DebugLib
-  PrintLib
-  MemoryAllocationLib
-  UefiDriverEntryPoint
-  DxeServicesLib
   IoLib
   PcdLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
   UefiLib
-  FdtLib
-  ArmLib
-  PciLib
-  PciSegmentLib
-  PciExpressLib
-  TimerLib
+  UefiRuntimeServicesTableLib
 
 [Pcd]
   gAppleSiliconPkgTokenSpaceGuid.PcdGpioBase
 
 [Protocols]
-  gEmbeddedGpioProtocolGuid # used
-  gPlatformGpioProtocolGuid # used
+  gEmbeddedGpioProtocolGuid # Produced/installed
+  gPlatformGpioProtocolGuid # produced/installed
+
+[Depex]
+  TRUE
