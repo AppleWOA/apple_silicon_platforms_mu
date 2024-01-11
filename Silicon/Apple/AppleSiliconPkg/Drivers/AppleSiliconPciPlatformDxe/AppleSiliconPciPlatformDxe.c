@@ -61,6 +61,8 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   UINT32 Index;
   UINT32 IndexLength;
   UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
+  CHAR8 PortName[10];
+  BOOLEAN
   
   //
   // TODO: GPIO setup
@@ -71,8 +73,16 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
 
   PciePortInfo->Complex = PcieComplex;
   PciePortInfo->DevicePortIndex = Index >> 11;
+  PciePortInfo->PortSubNode = SubNode;
 
+  //
+  // From the root PCIe0 node, get the addresses of each of the ports.
+  //
+  AsciiSPrint(PortName, sizeof(PortName), "port%d", PciePortInfo->DevicePortIndex);
 
+  //
+  // TODO: the rest of this, as of 1-11-2024 going back to strictly RAMDisk based testing.
+  //
   return EFI_SUCCESS;
 }
 

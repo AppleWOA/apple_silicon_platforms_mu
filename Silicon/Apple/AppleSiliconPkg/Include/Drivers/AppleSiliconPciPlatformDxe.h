@@ -146,6 +146,7 @@ typedef struct ApplePcieDevicePortInfo {
   UINT64 DeviceBaseAddress; // base address for the device port in the PCIe complex, pull from DT
   UINT32 DevicePortIndex;
   APPLE_PCIE_COMPLEX_INFO *Complex;
+  INT32 PortSubNode;
 } APPLE_PCIE_DEVICE_PORT_INFO;
 
 

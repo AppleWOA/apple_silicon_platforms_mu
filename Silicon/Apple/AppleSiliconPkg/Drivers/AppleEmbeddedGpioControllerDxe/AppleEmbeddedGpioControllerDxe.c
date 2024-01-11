@@ -45,7 +45,5 @@ AppleEmbeddedGpioControllerDxeInitialize(
   IN EFI_SYSTEM_TABLE  *SystemTable
 ) 
 {
-  //
-  // TODO: add stuff
-  //
+  
 }
