@@ -169,7 +169,7 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
   INF MdeModulePkg/Bus/Pci/NonDiscoverablePciDeviceDxe/NonDiscoverablePciDeviceDxe.inf
 
-  INF AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
+  #INF AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
 
   #NVMe Support
   #TODO: ANS2/SART driver
@@ -268,10 +268,10 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 #}
 
   # Embedded RAMDisk (IMG format)
-  #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
-  #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
-  #SECTION UI = "Embedded RAMDisk"  
-#}
+  FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
+  SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
+  SECTION UI = "Embedded RAMDisk"  
+}
   
   # Embedded USB firmware blob (for testing only!)
   FILE FREEFORM = d730ab59-670e-4a92-8475-b31939d05bb4 {

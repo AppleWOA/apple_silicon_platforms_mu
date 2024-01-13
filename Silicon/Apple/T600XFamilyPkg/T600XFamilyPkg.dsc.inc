@@ -37,7 +37,7 @@
   gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|18 #virt timer
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
-  gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|FALSE
+  gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T600x"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1 Pro/Max/Ultra (Jade)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
