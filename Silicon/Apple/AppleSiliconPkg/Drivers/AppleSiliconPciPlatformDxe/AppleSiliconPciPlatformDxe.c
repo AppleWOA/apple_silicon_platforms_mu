@@ -54,19 +54,26 @@
 // especially on later versions or later hardware.
 //
 
+STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 Index, APPLE_PCIE_GPIO_DESC *Desc) {
+
+}
+
 STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_INFO *PcieComplex, INT32 SubNode) {
   APPLE_PCIE_DEVICE_PORT_INFO *PciePortInfo = AllocateZeroPool(sizeof(APPLE_PCIE_DEVICE_PORT_INFO));
   EFI_STATUS Status;
   UINT32 *IndexPtr;
   UINT32 Index;
   UINT32 IndexLength;
+  APPLE_PCIE_GPIO_DESC ResetGpioStruct;
   UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
   CHAR8 PortName[10];
-  BOOLEAN
   
   //
-  // TODO: GPIO setup
+  // GPIO setup
+  // Using the Asahi Linux U-Boot method for now, might want to switch to UEFI specific
+  // methods later, but I need to get this running now.
   //
+  Status = AppleSiliconPciePlatformDxeGetResetGpios(SubNode, 0, &ResetGpioStruct);
 
   IndexPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reg", &IndexLength);
   Index = IndexPtr[0];

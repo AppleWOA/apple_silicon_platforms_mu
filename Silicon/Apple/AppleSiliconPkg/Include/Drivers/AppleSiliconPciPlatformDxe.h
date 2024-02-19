@@ -132,9 +132,35 @@
 
 #define MAX_RID2SID			512
 
+
+
+
 //
 // Type definitions
 //
+
+//
+// HACK HACK: borrowing from EmbeddedGpio driver. Remove once we have our
+// own implementation of the GPIO controller driver
+//
+
+typedef enum {
+  GPIO_MODE_INPUT              = 0x00,
+  GPIO_MODE_OUTPUT_0           = 0x0E,
+  GPIO_MODE_OUTPUT_1           = 0x0F,
+  GPIO_MODE_SPECIAL_FUNCTION_2 = 0x02,
+  GPIO_MODE_SPECIAL_FUNCTION_3 = 0x03,
+  GPIO_MODE_SPECIAL_FUNCTION_4 = 0x04,
+  GPIO_MODE_SPECIAL_FUNCTION_5 = 0x05,
+  GPIO_MODE_SPECIAL_FUNCTION_6 = 0x06,
+  GPIO_MODE_SPECIAL_FUNCTION_7 = 0x07
+} EMBEDDED_GPIO_MODE_EX;
+
+typedef enum {
+  GPIO_PULL_NONE,
+  GPIO_PULL_UP,
+  GPIO_PULL_DOWN
+} EMBEDDED_GPIO_PULL_EX;
 
 typedef struct ApplePcieComplexInfo {
   UINT64 EcamCfgRegionBase; // base address for ECAM region, pull from DT
@@ -149,6 +175,16 @@ typedef struct ApplePcieDevicePortInfo {
   INT32 PortSubNode;
 } APPLE_PCIE_DEVICE_PORT_INFO;
 
+//
+// Using a modified Asahi Linux U-Boot definition here, since using the UEFI semantics
+// would be a longer term refactor decision - and I need this running now.
+//
 
+typedef struct ApplePcieGpioDesc {
+  EMBEDDED_GPIO_PULL_EX GpioPull;
+  EMBEDDED_GPIO_MODE_EX GpioMode;
+  UINT32 MiscGpioFlags;
+  UINT32 Offset;
+} APPLE_PCIE_GPIO_DESC;
 
 #endif //APPLE_SILICON_PCI_PLATFORM_DXE_H
