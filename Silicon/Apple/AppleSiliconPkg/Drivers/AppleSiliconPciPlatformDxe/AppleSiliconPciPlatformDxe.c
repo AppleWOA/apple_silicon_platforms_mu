@@ -55,6 +55,61 @@
 //
 
 STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 Index, APPLE_PCIE_GPIO_DESC *Desc) {
+  UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
+  INT32 *GpioCellsNode;
+  INT32 PinCtrlApNode;
+  UINT32 NumGpioCells;
+  UINT32 *ResetGpiosPtr;
+  
+
+  //
+  // HACK - need to load the pinctrl_ap node from die 0 for multi-die
+  // systems, right now use a switch statement based on global PCD, use /soc for
+  // single die systems, /die0 for multi-die systems.
+  //
+  switch (PcdGet32(PcdAppleSocIdentifier)) {
+    case 0x8103:
+    case 0x8112:
+    case 0x8122:
+      PinCtrlApNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pinctrl_ap");
+      break;
+    case 0x6000:
+    case 0x6001:
+    case 0x6002:
+    case 0x6020:
+    case 0x6021:
+    case 0x6022:
+    case 0x6030:
+      PinCtrlApNode = fdt_path_offset((VOID *)FdtBlob, "/die0/pinctrl_ap");
+      break;
+  }
+
+  //
+  // Find the number of GPIO cells (this has been 2 in most Asahi Linux device trees) (after sanity checking)
+  //
+
+  if ( (PinCtrlApNode == (-FDT_ERR_BADPATH)) 
+  || (PinCtrlApNode == (-FDT_ERR_NOTFOUND)) 
+  || (PinCtrlApNode == (-FDT_ERR_BADMAGIC)) 
+  || (PinCtrlApNode == (-FDT_ERR_BADVERSION)) 
+  || (PinCtrlApNode == (-FDT_ERR_BADSTATE)) 
+  || (PinCtrlApNode == (-FDT_ERR_BADSTRUCTURE)) 
+  || (PinCtrlApNode == (-FDT_ERR_TRUNCATED))
+  )
+  {
+      DEBUG((DEBUG_ERROR, "FDT path offset finding failed!!\n"));
+      DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-InterruptControllerNode)));
+      ASSERT(PinCtrlApNode != (-FDT_ERR_BADPATH));
+      ASSERT(PinCtrlApNode != (-FDT_ERR_NOTFOUND));
+      ASSERT(PinCtrlApNode != (-FDT_ERR_BADMAGIC));
+      ASSERT(PinCtrlApNode != (-FDT_ERR_BADVERSION));
+      ASSERT(PinCtrlApNode != (-FDT_ERR_BADSTATE));
+      ASSERT(PinCtrlApNode != (-FDT_ERR_BADSTRUCTURE));
+      ASSERT(PinCtrlApNode != (-FDT_ERR_TRUNCATED));
+  }
+  
+  GpioCellsNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNode, "#gpio-cells", NULL);
+  NumGpioCells = GpioCellsNode[0];
 
 }
 
