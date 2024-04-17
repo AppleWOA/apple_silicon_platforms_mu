@@ -23,6 +23,7 @@
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = AppleEmbeddedGpioControllerDxeInitialize
+
 [Sources.common]
   AppleEmbeddedGpioControllerDxe.c
   AppleEmbeddedGpioControllerDxe.h
@@ -49,8 +50,8 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdGpioBase
 
 [Protocols]
-  gEmbeddedGpioProtocolGuid # Produced/installed
-  gPlatformGpioProtocolGuid # produced/installed
+  gEmbeddedGpioProtocolGuid # Produced/Installed
+  gPlatformGpioProtocolGuid # Produced/Installed
 
 [Depex]
   TRUE
