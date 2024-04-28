@@ -426,8 +426,10 @@ STATIC VOID AppleAsmediaLoadFirmware(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInstan
 //
 // Description:
 //   Checks if the driver is supported. Used as the vehicle to bootstrap the USB
-//   controller firmware blob. Returns unsupported afterwards to allow the normal XHCI DXE driver to do it's
-//   job.
+//   controller firmware blob.
+//
+// Return values:
+//   EFI_UNSUPPORTED - to allow the normal XHCI driver to take over after setup.
 //
 STATIC EFI_STATUS EFIAPI AppleBootTimeEmbeddedFirmwareDriverBindingSupported(
   IN EFI_DRIVER_BINDING_PROTOCOL *This,

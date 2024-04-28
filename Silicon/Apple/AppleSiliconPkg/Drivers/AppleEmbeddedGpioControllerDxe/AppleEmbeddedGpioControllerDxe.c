@@ -6,7 +6,8 @@
  * 
  * Abstract:
  *     Platform specific driver for Apple silicon platforms to control the pin/GPIO controller.
- *     Based on the PL061 ARM GPIO DXE driver. (from ArmPlatformPkg)
+ *     Based on the PL061 ARM GPIO DXE driver. (from ArmPlatformPkg).
+ *     GPIO hardware control based off the Asahi Linux driver.
  * 
  * Environment:
  *     UEFI DXE (Driver Execution Environment).
@@ -38,6 +39,8 @@ PLATFORM_GPIO_CONTROLLER *AppleSiliconPlatformGpioController;
 
 //
 // This driver's purpose is to control the GPIO controller on Apple platforms.
+// In Apple chips, at least as of Tonga/T8103, the pin controller is the same as the GPIO
+// controller, and the pin mappings are one to one.
 //
 
 EFI_STATUS AppleEmbeddedGpioControllerLocate(IN EMBEDDED_GPIO_PIN Gpio, OUT UINTN *ControllerIndex, OUT UINTN *ControllerOffset, OUT UINTN *GpioRegisterBase) {
@@ -55,11 +58,29 @@ EFI_STATUS AppleEmbeddedGpioControllerLocate(IN EMBEDDED_GPIO_PIN Gpio, OUT UINT
   }
 }
 
-EFI_STATUS EFIAPI AppleEmbeddedGpioGetGpioStatus(IN EMBEDDED_GPIO *This, IN EMBEDDED_GPIO_PIN Gpio, OUT UINTN *Value) {
+STATIC UINTN EFIAPI AppleEmbeddedGpioControllerGetRegister(IN UINTN RegisterBase, IN UINTN Offset) {
+  DEBUG((DEBUG_INFO, "%a - doing MMIO read\n", __FUNCTION__));
+  return MmioRead32(RegisterBase, GPIO_REG(Offset));
+}
+
+STATIC VOID EFIAPI AppleEmbeddedGpioControllerSetRegister(IN UINTN RegisterBase, IN UINTN Offset, IN UINTN Bitmask, IN UINTN Value) {
+  UINTN OriginalValue = MmioRead32(RegisterBase, GPIO_REG(Offset));
+  UINTN UpdatedValue = OriginalValue & ~(Bitmask);
+  UpdatedValue = (UpdatedValue | (Bitmask & Value));
+  DEBUG((DEBUG_INFO, "%a - doing MMIO write of 0x%llx\n", __FUNCTION__, UpdatedValue));
+  MmioWrite32((RegisterBase + GPIO_REG(Offset)), Value);
+}
+
+//
+// Description:
+//   Gets the given GPIO value
+
+EFI_STATUS EFIAPI AppleEmbeddedGpioGetGpio(IN EMBEDDED_GPIO *This, IN EMBEDDED_GPIO_PIN Gpio, OUT UINTN *Value) {
   EFI_STATUS Status;
   UINTN Index;
   UINTN RegisterBase;
   UINTN Offset;
+  UINTN GpioValue;
   Status = AppleEmbeddedGpioControllerLocate(Gpio, &Index, &Offset, &RegisterBase);
   if(EFI_ERROR(Status)) {
     DEBUG((DEBUG_INFO, "%a - GPIO not found\n", __FUNCTION__));
@@ -70,17 +91,68 @@ EFI_STATUS EFIAPI AppleEmbeddedGpioGetGpioStatus(IN EMBEDDED_GPIO *This, IN EMBE
     return EFI_INVALID_PARAMETER;
   }
   
+  GpioValue = AppleEmbeddedGpioControllerGetRegister(RegisterBase, Offset);
+  *Value = !!((GpioValue & (GPIOx_REG_DATA)));
+  return EFI_SUCCESS;
+
 }
 
-EFI_STATUS EFIAPI AppleEmbeddedGpioSetGpioStatus(IN EMBEDDED_GPIO *This, IN EMBEDDED_GPIO_PIN Gpio, IN EMBEDDED_GPIO_MODE Mode) {
+//
+// Description:
+//   Sets the EMBEDDED_GPIO_MODE (or direction) of the given GPIO.
+//
+// Return values:
+//   EFI_SUCCESS - GPIO set successfully
+//   EFI_UNSUPPORTED - the given direction is not supported. 
+//
+EFI_STATUS EFIAPI AppleEmbeddedGpioSetGpio(IN EMBEDDED_GPIO *This, IN EMBEDDED_GPIO_PIN Gpio, IN EMBEDDED_GPIO_MODE Mode) {
+  EFI_STATUS Status;
+  UINTN Index;
+  UINTN RegisterBase;
+  UINTN Offset;
+  UINTN GpioValue;
+  Status = AppleEmbeddedGpioControllerLocate(Gpio, &Index, &Offset, &RegisterBase);
+  if(EFI_ERROR(Status)) {
+    DEBUG((DEBUG_INFO, "%a - GPIO not found\n", __FUNCTION__));
+    ASSERT(FALSE);
+  }
+  //
+  // Only input/output directions are supported, anything else
+  // will return as unsupported.
+  //
+  switch(Mode) {
+    case GPIO_MODE_INPUT:
+      AppleEmbeddedGpioControllerSetRegister(RegisterBase, Offset, (GPIOx_PERIPHERAL | GPIOx_MODE | GPIOx_INPUT_ENABLE | GPIOx_REG_DATA), ((FIELD_PREP(GPIOx_MODE, GPIOx_IN_MODE_IRQ_OFF)) | (GPIOx_INPUT_ENABLE)));
+    case GPIO_MODE_OUTPUT_0:
+      AppleEmbeddedGpioControllerSetRegister(RegisterBase, Offset, (GPIOx_PERIPHERAL | GPIOx_MODE | GPIOx_INPUT_ENABLE | GPIOx_REG_DATA), ((FIELD_PREP(GPIOx_MODE, GPIOx_OUT_MODE))));
+    case GPIO_MODE_OUTPUT_1:
+      AppleEmbeddedGpioControllerSetRegister(RegisterBase, Offset, (GPIOx_PERIPHERAL | GPIOx_MODE | GPIOx_INPUT_ENABLE | GPIOx_REG_DATA), ((FIELD_PREP(GPIOx_MODE, GPIOx_OUT_MODE)) | (GPIOx_REG_DATA)));
+    default:
+      DEBUG((DEBUG_INFO, "%a - requested GPIO mode is unsupported\n", __FUNCTION__));
+      return EFI_UNSUPPORTED;
+  }
+  return EFI_SUCCESS;
 
+}
+
+EFI_STATUS EFIAPI AppleEmbeddedGpioControllerGetMode(IN EMBEDDED_GPIO *This, IN EMBEDDED_GPIO_PIN Gpio, OUT EMBEDDED_GPIO_MODE *Mode) {
+  EFI_STATUS Status;
+  UINTN Index;
+  UINTN RegisterBase;
+  UINTN Offset;
+  UINTN GpioValue;
+  Status = AppleEmbeddedGpioControllerLocate(Gpio, &Index, &Offset, &RegisterBase);
+  if(EFI_ERROR(Status)) {
+    DEBUG((DEBUG_INFO, "%a - GPIO not found\n", __FUNCTION__));
+    ASSERT(FALSE);
+  }
 }
 
 
 EMBEDDED_GPIO  gGpio = {
-  AppleEmbeddedGpioGetGpioStatus,
-  AppleEmbeddedGpioSetGpioStatus,
-  GetMode,
+  AppleEmbeddedGpioGetGpio,
+  AppleEmbeddedGpioSetGpio,
+  AppleEmbeddedGpioControllerGetMode,
   SetPull
 };
 
@@ -152,10 +224,18 @@ AppleEmbeddedGpioControllerDxeInitialize(
       return EFI_OUT_OF_RESOURCES;
     }
     //
+    // Verify that we are on an Apple SoC by reading MIDR and checking the vendor ID bit,
+    // bail out if not found.
+    //
+    if(((Midr >> 24) & 0x61) == 0) {
+      DEBUG((DEBUG_ERROR, "%a - not on an Apple SoC, GPIO controller not present, aborting\n", __FUNCTION__));
+      return EFI_NOT_FOUND;
+    }
+    //
     // Pin control GPIO controllers = 3 * NUM_DIES 
     // only 1 SMC pin control GPIO controller.
     // For now, use 1 * NUM_DIES (as for now we only need to concern ourselves with AP pin controllers)
-    // if we need the others, change this
+    // if we need the others, change this.
     //
     NumberOfPinsNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNodes[0], "apple,npins", NULL);
     AppleSiliconPlatformGpioController->GpioCount = NumberOfPinsNode[0];
@@ -170,14 +250,6 @@ AppleEmbeddedGpioControllerDxeInitialize(
     GpioController->RegisterBase = PinCtrlApReg;
     GpioController->InternalGpioCount = NumberOfPinsNode[0];
 
-    //
-    // Verify that we are on an Apple SoC by reading MIDR and checking the vendor ID bit,
-    // bail out if not found.
-    //
-    if(((Midr >> 24) & 0x61) == 0) {
-      DEBUG((DEBUG_ERROR, "%a - not on an Apple SoC, GPIO controller not present, aborting\n", __FUNCTION__));
-      return EFI_NOT_FOUND;
-    }
     //
     // Install the GPIO protocol.
     //
