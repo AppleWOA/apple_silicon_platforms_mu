@@ -1,0 +1,30 @@
+#T602x SoC specific EDK2 Package Description File
+#SPDX-License-Identifier: BSD-2-Clause-Patent
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = T602XFamilyPkg
+  PACKAGE_GUID                   = 4941ad03-1d3d-4177-a1d7-3d30699cb5a5
+  PACKAGE_VERSION                = 1.0
+
+[Includes.common]
+  Include
+
+[Guids.common]
+  # e2dcafca-abcd-48c4-baf7-042ecb5a0558
+  gT602XFamilyPkgTokenSpaceGuid = { 0xe2dcafca, 0xabcd, 0x48c4, { 0xba, 0xf7, 0x04, 0x2e, 0xcb, 0x5a, 0x05, 0x58 } }
+
+
+[PcdsFixedAtBuild.common]
+
+  #Fallback stack base in case ModuleEntryPoint setup won't work.
+  #gT602XFamilyPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000|UINT64|0x0000440b
+
+[PcdsPatchableInModule.common]
+
+  #number of cores
+  gT602XFamilyPkgTokenSpaceGuid.PcdCoreCount|10|UINT32|0x00004406
+  #all Rhodes chips have three clusters, "boot", P-core/E-core clusters
+  # for multi-die systems, this cluster setup is duplicated on the second die
+  gT602XFamilyPkgTokenSpaceGuid.PcdClusterCount|3|UINT32|0x00004407
+
+  

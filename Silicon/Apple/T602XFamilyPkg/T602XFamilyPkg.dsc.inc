@@ -1,4 +1,4 @@
-# T600x SoC family DSC include file
+# T602x SoC family DSC include file
 #  Copyright (c) 2011-2015, ARM Limited. All rights reserved.
 #  Copyright (c) 2014, Linaro Limited. All rights reserved.
 #  Copyright (c) 2015 - 2016, Intel Corporation. All rights reserved.
@@ -22,7 +22,7 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x400000000 #16GB RAM space by default
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000 # TODO: verify this hack still works on T6020
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize|0x0
 
@@ -36,10 +36,10 @@
   gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|20 #this disables the HV timer
   gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|18 #virt timer
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase|0x39b200000
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6000
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x6020
   gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T600x"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M1 Pro/Max/Ultra (Jade)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuIdentifier|"T602x"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosCpuModel|"Apple M2 Pro/Max/Ultra (Rhodes)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion|3
   gAppleSiliconPkgTokenSpaceGuid.PcdXhciPcieDeviceNumber|3
@@ -47,7 +47,7 @@
 !if $(AIC_BUILD) == FALSE
   #
   # if GIC is used, it's expected to be virtualized by trusted firmware at the below addresses 
-  # as Jade/T600x has no onboard GIC. (but does contain the MSRs to do accelerated virt)
+  # as Rhodes/T602x has no onboard GIC. (but does contain the MSRs to do accelerated virt)
   #
   gArmTokenSpaceGuid.PcdGicDistributorBase|0x5000000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x5100000000
@@ -107,9 +107,9 @@
 
 
 [LibraryClasses.common]
-  MemoryInitPeiLib|T600XFamilyPkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
-  MsPlatformDevicesLib  |T600XFamilyPkg/Library/MsPlatformDevicesLib/MsPlatformDevicesLib.inf
+  MemoryInitPeiLib|T602XFamilyPkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
+  MsPlatformDevicesLib  |T602XFamilyPkg/Library/MsPlatformDevicesLib/MsPlatformDevicesLib.inf
 
 [Components.common]
 
-  T600XFamilyPkg/AcpiTables/CPUAcpiTables.inf
+  T602XFamilyPkg/AcpiTables/CPUAcpiTables.inf

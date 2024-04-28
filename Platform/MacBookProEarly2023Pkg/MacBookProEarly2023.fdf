@@ -28,7 +28,7 @@ BaseAddress   = 0x10030000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired add
 Size          = 0x00001E00000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 ErasePolarity = 1
 BlockSize     = 0x1000
-NumBlocks     = 0x1e00
+NumBlocks     = 0x1E00
 
 ################################################################################
 #
@@ -98,7 +98,7 @@ READ_ENABLED_CAP   = TRUE
 READ_STATUS        = TRUE
 READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
-FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
+FvNameGuid         = 02e6c12f-69f7-4626-b5de-e3cfd6c0dc56
 
   !include AppleSiliconPkg/Include/DXEApriori.fdf.inc
   
@@ -258,3 +258,31 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 }
   
 !include AppleSiliconPkg/FrontpageFdf.inc
+
+[FV.FVMAIN_COMPACT]
+FvAlignment        = 8
+ERASE_POLARITY     = 1
+MEMORY_MAPPED      = TRUE
+STICKY_WRITE       = TRUE
+LOCK_CAP           = TRUE
+LOCK_STATUS        = TRUE
+WRITE_DISABLED_CAP = TRUE
+WRITE_ENABLED_CAP  = TRUE
+WRITE_STATUS       = TRUE
+WRITE_LOCK_CAP     = TRUE
+WRITE_LOCK_STATUS  = TRUE
+READ_DISABLED_CAP  = TRUE
+READ_ENABLED_CAP   = TRUE
+READ_STATUS        = TRUE
+READ_LOCK_CAP      = TRUE
+READ_LOCK_STATUS   = TRUE
+
+  INF RuleOverride = SELF_RELOC AppleSiliconPkg/PrePi/PrePi.inf
+
+  FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
+    SECTION GUIDED EE4E5898-3914-4259-9D6E-DC7BD79403CF PROCESSING_REQUIRED = TRUE {
+      SECTION FV_IMAGE = FVMAIN
+    }
+  }
+
+!include AppleSiliconPkg/AppleSiliconFdfRules.fdf.inc

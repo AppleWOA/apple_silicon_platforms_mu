@@ -1,0 +1,45 @@
+/**
+ * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * 
+ * Module Name:
+ *     BERT.aslc
+ * 
+ * Abstract:
+ *     Boot Error Record Table. This source file implements the BERT table
+ *     for "Jade" (M1 Pro/Max/Ultra) SoCs.
+ * 
+ *     Original source file from AmpereAltraPkg.
+ * 
+ * Environment:
+ *     UEFI firmware/runtime services.
+ * 
+ * License:
+ *     SPDX-License-Identifier: BSD-2-Clause-Patent OR MIT
+ * 
+*/
+
+#include <IndustryStandard/Acpi.h>
+#include <Acpi/AcpiHeader.h>
+
+#define BOOT_ERROR_REGION_LENGTH  0x50000
+//#define BOOT_ERROR_REGION_BASE    0x0000000088230000
+
+#pragma pack(1)
+
+EFI_ACPI_6_3_BOOT_ERROR_RECORD_TABLE_HEADER Bert = {
+  __ACPI_HEADER (
+    EFI_ACPI_6_3_BOOT_ERROR_RECORD_TABLE_SIGNATURE,
+    EFI_ACPI_6_3_BOOT_ERROR_RECORD_TABLE_HEADER,
+    EFI_ACPI_6_3_BOOT_ERROR_RECORD_TABLE_REVISION
+  ),
+  BOOT_ERROR_REGION_LENGTH,
+  BOOT_ERROR_REGION_BASE
+};
+
+#pragma pack()
+
+//
+// Reference the table being generated to prevent the optimizer from removing
+// the data structure from the executable
+//
+VOID* CONST ReferenceAcpiTable = &Bert;
