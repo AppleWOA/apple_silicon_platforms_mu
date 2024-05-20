@@ -60,7 +60,7 @@ EFI_STATUS AppleEmbeddedGpioControllerLocate(IN EMBEDDED_GPIO_PIN Gpio, OUT UINT
 
 STATIC UINTN EFIAPI AppleEmbeddedGpioControllerGetRegister(IN UINTN RegisterBase, IN UINTN Offset) {
   DEBUG((DEBUG_INFO, "%a - doing MMIO read\n", __FUNCTION__));
-  return MmioRead32(RegisterBase, GPIO_REG(Offset));
+  return MmioRead32(RegisterBase + GPIO_REG(Offset));
 }
 
 STATIC VOID EFIAPI AppleEmbeddedGpioControllerSetRegister(IN UINTN RegisterBase, IN UINTN Offset, IN UINTN Bitmask, IN UINTN Value) {
@@ -146,6 +146,35 @@ EFI_STATUS EFIAPI AppleEmbeddedGpioControllerGetMode(IN EMBEDDED_GPIO *This, IN 
     DEBUG((DEBUG_INFO, "%a - GPIO not found\n", __FUNCTION__));
     ASSERT(FALSE);
   }
+  if(Mode == NULL) {
+    DEBUG((DEBUG_ERROR, "%a - GPIO mode request cannot be NULL\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+  GpioValue = AppleEmbeddedGpioControllerGetRegister(RegisterBase, Offset);
+  if (FIELD_GET(GPIOx_MODE, GpioValue) == GPIOx_OUT_MODE) {
+    if((GpioValue & GPIOx_REG_DATA) != 0) {
+      *Mode = GPIO_MODE_OUTPUT_1;
+    }
+    else {
+      *Mode = GPIO_MODE_OUTPUT_0;
+    }
+  }
+  else {
+    *Mode = GPIO_MODE_INPUT;
+  }
+  return EFI_SUCCESS;
+
+}
+
+//
+// Description:
+//   Sets the pull up/pull down behavior of a GPIO. Not supported currently.
+//
+// Return values:
+//   EFI_UNSUPPORTED - cannot do the operation as it's not supported.
+//
+EFI_STATUS EFIAPI AppleEmbeddedGpioControllerSetPull(IN EMBEDDED_GPIO *This, IN EMBEDDED_GPIO_PIN Gpio, IN EMBEDDED_GPIO_PULL Direction) {
+  return EFI_UNSUPPORTED;
 }
 
 
@@ -153,7 +182,7 @@ EMBEDDED_GPIO  gGpio = {
   AppleEmbeddedGpioGetGpio,
   AppleEmbeddedGpioSetGpio,
   AppleEmbeddedGpioControllerGetMode,
-  SetPull
+  AppleEmbeddedGpioControllerSetPull
 };
 
 
