@@ -41,6 +41,7 @@
 #include <IndustryStandard/Pci.h>
 #include <Library/TimerLib.h>
 #include <Include/libfdt.h>
+#include <Protocol/EmbeddedGpio.h>
 #include <Drivers/AppleSiliconPciPlatformDxe.h>
 
 //
@@ -59,7 +60,8 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 
   INT32 *GpioCellsNode;
   INT32 PinCtrlApNode;
   UINT32 NumGpioCells;
-  UINT32 *ResetGpiosPtr;
+  INT32 *ResetGpiosPtr;
+  UINT32 ResetGpiosLength;
   
 
   //
@@ -107,9 +109,27 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 
       ASSERT(PinCtrlApNode != (-FDT_ERR_BADSTRUCTURE));
       ASSERT(PinCtrlApNode != (-FDT_ERR_TRUNCATED));
   }
+
+  //
+  // This is probably just temporary debugging code, will be removed later.
+  //
   
   GpioCellsNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNode, "#gpio-cells", NULL);
   NumGpioCells = GpioCellsNode[0];
+  DEBUG((DEBUG_INFO, "%a - there are %d gpio-cells in the devicetree\n", __FUNCTION__, NumGpioCells));
+
+  //
+  // END temporary debug code
+  //
+
+  //
+  // Get the reset GPIO values from the node.
+  //
+  ResetGpiosPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reset-gpios", &ResetGpiosLength);
+  DEBUG((DEBUG_INFO, "%a - length of reset-gpios is 0x%x\n", __FUNCTION__, ResetGpiosLength));
+  Desc->GpioNum = ResetGpiosPtr[0];
+  Desc->GpioActivePolarity = ResetGpiosPtr[1];
+  return EFI_SUCCESS;
 
 }
 
@@ -119,32 +139,248 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   UINT32 *IndexPtr;
   UINT32 Index;
   UINT32 IndexLength;
+  UINT32 Length;
+  UINT32 PortAppClkValue;
   APPLE_PCIE_GPIO_DESC ResetGpioStruct;
+  EMBEDDED_GPIO *GpioProtocol;
   UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
   CHAR8 PortName[10];
+  INT32 PcieNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pcie");
+  CONST INT32 *PcieRegs = fdt_getprop((VOID *)FdtBlob, PcieNode, "reg", &Length);
+  UINT32 PhyLaneCtl;
+  UINT32 PhyLaneCfg;
+  UINT32 PortRefClk;
+  UINT32 PortPerst;
+  BOOLEAN RefClkAcked = TRUE;
+  BOOLEAN PortReady = TRUE;
+  BOOLEAN LinkUp = TRUE;
+  UINT32 Timeout = 0;
   
   //
-  // GPIO setup
-  // Using the Asahi Linux U-Boot method for now, might want to switch to UEFI specific
-  // methods later, but I need to get this running now.
+  // GPIO setup.
   //
-  Status = AppleSiliconPciePlatformDxeGetResetGpios(SubNode, 0, &ResetGpioStruct);
 
-  IndexPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reg", &IndexLength);
-  Index = IndexPtr[0];
-
-  PciePortInfo->Complex = PcieComplex;
-  PciePortInfo->DevicePortIndex = Index >> 11;
-  PciePortInfo->PortSubNode = SubNode;
+  //
+  // Locate the EmbeddedGpio protocol.
+  //
+  Status = gBS->LocateProtocol(&gEmbeddedGpioProtocolGuid, NULL, (VOID **)&GpioProtocol);
+  if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "%a: Couldn't find the Embedded GPIO protocol - %r\n", __FUNCTION__, Status));
+      return Status;
+  }
 
   //
   // From the root PCIe0 node, get the addresses of each of the ports.
   //
-  AsciiSPrint(PortName, sizeof(PortName), "port%d", PciePortInfo->DevicePortIndex);
+
+  IndexPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reg", &IndexLength);
+  Index = IndexPtr[0];
+  Index = Index >> 11;
+
+  PciePortInfo->Complex = PcieComplex;
+  PciePortInfo->DevicePortIndex = Index;
+  PciePortInfo->PortSubNode = SubNode;
+
+  Status = AppleSiliconPciePlatformDxeGetResetGpios(SubNode, Index, &ResetGpioStruct);
+
+  PciePortInfo->ResetGpioDesc = ResetGpioStruct;
 
   //
-  // TODO: the rest of this, as of 1-11-2024 going back to strictly RAMDisk based testing.
+  // the device's base address is in the PCIe 'reg' property, after the rc base.
+  // this implementation is a total hack
+  // to compensate for not having the openfirmware interfacing that Linux and U-Boot have while
+  // using devicetree.
   //
+  PciePortInfo->DeviceBaseAddress = fdt32_to_cpu(PcieRegs[8 + 4*Index]);
+  PciePortInfo->DeviceBaseAddress = (((PciePortInfo->DeviceBaseAddress) << 32) | fdt32_to_cpu(PcieRegs[9 + 4*Index]));
+
+  PciePortInfo->DevicePhyBaseAddress = PcieComplex->RcRegionBase + CORE_PHY_DEFAULT_BASE(PciePortInfo->DevicePortIndex);
+
+  //
+  // Begin bringing up the PCIe device.
+  //
+  PortAppClkValue = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK);
+  PortAppClkValue = (PortAppClkValue | PORT_APPCLK_EN);
+  MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK, PortAppClkValue);
+
+  //
+  // Per Asahi U-Boot, this is to assert PERST#
+  //
+  Status = GpioProtocol->Set(GpioProtocol, ResetGpioStruct.GpioNum, GPIO_MODE_OUTPUT_0);
+
+  //
+  // Set up REFCLK
+  //
+
+  switch(PcdGet32(PcdAppleSocIdentifier)) {
+    case 0x6020:
+    case 0x6021:
+    case 0x6022:
+      //
+      // no PHY_LANE_CTL on T602X SoCs
+      //
+      break;
+    default:
+      //
+      // Set up PHY_LANE_CTL
+      //
+      PhyLaneCtl = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL);
+      PhyLaneCtl = PhyLaneCtl | PHY_LANE_CTL_CFGACC;
+      MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL, PhyLaneCtl);
+      break;
+  }
+
+  PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
+  PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLK0REQ;
+  MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
+
+  while(!(MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK0ACK))
+  {
+    MicroSecondDelay(100);
+    Timeout += 100;
+    if(Timeout >= 50000) {
+      RefClkAcked = FALSE;
+      break;
+    }
+  }
+
+  Timeout = 0;
+
+  if(RefClkAcked == FALSE) {
+    DEBUG((DEBUG_ERROR, "%a - REFCLK0ACK timed out\n", __FUNCTION__));
+    return EFI_TIMEOUT;
+  }
+
+  PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
+  PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLK1REQ;
+  MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
+
+
+  while(!(MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK1ACK))
+  {
+    MicroSecondDelay(100);
+    Timeout += 100;
+    if(Timeout >= 50000) {
+      RefClkAcked = FALSE;
+      break;
+    }
+  }
+
+  Timeout = 0;
+
+  if(RefClkAcked == FALSE) {
+    DEBUG((DEBUG_ERROR, "%a - REFCLK1ACK timed out\n", __FUNCTION__));
+    return EFI_TIMEOUT;
+  }
+  
+  switch(PcdGet32(PcdAppleSocIdentifier)) {
+    case 0x6020:
+    case 0x6021:
+    case 0x6022:
+      //
+      // no PHY_LANE_CTL on T602X SoCs
+      //
+      break;
+    default:
+      PhyLaneCtl = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL);
+      PhyLaneCtl = PhyLaneCtl & (~(PHY_LANE_CTL_CFGACC));
+      MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL, PhyLaneCtl);
+      break;
+  }
+
+  PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
+  PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLKEN;
+  MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
+
+
+  switch(PcdGet32(PcdAppleSocIdentifier)) {
+    case 0x6020:
+    case 0x6021:
+    case 0x6022:
+      //
+      // no PORT_REFCLK on T602X SoCs per Asahi driver.
+      //
+      break;
+    default:
+      PortRefClk = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_REFCLK);
+      PortRefClk = PortRefClk | PORT_REFCLK_EN;
+      MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_REFCLK, PortRefClk);
+      break;
+  }
+
+  //
+  // Wait 100us for TPERST-CLK
+  //
+  MicroSecondDelay(100);
+
+  //
+  // de-assert PERST#
+  //
+  switch(PcdGet32(PcdAppleSocIdentifier)) {
+    case 0x6020:
+    case 0x6021:
+    case 0x6022:
+      PortPerst = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_T602X_PERST);
+      PortPerst = PortPerst | PORT_PERST_OFF;
+      MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_T602X_PERST, PortPerst);
+      break;
+    default:
+      PortPerst = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_PERST);
+      PortPerst = PortPerst | PORT_PERST_OFF;
+      MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_PERST, PortPerst);
+      break;
+  }
+
+  Status = GpioProtocol->Set(GpioProtocol, ResetGpioStruct.GpioNum, GPIO_MODE_OUTPUT_1);
+  MicroSecondDelay(100 * 1000);
+  Timeout = 0;
+
+  while(!(MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_STATUS) & PORT_STATUS_READY))
+  {
+    MicroSecondDelay(100);
+    Timeout += 100;
+    if(Timeout >= 250000) {
+      PortReady = FALSE;
+      break;
+    }
+  }
+  Timeout = 0;
+  if(PortReady == FALSE) {
+    DEBUG((DEBUG_ERROR, "%a - port %d ready signal timed out\n", __FUNCTION__, PciePortInfo->DevicePortIndex));
+    return EFI_TIMEOUT;
+  }
+
+  MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_LTSSMCTL, PORT_LTSSMCTL_START);
+
+  while(!(MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_LINKSTS) & PORT_LINKSTS_UP))
+  {
+    MicroSecondDelay(100);
+    Timeout += 100;
+    if(Timeout >= 100000) {
+      LinkUp = FALSE;
+      break;
+    }
+  }
+
+  switch(PcdGet32(PcdAppleSocIdentifier)) {
+    case 0x6020:
+    case 0x6021:
+    case 0x6022:
+      PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
+      PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLKCGEN;
+      MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
+      break;
+    default:
+      PortRefClk = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_REFCLK);
+      PortRefClk = PortRefClk & (~(PORT_REFCLK_CGDIS));
+      MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_REFCLK, PortRefClk);
+      break;
+  }
+  PortAppClkValue = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK);
+  PortAppClkValue = PortAppClkValue & (~(PORT_APPCLK_CGDIS));
+  MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK, PortAppClkValue);
+
+  DEBUG((DEBUG_INFO, "%a - PCIe port %d setup done\n", __FUNCTION__, PciePortInfo->DevicePortIndex));
   return EFI_SUCCESS;
 }
 
@@ -182,6 +418,16 @@ AppleSiliconPciPlatformDxeInitialize(
     PcieComplexInfoStruct->RcRegionBase = fdt32_to_cpu(PcieRegs[4]);
     PcieComplexInfoStruct->RcRegionBase = ((PcieComplexInfoStruct->RcRegionBase) << 32) | (fdt32_to_cpu(PcieRegs[5]));
 
+    //
+    // Pull the base address for each port
+    //
+    for(UINT32 i = 0; i <= 3; i++) {
+      PcieComplexInfoStruct->PortRegionBase[i] = fdt32_to_cpu(PcieRegs[8 + 4*i]);
+      PcieComplexInfoStruct->PortRegionBase[i] = ((PcieComplexInfoStruct->PortRegionBase[i]) << 32) | fdt32_to_cpu(PcieRegs[9 + 4*i]);
+      if((PcdGet32(PcdAppleSocIdentifier)) == 0x8103 && (i >= 2)) {
+        break;
+      }
+    }
     //
     // NOTE: the following does NOT account for APCIe-GE devices such as the Mac Pros.
     //

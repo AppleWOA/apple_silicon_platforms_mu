@@ -132,59 +132,37 @@
 
 #define MAX_RID2SID			512
 
-
+#define PORT_T602X_PERST		0x082c
 
 
 //
 // Type definitions
 //
 
-//
-// HACK HACK: borrowing from EmbeddedGpio driver. Remove once we have our
-// own implementation of the GPIO controller driver
-//
-
-typedef enum {
-  GPIO_MODE_INPUT              = 0x00,
-  GPIO_MODE_OUTPUT_0           = 0x0E,
-  GPIO_MODE_OUTPUT_1           = 0x0F,
-  GPIO_MODE_SPECIAL_FUNCTION_2 = 0x02,
-  GPIO_MODE_SPECIAL_FUNCTION_3 = 0x03,
-  GPIO_MODE_SPECIAL_FUNCTION_4 = 0x04,
-  GPIO_MODE_SPECIAL_FUNCTION_5 = 0x05,
-  GPIO_MODE_SPECIAL_FUNCTION_6 = 0x06,
-  GPIO_MODE_SPECIAL_FUNCTION_7 = 0x07
-} EMBEDDED_GPIO_MODE_EX;
-
-typedef enum {
-  GPIO_PULL_NONE,
-  GPIO_PULL_UP,
-  GPIO_PULL_DOWN
-} EMBEDDED_GPIO_PULL_EX;
-
 typedef struct ApplePcieComplexInfo {
   UINT64 EcamCfgRegionBase; // base address for ECAM region, pull from DT
   UINT32 EcamCfgRegionSize; // Size of ECAM region
   UINT64 RcRegionBase; // base address for "rc" region
+  UINT64 PortRegionBase[4];
 } APPLE_PCIE_COMPLEX_INFO;
+
+typedef struct ApplePcieGpioDesc {
+  UINT32 GpioNum;
+  //
+  // 1 is active low, 0 is active high
+  //
+  UINT32 GpioActivePolarity;
+} APPLE_PCIE_GPIO_DESC;
 
 typedef struct ApplePcieDevicePortInfo {
   UINT64 DeviceBaseAddress; // base address for the device port in the PCIe complex, pull from DT
   UINT32 DevicePortIndex;
   APPLE_PCIE_COMPLEX_INFO *Complex;
   INT32 PortSubNode;
+  APPLE_PCIE_GPIO_DESC ResetGpioDesc;
+  UINT64 DevicePhyBaseAddress; // base address for device PHY, this is calculated.
 } APPLE_PCIE_DEVICE_PORT_INFO;
 
-//
-// Using a modified Asahi Linux U-Boot definition here, since using the UEFI semantics
-// would be a longer term refactor decision - and I need this running now.
-//
 
-typedef struct ApplePcieGpioDesc {
-  EMBEDDED_GPIO_PULL_EX GpioPull;
-  EMBEDDED_GPIO_MODE_EX GpioMode;
-  UINT32 MiscGpioFlags;
-  UINT32 Offset;
-} APPLE_PCIE_GPIO_DESC;
 
 #endif //APPLE_SILICON_PCI_PLATFORM_DXE_H

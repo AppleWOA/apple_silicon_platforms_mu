@@ -50,8 +50,8 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdGpioBase
 
 [Protocols]
-  gEmbeddedGpioProtocolGuid # Produced/Installed
-  gPlatformGpioProtocolGuid # Produced/Installed
+  gEmbeddedGpioProtocolGuid # Installed
+  gPlatformGpioProtocolGuid # Checked if present
 
 [Depex]
   TRUE
