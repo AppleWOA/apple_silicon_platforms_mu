@@ -73,7 +73,12 @@ STATIC VOID EFIAPI AppleEmbeddedGpioControllerSetRegister(IN UINTN RegisterBase,
 
 //
 // Description:
-//   Gets the given GPIO value
+//   Gets the given GPIO value.
+//
+// Return values:
+//   EFI_SUCCESS - Got the value.
+//   EFI_INVALID_PARAMETER - value output pointer is NULL.
+//
 
 EFI_STATUS EFIAPI AppleEmbeddedGpioGetGpio(IN EMBEDDED_GPIO *This, IN EMBEDDED_GPIO_PIN Gpio, OUT UINTN *Value) {
   EFI_STATUS Status;
@@ -99,7 +104,7 @@ EFI_STATUS EFIAPI AppleEmbeddedGpioGetGpio(IN EMBEDDED_GPIO *This, IN EMBEDDED_G
 
 //
 // Description:
-//   Sets the EMBEDDED_GPIO_MODE (or direction) of the given GPIO.
+//   Sets the EMBEDDED_GPIO_MODE (or direction) and output value (if applicable) of the given GPIO.
 //
 // Return values:
 //   EFI_SUCCESS - GPIO set successfully
@@ -173,6 +178,7 @@ EFI_STATUS EFIAPI AppleEmbeddedGpioControllerGetMode(IN EMBEDDED_GPIO *This, IN 
 // Return values:
 //   EFI_UNSUPPORTED - cannot do the operation as it's not supported.
 //
+
 EFI_STATUS EFIAPI AppleEmbeddedGpioControllerSetPull(IN EMBEDDED_GPIO *This, IN EMBEDDED_GPIO_PIN Gpio, IN EMBEDDED_GPIO_PULL Direction) {
   return EFI_UNSUPPORTED;
 }
