@@ -16,6 +16,7 @@ APRIORI DXE {
   INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
   INF MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
   INF MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
+
   #
   # PCIe bringup and XHCI controller firmware load for ASMedia chips needs to happen *before* XHCI device discovery
   #

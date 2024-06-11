@@ -36,18 +36,24 @@
   AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
+  ArmLib
   BaseLib
   BaseMemoryLib
   DebugLib
   IoLib
   PcdLib
+  FdtLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
   UefiLib
+  PrintLib
+  TimerLib
   UefiRuntimeServicesTableLib
 
 [Pcd]
-  gAppleSiliconPkgTokenSpaceGuid.PcdGpioBase
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumGpios
 
 [Protocols]
   gEmbeddedGpioProtocolGuid # Installed

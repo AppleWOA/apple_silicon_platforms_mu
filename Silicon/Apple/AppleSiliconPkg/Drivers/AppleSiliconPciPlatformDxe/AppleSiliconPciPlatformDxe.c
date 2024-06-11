@@ -57,32 +57,30 @@
 
 STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 Index, APPLE_PCIE_GPIO_DESC *Desc) {
   UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-  INT32 *GpioCellsNode;
+  CONST INT32 *GpioCellsNode;
   INT32 PinCtrlApNode;
   UINT32 NumGpioCells;
-  INT32 *ResetGpiosPtr;
-  UINT32 ResetGpiosLength;
+  CONST INT32 *ResetGpiosPtr;
+  INT32 ResetGpiosLength;
   
 
   //
-  // HACK - need to load the pinctrl_ap node from die 0 for multi-die
-  // systems, right now use a switch statement based on global PCD, use /soc for
-  // single die systems, /die0 for multi-die systems.
+  // HACK - currently the GPIO address needs to be specified by base address in devicetree (the aliases don't seem to work?)
+  // ask marcan, et al how those aliases can be used
   //
   switch (PcdGet32(PcdAppleSocIdentifier)) {
     case 0x8103:
     case 0x8112:
-    case 0x8122:
-      PinCtrlApNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pinctrl_ap");
+      PinCtrlApNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pinctrl@23c100000");
       break;
+    case 0x8122:
     case 0x6000:
     case 0x6001:
     case 0x6002:
     case 0x6020:
     case 0x6021:
     case 0x6022:
-    case 0x6030:
-      PinCtrlApNode = fdt_path_offset((VOID *)FdtBlob, "/die0/pinctrl_ap");
+      PinCtrlApNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pinctrl@39b028000");
       break;
   }
 
@@ -100,7 +98,7 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 
   )
   {
       DEBUG((DEBUG_ERROR, "FDT path offset finding failed!!\n"));
-      DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-InterruptControllerNode)));
+      DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-PinCtrlApNode)));
       ASSERT(PinCtrlApNode != (-FDT_ERR_BADPATH));
       ASSERT(PinCtrlApNode != (-FDT_ERR_NOTFOUND));
       ASSERT(PinCtrlApNode != (-FDT_ERR_BADMAGIC));
@@ -115,7 +113,7 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 
   //
   
   GpioCellsNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNode, "#gpio-cells", NULL);
-  NumGpioCells = GpioCellsNode[0];
+  NumGpioCells = fdt32_to_cpu(GpioCellsNode[0]);
   DEBUG((DEBUG_INFO, "%a - there are %d gpio-cells in the devicetree\n", __FUNCTION__, NumGpioCells));
 
   //
@@ -127,26 +125,22 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 
   //
   ResetGpiosPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reset-gpios", &ResetGpiosLength);
   DEBUG((DEBUG_INFO, "%a - length of reset-gpios is 0x%x\n", __FUNCTION__, ResetGpiosLength));
-  Desc->GpioNum = ResetGpiosPtr[0];
-  Desc->GpioActivePolarity = ResetGpiosPtr[1];
+  Desc->GpioNum = fdt32_to_cpu(ResetGpiosPtr[0]);
+  Desc->GpioActivePolarity = fdt32_to_cpu(ResetGpiosPtr[1]);
   return EFI_SUCCESS;
 
 }
 
-STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_INFO *PcieComplex, INT32 SubNode) {
+STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_INFO *PcieComplex, INT32 SubNode, UINT32 PortIndex) {
   APPLE_PCIE_DEVICE_PORT_INFO *PciePortInfo = AllocateZeroPool(sizeof(APPLE_PCIE_DEVICE_PORT_INFO));
   EFI_STATUS Status;
-  UINT32 *IndexPtr;
+  // CONST INT32 *IndexPtr;
   UINT32 Index;
-  UINT32 IndexLength;
-  UINT32 Length;
+  // INT32 IndexLength;
   UINT32 PortAppClkValue;
   APPLE_PCIE_GPIO_DESC ResetGpioStruct;
   EMBEDDED_GPIO *GpioProtocol;
-  UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-  CHAR8 PortName[10];
-  INT32 PcieNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pcie");
-  CONST INT32 *PcieRegs = fdt_getprop((VOID *)FdtBlob, PcieNode, "reg", &Length);
+  // UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
   UINT32 PhyLaneCtl;
   UINT32 PhyLaneCfg;
   UINT32 PortRefClk;
@@ -165,7 +159,7 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   //
   Status = gBS->LocateProtocol(&gEmbeddedGpioProtocolGuid, NULL, (VOID **)&GpioProtocol);
   if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "%a: Couldn't find the Embedded GPIO protocol - %r\n", __FUNCTION__, Status));
+      DEBUG ((DEBUG_ERROR, "%a: Couldn't find the Embedded GPIO protocol\n", __FUNCTION__));
       return Status;
   }
 
@@ -173,9 +167,7 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   // From the root PCIe0 node, get the addresses of each of the ports.
   //
 
-  IndexPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reg", &IndexLength);
-  Index = IndexPtr[0];
-  Index = Index >> 11;
+  Index = PortIndex;
 
   PciePortInfo->Complex = PcieComplex;
   PciePortInfo->DevicePortIndex = Index;
@@ -191,16 +183,18 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   // to compensate for not having the openfirmware interfacing that Linux and U-Boot have while
   // using devicetree.
   //
-  PciePortInfo->DeviceBaseAddress = fdt32_to_cpu(PcieRegs[8 + 4*Index]);
-  PciePortInfo->DeviceBaseAddress = (((PciePortInfo->DeviceBaseAddress) << 32) | fdt32_to_cpu(PcieRegs[9 + 4*Index]));
+  PciePortInfo->DeviceBaseAddress = PcieComplex->PortRegionBase[Index];
 
   PciePortInfo->DevicePhyBaseAddress = PcieComplex->RcRegionBase + CORE_PHY_DEFAULT_BASE(PciePortInfo->DevicePortIndex);
 
+  DEBUG((DEBUG_INFO, "%a - PCIe device base address is 0x%llx, device PHY base address is 0x%llx\n", __FUNCTION__, PciePortInfo->DeviceBaseAddress, PciePortInfo->DevicePhyBaseAddress));
   //
   // Begin bringing up the PCIe device.
   //
+  DEBUG((DEBUG_INFO, "%a - reading PORT_APPCLK addr 0x%llx\n", __FUNCTION__, PciePortInfo->DeviceBaseAddress + PORT_APPCLK));
   PortAppClkValue = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK);
   PortAppClkValue = (PortAppClkValue | PORT_APPCLK_EN);
+  DEBUG((DEBUG_INFO, "%a - writing PORT_APPCLK addr 0x%llx\n", __FUNCTION__, PciePortInfo->DeviceBaseAddress + PORT_APPCLK));
   MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK, PortAppClkValue);
 
   //
@@ -224,16 +218,20 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
       //
       // Set up PHY_LANE_CTL
       //
+      DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CTL addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL));
       PhyLaneCtl = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL);
       PhyLaneCtl = PhyLaneCtl | PHY_LANE_CTL_CFGACC;
+      DEBUG((DEBUG_INFO, "%a - writing PHY_LANE_CTL addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL));
       MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL, PhyLaneCtl);
       break;
   }
-
+  DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
   PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
   PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLK0REQ;
+  DEBUG((DEBUG_INFO, "%a - writing PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
   MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
 
+  DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
   while(!(MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK0ACK))
   {
     MicroSecondDelay(100);
@@ -251,11 +249,14 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
     return EFI_TIMEOUT;
   }
 
+  DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
   PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
   PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLK1REQ;
+  DEBUG((DEBUG_INFO, "%a - writing PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
   MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
 
 
+  DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
   while(!(MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK1ACK))
   {
     MicroSecondDelay(100);
@@ -282,8 +283,10 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
       //
       break;
     default:
+      DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CTL addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL));
       PhyLaneCtl = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL);
       PhyLaneCtl = PhyLaneCtl & (~(PHY_LANE_CTL_CFGACC));
+      DEBUG((DEBUG_INFO, "%a - writing PHY_LANE_CTL addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL));
       MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL, PhyLaneCtl);
       break;
   }
@@ -396,15 +399,18 @@ AppleSiliconPciPlatformDxeInitialize(
     INT32 PcieNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pcie");
     CONST INT32 *PcieRegs = fdt_getprop((VOID *)FdtBlob, PcieNode, "reg", &Length);
     APPLE_PCIE_COMPLEX_INFO *PcieComplexInfoStruct = AllocateZeroPool(sizeof(APPLE_PCIE_COMPLEX_INFO));
-    CHAR8 *PortStatus;
-    INT32 PortStatusLength;
+    // CONST CHAR8 *PortStatus;
+    // INT32 PortStatusLength;
     INT32 PcieSubNode;
     EFI_STATUS Status;
+    UINT32 PciePortIndex = 0;
 
     //
     // The PCIe controller itself seems to be brought up by m1n1 itself, including tunables,
     // so we just need to bring up root ports here so that DXE can detect the devices on the ports, including the XHCI controller.
     //
+
+    DEBUG((DEBUG_INFO, "%a - started, FDT pointer: 0x%llx\n", __FUNCTION__, FdtBlob));
 
     //
     // Pull the ECAM base address from the FDT. Ditto for "rc" base address.
@@ -415,8 +421,10 @@ AppleSiliconPciPlatformDxeInitialize(
     PcieComplexInfoStruct->EcamCfgRegionBase = fdt32_to_cpu(PcieRegs[0]);
     PcieComplexInfoStruct->EcamCfgRegionBase = ((PcieComplexInfoStruct->EcamCfgRegionBase) << 32) | (fdt32_to_cpu(PcieRegs[1]));
     PcieComplexInfoStruct->EcamCfgRegionSize = fdt32_to_cpu(PcieRegs[3]);
+    DEBUG((DEBUG_INFO, "%a - PCIe ECAM base: 0x%llx, size 0x%x\n", __FUNCTION__, PcieComplexInfoStruct->EcamCfgRegionBase, PcieComplexInfoStruct->EcamCfgRegionSize));
     PcieComplexInfoStruct->RcRegionBase = fdt32_to_cpu(PcieRegs[4]);
     PcieComplexInfoStruct->RcRegionBase = ((PcieComplexInfoStruct->RcRegionBase) << 32) | (fdt32_to_cpu(PcieRegs[5]));
+    DEBUG((DEBUG_INFO, "%a - PCIe RC base: 0x%llx\n", __FUNCTION__, PcieComplexInfoStruct->RcRegionBase));
 
     //
     // Pull the base address for each port
@@ -424,6 +432,7 @@ AppleSiliconPciPlatformDxeInitialize(
     for(UINT32 i = 0; i <= 3; i++) {
       PcieComplexInfoStruct->PortRegionBase[i] = fdt32_to_cpu(PcieRegs[8 + 4*i]);
       PcieComplexInfoStruct->PortRegionBase[i] = ((PcieComplexInfoStruct->PortRegionBase[i]) << 32) | fdt32_to_cpu(PcieRegs[9 + 4*i]);
+      DEBUG((DEBUG_INFO, "%a - PCIe port %d base: 0x%llx\n", __FUNCTION__, i, PcieComplexInfoStruct->PortRegionBase[i]));
       if((PcdGet32(PcdAppleSocIdentifier)) == 0x8103 && (i >= 2)) {
         break;
       }
@@ -432,16 +441,21 @@ AppleSiliconPciPlatformDxeInitialize(
     // NOTE: the following does NOT account for APCIe-GE devices such as the Mac Pros.
     //
     fdt_for_each_subnode(PcieSubNode, (VOID *)FdtBlob, PcieNode) {
-      PortStatus = fdt_getprop((VOID *)FdtBlob, PcieSubNode, "status", &PortStatusLength);
-      if(!strcmp(PortStatus, "disabled")) {
-        DEBUG((DEBUG_INFO, "PCIe port disabled, continuing\n"));
-        continue;
-      }
-      Status = AppleSiliconPciePlatformDxeSetupPciePort(PcieComplexInfoStruct, PcieSubNode);
+      // DEBUG((DEBUG_INFO, "Test1\n"));
+      // PortStatus = fdt_getprop((VOID *)FdtBlob, PcieSubNode, "status", &PortStatusLength);
+      // DEBUG((DEBUG_INFO, "%a - PCIe port status is %s", __FUNCTION__, PortStatus));
+      // if(!strcmp(PortStatus, "disabled")) {
+      //   DEBUG((DEBUG_INFO, "PCIe port disabled, continuing\n"));
+      //   continue;
+      // }
+      DEBUG((DEBUG_INFO, "%a - starting PCIe port setup\n", __FUNCTION__));
+      Status = AppleSiliconPciePlatformDxeSetupPciePort(PcieComplexInfoStruct, PcieSubNode, PciePortIndex);
       if(EFI_ERROR(Status)) {
-        DEBUG((DEBUG_ERROR, "%a - Port setup failed: %r\n", __FUNCTION__, Status));
+        DEBUG((DEBUG_ERROR, "%a - Port setup failed\n", __FUNCTION__));
         ASSERT_EFI_ERROR(Status);
       }
+      DEBUG((DEBUG_ERROR, "%a - Port setup succeeded\n", __FUNCTION__));
+      PciePortIndex++;
     }
 
     return EFI_SUCCESS;

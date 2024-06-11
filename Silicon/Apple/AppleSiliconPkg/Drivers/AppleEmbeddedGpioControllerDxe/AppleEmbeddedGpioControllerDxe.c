@@ -22,6 +22,7 @@
 #include <PiDxe.h>
 
 #include <Library/BaseLib.h>
+#include <Library/ArmLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
@@ -29,7 +30,10 @@
 #include <Library/PcdLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
+#include <Library/PrintLib.h>
+#include <Include/libfdt.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/TimerLib.h>
 
 #include <Protocol/EmbeddedGpio.h>
 
@@ -56,6 +60,7 @@ EFI_STATUS AppleEmbeddedGpioControllerLocate(IN EMBEDDED_GPIO_PIN Gpio, OUT UINT
       return EFI_NOT_FOUND;
     }
   }
+  return EFI_SUCCESS;
 }
 
 STATIC UINTN EFIAPI AppleEmbeddedGpioControllerGetRegister(IN UINTN RegisterBase, IN UINTN Offset) {
@@ -64,7 +69,7 @@ STATIC UINTN EFIAPI AppleEmbeddedGpioControllerGetRegister(IN UINTN RegisterBase
 }
 
 STATIC VOID EFIAPI AppleEmbeddedGpioControllerSetRegister(IN UINTN RegisterBase, IN UINTN Offset, IN UINTN Bitmask, IN UINTN Value) {
-  UINTN OriginalValue = MmioRead32(RegisterBase, GPIO_REG(Offset));
+  UINTN OriginalValue = MmioRead32(RegisterBase + GPIO_REG(Offset));
   UINTN UpdatedValue = OriginalValue & ~(Bitmask);
   UpdatedValue = (UpdatedValue | (Bitmask & Value));
   DEBUG((DEBUG_INFO, "%a - doing MMIO write of 0x%llx\n", __FUNCTION__, UpdatedValue));
@@ -115,7 +120,6 @@ EFI_STATUS EFIAPI AppleEmbeddedGpioSetGpio(IN EMBEDDED_GPIO *This, IN EMBEDDED_G
   UINTN Index;
   UINTN RegisterBase;
   UINTN Offset;
-  UINTN GpioValue;
   Status = AppleEmbeddedGpioControllerLocate(Gpio, &Index, &Offset, &RegisterBase);
   if(EFI_ERROR(Status)) {
     DEBUG((DEBUG_INFO, "%a - GPIO not found\n", __FUNCTION__));
@@ -128,10 +132,13 @@ EFI_STATUS EFIAPI AppleEmbeddedGpioSetGpio(IN EMBEDDED_GPIO *This, IN EMBEDDED_G
   switch(Mode) {
     case GPIO_MODE_INPUT:
       AppleEmbeddedGpioControllerSetRegister(RegisterBase, Offset, (GPIOx_PERIPHERAL | GPIOx_MODE | GPIOx_INPUT_ENABLE | GPIOx_REG_DATA), ((FIELD_PREP(GPIOx_MODE, GPIOx_IN_MODE_IRQ_OFF)) | (GPIOx_INPUT_ENABLE)));
+      break;
     case GPIO_MODE_OUTPUT_0:
       AppleEmbeddedGpioControllerSetRegister(RegisterBase, Offset, (GPIOx_PERIPHERAL | GPIOx_MODE | GPIOx_INPUT_ENABLE | GPIOx_REG_DATA), ((FIELD_PREP(GPIOx_MODE, GPIOx_OUT_MODE))));
+      break;
     case GPIO_MODE_OUTPUT_1:
       AppleEmbeddedGpioControllerSetRegister(RegisterBase, Offset, (GPIOx_PERIPHERAL | GPIOx_MODE | GPIOx_INPUT_ENABLE | GPIOx_REG_DATA), ((FIELD_PREP(GPIOx_MODE, GPIOx_OUT_MODE)) | (GPIOx_REG_DATA)));
+      break;
     default:
       DEBUG((DEBUG_INFO, "%a - requested GPIO mode is unsupported\n", __FUNCTION__));
       return EFI_UNSUPPORTED;
@@ -202,62 +209,25 @@ AppleEmbeddedGpioControllerDxeInitialize(
   EFI_STATUS Status;
   EFI_HANDLE GpioHandle;
   GPIO_CONTROLLER *GpioController;
-  UINTN NumberOfCpuDies;
-  INT32 *NumberOfPinsNode;
+  // UINTN NumberOfCpuDies;
+  UINT8 NumberOfGpioPins = PcdGet8(PcdAppleNumGpios);
   UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-  INT32 PinCtrlApNodes[2];
-  INT32 *PinCtrlApRegNode;
+  // INT32 PinCtrlApNodes[2];
+  INT32 PinCtrlApNode;
+  CONST INT32 *PinCtrlApRegNode;
   UINT64 PinCtrlApReg;
   UINT32 Midr = ArmReadMidr();
-  CHAR8 PinCtrlApNodeName[20]; //really 17 chars, but playing it safe here.
-  BOOLEAN BaseSocSupportsMultipleDies; // T60XX SoCs support multiple dies, indicate that boolean here
-  switch (PcdGet32(PcdAppleSocIdentifier)) {
-    case 0x8103:
-    case 0x8112:
-    case 0x8122:
-      NumberOfCpuDies = 1;
-      BaseSocSupportsMultipleDies = FALSE;
-      break;
-    case 0x6000:
-    case 0x6001:
-    case 0x6020:
-    case 0x6021:
-    case 0x6030:
-    case 0x6031:
-    case 0x6034:
-      NumberOfCpuDies = 1;
-      BaseSocSupportsMultipleDies = TRUE;
-      break;
-    case 0x6002:
-    case 0x6022:
-      NumberOfCpuDies = 2;
-      BaseSocSupportsMultipleDies = TRUE;
-      break;
-  }
-  if(BaseSocSupportsMultipleDies == TRUE) {
-    for(UINT32 i = 0; i < NumberOfCpuDies; i++) {
-      AsciiSPrint(PinCtrlApNodeName, sizeof(PinCtrlApNodeName), "/die%d/pinctrl_ap", i);
-      PinCtrlApNodes[i] = fdt_path_offset((VOID*)FdtBlob, PinCtrlApNodeName);
-    }
-  }
-  else {
-    PinCtrlApNodes[0] = fdt_path_offset((VOID*)FdtBlob, "/soc/pinctrl_ap");
-  }
+  //CHAR8 PinCtrlApNodeName[13];
+  // BOOLEAN BaseSocSupportsMultipleDies; // T60XX SoCs support multiple dies, indicate that boolean here
+  DEBUG((DEBUG_INFO, "%a - started, FDT pointer: 0x%llx\n", __FUNCTION__, FdtBlob));
+
   //
   // Sanity check: make sure there isn't another GPIO controller check installed
   //
   ASSERT_PROTOCOL_ALREADY_INSTALLED (NULL, &gEmbeddedGpioProtocolGuid);
-
   Status = gBS->LocateProtocol (&gPlatformGpioProtocolGuid, NULL, (VOID **)&AppleSiliconPlatformGpioController);
-  if(Status == EFI_NOT_FOUND) {
-    // 
-    // Allocate the Platform GPIO controller struct
-    //
-    AppleSiliconPlatformGpioController = (PLATFORM_GPIO_CONTROLLER *)AllocateZeroPool(sizeof (PLATFORM_GPIO_CONTROLLER) + sizeof (GPIO_CONTROLLER));
-    if (AppleSiliconPlatformGpioController == NULL) {
-      DEBUG((DEBUG_ERROR, "%a - allocation of platform GPIO controller struct failed\n", __FUNCTION__));
-      return EFI_OUT_OF_RESOURCES;
-    }
+  if(EFI_ERROR (Status) && (Status == EFI_NOT_FOUND)) {
+    DEBUG((DEBUG_INFO, "%a - embedded gpio protocol is not installed\n", __FUNCTION__));
     //
     // Verify that we are on an Apple SoC by reading MIDR and checking the vendor ID bit,
     // bail out if not found.
@@ -266,24 +236,91 @@ AppleEmbeddedGpioControllerDxeInitialize(
       DEBUG((DEBUG_ERROR, "%a - not on an Apple SoC, GPIO controller not present, aborting\n", __FUNCTION__));
       return EFI_NOT_FOUND;
     }
+
+    switch (PcdGet32(PcdAppleSocIdentifier)) {
+      case 0x8103:
+      case 0x8112:
+      case 0x8122:
+        // NumberOfCpuDies = 1;
+        // BaseSocSupportsMultipleDies = FALSE;
+        break;
+      case 0x6000:
+      case 0x6001:
+      case 0x6020:
+      case 0x6021:
+      case 0x6030:
+      case 0x6031:
+      case 0x6034:
+        // NumberOfCpuDies = 1;
+        // BaseSocSupportsMultipleDies = TRUE;
+        break;
+      case 0x6002:
+      case 0x6022:
+        // NumberOfCpuDies = 2;
+        // BaseSocSupportsMultipleDies = TRUE;
+        break;
+    }
+    DEBUG((DEBUG_INFO, "%a - soc identified\n", __FUNCTION__));
+
+    // if(BaseSocSupportsMultipleDies == TRUE) {
+    //   for(UINT32 i = 0; i < NumberOfCpuDies; i++) {
+    //     DEBUG((DEBUG_INFO, "%a - getting pinctrl_ap for die %d of 2\n", __FUNCTION__, i));
+    //     //
+    //     // HACK
+    //     //
+    //     if(i == 0) {
+    //       PinCtrlApNodes[i] = fdt_path_offset((VOID*)FdtBlob, "/soc@200000000/pinctrl");
+    //     }
+    //     else if (i == 1) {
+    //       PinCtrlApNodes[i] = fdt_path_offset((VOID*)FdtBlob, "/soc@2200000000/pinctrl");
+    //     }
+    //   }
+    // }
+    // else {
+    DEBUG((DEBUG_INFO, "%a - getting pinctrl_ap for die 0\n", __FUNCTION__));
+    //
+    // NOTE: this will change on future SoCs, needs to be updated
+    //
+    PinCtrlApNode = fdt_path_offset((VOID*)FdtBlob, "/soc/pinctrl@39b028000");
+    // }
+  
+    // 
+    // Allocate the Platform GPIO controller struct
+    //
+    DEBUG((DEBUG_ERROR, "%a - starting allocation of memory for platform gpio controller struct\n", __FUNCTION__));
+    AppleSiliconPlatformGpioController = (PLATFORM_GPIO_CONTROLLER *)AllocateZeroPool (sizeof (PLATFORM_GPIO_CONTROLLER) + sizeof (GPIO_CONTROLLER));
+    if (AppleSiliconPlatformGpioController == NULL) {
+      DEBUG((DEBUG_ERROR, "%a - allocation of platform GPIO controller struct failed\n", __FUNCTION__));
+      return EFI_OUT_OF_RESOURCES;
+    }
     //
     // Pin control GPIO controllers = 3 * NUM_DIES 
     // only 1 SMC pin control GPIO controller.
     // For now, use 1 * NUM_DIES (as for now we only need to concern ourselves with AP pin controllers)
     // if we need the others, change this.
     //
-    NumberOfPinsNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNodes[0], "apple,npins", NULL);
-    AppleSiliconPlatformGpioController->GpioCount = NumberOfPinsNode[0];
-    AppleSiliconPlatformGpioController->GpioControllerCount = (1 * NumberOfCpuDies);
+    DEBUG((DEBUG_INFO, "%a - setting GPIO count to %d\n", __FUNCTION__, NumberOfGpioPins ));
+    AppleSiliconPlatformGpioController->GpioCount = NumberOfGpioPins;
+    DEBUG((DEBUG_INFO, "%a - setting GPIO controller count to 1\n", __FUNCTION__));
+    AppleSiliconPlatformGpioController->GpioControllerCount = 1;
+    // DEBUG((DEBUG_INFO, "%a - setting GPIO controller count to %d\n", __FUNCTION__, (1 * NumberOfCpuDies)));
+    // AppleSiliconPlatformGpioController->GpioControllerCount = (1 * NumberOfCpuDies);
+    DEBUG((DEBUG_INFO, "%a - setting GPIO controller pointer\n", __FUNCTION__));
     AppleSiliconPlatformGpioController->GpioController = (GPIO_CONTROLLER *)((UINTN)AppleSiliconPlatformGpioController + sizeof(PLATFORM_GPIO_CONTROLLER));
+    //
+    // HACK: only doing 1 cpu die support for now (die 0)
+    //
+    //DEBUG((DEBUG_INFO, "%a - setting GPIO pointer to 0x%llx\n", __FUNCTION__, ((GPIO_CONTROLLER *)((UINTN)AppleSiliconPlatformGpioController + sizeof(PLATFORM_GPIO_CONTROLLER)))));
 
     GpioController = AppleSiliconPlatformGpioController->GpioController;
+    DEBUG((DEBUG_INFO, "%a - setting GPIO controller index (local var)\n", __FUNCTION__));
     GpioController->GpioIndex = 0;
-    PinCtrlApRegNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNodes[0], "reg", NULL);
+    PinCtrlApRegNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNode, "reg", NULL);
     PinCtrlApReg = fdt32_to_cpu(PinCtrlApRegNode[0]);
     PinCtrlApReg = (PinCtrlApReg << 32) | fdt32_to_cpu(PinCtrlApRegNode[1]);
+    DEBUG((DEBUG_INFO, "%a - setting GPIO controller base reg (local var) to 0x%llx\n", __FUNCTION__, PinCtrlApReg));
     GpioController->RegisterBase = PinCtrlApReg;
-    GpioController->InternalGpioCount = NumberOfPinsNode[0];
+    GpioController->InternalGpioCount = NumberOfGpioPins;
 
     //
     // Install the GPIO protocol.
@@ -299,6 +336,7 @@ AppleEmbeddedGpioControllerDxeInitialize(
       DEBUG((DEBUG_ERROR, "%a - failed to install gEmbeddedGpioProtocolGuid, aborting\n", __FUNCTION__));
       Status = EFI_OUT_OF_RESOURCES;
     }
-
   }
+  DEBUG((DEBUG_INFO, "%a - GPIO protocol installation successful\n", __FUNCTION__));
+  return Status;
 }

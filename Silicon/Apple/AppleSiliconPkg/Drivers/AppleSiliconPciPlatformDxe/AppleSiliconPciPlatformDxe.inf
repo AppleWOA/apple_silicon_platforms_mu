@@ -54,8 +54,12 @@
   TimerLib
 
 [Pcd]
-  gAppleSiliconPkgTokenSpaceGuid.PcdGpioBase
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
 
 [Protocols]
   gEmbeddedGpioProtocolGuid # used
   gPlatformGpioProtocolGuid # used
+
+[Depex]
+  TRUE

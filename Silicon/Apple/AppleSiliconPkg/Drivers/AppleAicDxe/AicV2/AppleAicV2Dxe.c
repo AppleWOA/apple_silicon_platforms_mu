@@ -148,7 +148,7 @@ STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
     INT32 Length;
     INT32 InterruptControllerNode = fdt_path_offset((VOID *)FdtBlob, "/soc/interrupt-controller");
     CONST INT32 *InterruptControllerRegs = fdt_getprop((VOID *)FdtBlob, InterruptControllerNode, "reg", &Length);
-    UINT64 EventRegisterValue = 0;
+    //UINT64 EventRegisterValue = 0;
     UINT64 StartOffset;
     UINT64 CurrentOffset;
 
