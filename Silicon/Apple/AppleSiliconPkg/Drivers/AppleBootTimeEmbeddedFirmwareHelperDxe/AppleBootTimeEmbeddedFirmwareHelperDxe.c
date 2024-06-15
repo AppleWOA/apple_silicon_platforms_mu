@@ -280,7 +280,7 @@ STATIC EFI_STATUS AppleAsmediaGetFirmwareVersion(IN EFI_PCI_IO_PROTOCOL *PciIoPr
 }
 
 STATIC BOOLEAN AppleAsmediaCheckFirmwareIsLoaded(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInstance) {
-    UINT64 FirmwareVersion = 0;
+    UINT64 FirmwareVersion;
     EFI_STATUS Status;
     Status = AppleAsmediaGetFirmwareVersion(PciIoProtocolInstance, &FirmwareVersion);
     if(EFI_ERROR(Status)) {
@@ -474,9 +474,6 @@ STATIC EFI_STATUS EFIAPI AppleBootTimeEmbeddedFirmwareDriverBindingSupported(
     goto CloseProtocolAndExit;
   }
 
-  //
-  // Now, we need to get a handle to the real XHCI controller.
-  //
   UINT64 AttributeResult1 = 0;
   UINT64 AttributeResult2 = 0;
   PciIoProtocol->Attributes(PciIoProtocol, EfiPciIoAttributeOperationGet, 0, &AttributeResult1);

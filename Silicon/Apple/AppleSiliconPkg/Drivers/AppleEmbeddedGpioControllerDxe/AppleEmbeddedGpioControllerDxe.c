@@ -70,8 +70,8 @@ STATIC UINTN EFIAPI AppleEmbeddedGpioControllerGetRegister(IN UINTN RegisterBase
 
 STATIC VOID EFIAPI AppleEmbeddedGpioControllerSetRegister(IN UINTN RegisterBase, IN UINTN Offset, IN UINTN Bitmask, IN UINTN Value) {
   UINTN OriginalValue = MmioRead32(RegisterBase + GPIO_REG(Offset));
-  UINTN UpdatedValue = OriginalValue & ~(Bitmask);
-  UpdatedValue = (UpdatedValue | (Bitmask & Value));
+  UINTN UpdatedValue = OriginalValue & ((~Bitmask));
+  UpdatedValue = (UpdatedValue | Value);
   DEBUG((DEBUG_INFO, "%a - doing MMIO write of 0x%llx\n", __FUNCTION__, UpdatedValue));
   MmioWrite32((RegisterBase + GPIO_REG(Offset)), Value);
 }
@@ -102,7 +102,8 @@ EFI_STATUS EFIAPI AppleEmbeddedGpioGetGpio(IN EMBEDDED_GPIO *This, IN EMBEDDED_G
   }
   
   GpioValue = AppleEmbeddedGpioControllerGetRegister(RegisterBase, Offset);
-  *Value = !!((GpioValue & (GPIOx_REG_DATA)));
+  //*Value = !!((GpioValue & (GPIOx_REG_DATA)));
+  *Value = GpioValue;
   return EFI_SUCCESS;
 
 }
@@ -180,7 +181,7 @@ EFI_STATUS EFIAPI AppleEmbeddedGpioControllerGetMode(IN EMBEDDED_GPIO *This, IN 
 
 //
 // Description:
-//   Sets the pull up/pull down behavior of a GPIO. Not supported currently.
+//   Sets the pull up/pull down behavior of a GPIO. Not supported.
 //
 // Return values:
 //   EFI_UNSUPPORTED - cannot do the operation as it's not supported.

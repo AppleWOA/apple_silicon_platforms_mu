@@ -55,6 +55,19 @@
 // especially on later versions or later hardware.
 //
 
+
+//
+// Helpers to do MMIO reads and writes
+//
+
+
+//
+// Description:
+//   Gets the reset GPIO number for a given PCIe port. ASSERT's on failure.
+//
+// Return values:
+//   EFI_SUCCESS - GPIO number found
+
 STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 Index, APPLE_PCIE_GPIO_DESC *Desc) {
   UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
   CONST INT32 *GpioCellsNode;
@@ -125,10 +138,32 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 
   //
   ResetGpiosPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reset-gpios", &ResetGpiosLength);
   DEBUG((DEBUG_INFO, "%a - length of reset-gpios is 0x%x\n", __FUNCTION__, ResetGpiosLength));
-  Desc->GpioNum = fdt32_to_cpu(ResetGpiosPtr[0]);
-  Desc->GpioActivePolarity = fdt32_to_cpu(ResetGpiosPtr[1]);
+  Desc->GpioNum = fdt32_to_cpu(ResetGpiosPtr[1]);
+  Desc->GpioActivePolarity = fdt32_to_cpu(ResetGpiosPtr[2]);
+  DEBUG((DEBUG_INFO, "%a - GPIO found is 0x%x, polarity is 0x%x\n", __FUNCTION__, Desc->GpioNum, Desc->GpioActivePolarity));
   return EFI_SUCCESS;
 
+}
+
+STATIC VOID AppleSiliconPcieSetBits(UINT32 BitsToSet, UINTN Address) {
+  UINT32 OriginalValue = MmioRead32(Address);
+  DEBUG((DEBUG_INFO, "%a - Original MMIO value for 0x%llx is 0x%x\n", __FUNCTION__, Address, OriginalValue));
+  UINT32 UpdatedValue = OriginalValue | BitsToSet;
+  DEBUG((DEBUG_INFO, "%a - MMIO value to be written to 0x%llx is 0x%x\n", __FUNCTION__, Address, UpdatedValue));
+  MmioWrite32(Address, UpdatedValue);
+  UINT32 NewValue = MmioRead32(Address);
+  DEBUG((DEBUG_INFO, "%a - MMIO value for 0x%llx that was read back is 0x%x\n", __FUNCTION__, Address, NewValue));
+
+}
+
+STATIC VOID AppleSiliconPcieClearBits(UINT32 BitsToClear, UINTN Address) {
+  UINT32 OriginalValue = MmioRead32(Address);
+  DEBUG((DEBUG_INFO, "%a - Original MMIO value for 0x%llx is 0x%x\n", __FUNCTION__, Address, OriginalValue));
+  UINT32 UpdatedValue = OriginalValue & ((~BitsToClear));
+  DEBUG((DEBUG_INFO, "%a - MMIO value to be written to 0x%llx is 0x%x\n", __FUNCTION__, Address, UpdatedValue));
+  MmioWrite32(Address, UpdatedValue);
+  UINT32 NewValue = MmioRead32(Address);
+  DEBUG((DEBUG_INFO, "%a - MMIO value for 0x%llx that was read back is 0x%x\n", __FUNCTION__, Address, NewValue));
 }
 
 STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_INFO *PcieComplex, INT32 SubNode, UINT32 PortIndex) {
@@ -137,18 +172,15 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   // CONST INT32 *IndexPtr;
   UINT32 Index;
   // INT32 IndexLength;
-  UINT32 PortAppClkValue;
   APPLE_PCIE_GPIO_DESC ResetGpioStruct;
   EMBEDDED_GPIO *GpioProtocol;
+  UINTN RetrievedGpioValue;
   // UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-  UINT32 PhyLaneCtl;
-  UINT32 PhyLaneCfg;
-  UINT32 PortRefClk;
-  UINT32 PortPerst;
-  BOOLEAN RefClkAcked = TRUE;
-  BOOLEAN PortReady = TRUE;
-  BOOLEAN LinkUp = TRUE;
-  UINT32 Timeout = 0;
+  BOOLEAN RefClk0Acked;
+  BOOLEAN RefClk1Acked;
+  BOOLEAN PortReady;
+  BOOLEAN LinkUp;
+  UINT32 i = 0;
   
   //
   // GPIO setup.
@@ -175,6 +207,7 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
 
   Status = AppleSiliconPciePlatformDxeGetResetGpios(SubNode, Index, &ResetGpioStruct);
 
+  DEBUG((DEBUG_INFO, "%a - Reset GPIO number is 0x%x\n", __FUNCTION__, ResetGpioStruct.GpioNum));
   PciePortInfo->ResetGpioDesc = ResetGpioStruct;
 
   //
@@ -191,16 +224,24 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   //
   // Begin bringing up the PCIe device.
   //
-  DEBUG((DEBUG_INFO, "%a - reading PORT_APPCLK addr 0x%llx\n", __FUNCTION__, PciePortInfo->DeviceBaseAddress + PORT_APPCLK));
-  PortAppClkValue = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK);
-  PortAppClkValue = (PortAppClkValue | PORT_APPCLK_EN);
-  DEBUG((DEBUG_INFO, "%a - writing PORT_APPCLK addr 0x%llx\n", __FUNCTION__, PciePortInfo->DeviceBaseAddress + PORT_APPCLK));
-  MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK, PortAppClkValue);
+
+  AppleSiliconPcieSetBits(PORT_APPCLK_EN, PciePortInfo->DeviceBaseAddress + PORT_APPCLK);
 
   //
   // Per Asahi U-Boot, this is to assert PERST#
   //
+
+  //
+  // NOTE: The "SetPull" call is NOT to set the pull state of the GPIO, this is currently being used as a hack
+  // to set just the output value of 0 or 1 without changing the other bits.
+  //
+  // The SetPull method will be reverted to the proper behavior later.
+  //
+  Status = GpioProtocol->Get(GpioProtocol, ResetGpioStruct.GpioNum, &RetrievedGpioValue);
+  DEBUG((DEBUG_INFO, "%a - GPIO value before asserting PERST# is 0x%llx\n", __FUNCTION__, RetrievedGpioValue));
   Status = GpioProtocol->Set(GpioProtocol, ResetGpioStruct.GpioNum, GPIO_MODE_OUTPUT_0);
+  Status = GpioProtocol->Get(GpioProtocol, ResetGpioStruct.GpioNum, &RetrievedGpioValue);
+  DEBUG((DEBUG_INFO, "%a - GPIO value after asserting PERST# is 0x%llx\n", __FUNCTION__, RetrievedGpioValue));
 
   //
   // Set up REFCLK
@@ -218,59 +259,47 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
       //
       // Set up PHY_LANE_CTL
       //
-      DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CTL addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL));
-      PhyLaneCtl = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL);
-      PhyLaneCtl = PhyLaneCtl | PHY_LANE_CTL_CFGACC;
-      DEBUG((DEBUG_INFO, "%a - writing PHY_LANE_CTL addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL));
-      MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL, PhyLaneCtl);
+      AppleSiliconPcieSetBits(PHY_LANE_CTL_CFGACC, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL);
       break;
   }
-  DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
-  PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
-  PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLK0REQ;
-  DEBUG((DEBUG_INFO, "%a - writing PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
-  MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
+  AppleSiliconPcieSetBits(PHY_LANE_CFG_REFCLK0REQ, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
 
-  DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
-  while(!(MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK0ACK))
+  RefClk0Acked = (MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK0ACK) != 0;
+
+  while (RefClk0Acked == FALSE)
   {
     MicroSecondDelay(100);
-    Timeout += 100;
-    if(Timeout >= 50000) {
-      RefClkAcked = FALSE;
+    RefClk0Acked = (MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK0ACK) != 0;
+    if(RefClk0Acked == TRUE || i >= 500) {
       break;
     }
+    i++; 
   }
 
-  Timeout = 0;
+  i = 0;
 
-  if(RefClkAcked == FALSE) {
-    DEBUG((DEBUG_ERROR, "%a - REFCLK0ACK timed out\n", __FUNCTION__));
+  if(RefClk0Acked == FALSE) {
+    DEBUG((DEBUG_ERROR, "%a - REFCLK0ACK timed out or failed\n", __FUNCTION__));
     return EFI_TIMEOUT;
   }
 
-  DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
-  PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
-  PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLK1REQ;
-  DEBUG((DEBUG_INFO, "%a - writing PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
-  MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
+  AppleSiliconPcieSetBits(PHY_LANE_CFG_REFCLK1REQ, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
 
-
-  DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CFG addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG));
-  while(!(MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK1ACK))
+  RefClk1Acked = (MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK1ACK) != 0;
+  while(RefClk1Acked == FALSE)
   {
     MicroSecondDelay(100);
-    Timeout += 100;
-    if(Timeout >= 50000) {
-      RefClkAcked = FALSE;
+    RefClk1Acked = (MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG) & PHY_LANE_CFG_REFCLK1ACK) != 0;
+    if(RefClk1Acked == TRUE || i >= 500) {
       break;
     }
+    i++; 
   }
 
-  Timeout = 0;
+  i = 0;
 
-  if(RefClkAcked == FALSE) {
-    DEBUG((DEBUG_ERROR, "%a - REFCLK1ACK timed out\n", __FUNCTION__));
+  if(RefClk1Acked == FALSE) {
+    DEBUG((DEBUG_ERROR, "%a - REFCLK1ACK timed out or failed\n", __FUNCTION__));
     return EFI_TIMEOUT;
   }
   
@@ -283,18 +312,11 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
       //
       break;
     default:
-      DEBUG((DEBUG_INFO, "%a - reading PHY_LANE_CTL addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL));
-      PhyLaneCtl = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL);
-      PhyLaneCtl = PhyLaneCtl & (~(PHY_LANE_CTL_CFGACC));
-      DEBUG((DEBUG_INFO, "%a - writing PHY_LANE_CTL addr 0x%llx\n", __FUNCTION__, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL));
-      MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL, PhyLaneCtl);
+      AppleSiliconPcieClearBits(PHY_LANE_CTL_CFGACC, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CTL);
       break;
   }
 
-  PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
-  PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLKEN;
-  MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
-
+  AppleSiliconPcieSetBits(PHY_LANE_CFG_REFCLKEN, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
 
   switch(PcdGet32(PcdAppleSocIdentifier)) {
     case 0x6020:
@@ -305,9 +327,7 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
       //
       break;
     default:
-      PortRefClk = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_REFCLK);
-      PortRefClk = PortRefClk | PORT_REFCLK_EN;
-      MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_REFCLK, PortRefClk);
+      AppleSiliconPcieSetBits(PORT_REFCLK_EN, PciePortInfo->DeviceBaseAddress + PORT_REFCLK);
       break;
   }
 
@@ -323,66 +343,67 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
     case 0x6020:
     case 0x6021:
     case 0x6022:
-      PortPerst = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_T602X_PERST);
-      PortPerst = PortPerst | PORT_PERST_OFF;
-      MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_T602X_PERST, PortPerst);
+      AppleSiliconPcieSetBits(PORT_PERST_OFF, PciePortInfo->DeviceBaseAddress + PORT_T602X_PERST);
       break;
     default:
-      PortPerst = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_PERST);
-      PortPerst = PortPerst | PORT_PERST_OFF;
-      MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_PERST, PortPerst);
+      AppleSiliconPcieSetBits(PORT_PERST_OFF, PciePortInfo->DeviceBaseAddress + PORT_PERST);
       break;
   }
 
   Status = GpioProtocol->Set(GpioProtocol, ResetGpioStruct.GpioNum, GPIO_MODE_OUTPUT_1);
   MicroSecondDelay(100 * 1000);
-  Timeout = 0;
 
-  while(!(MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_STATUS) & PORT_STATUS_READY))
+  PortReady = (MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_STATUS) & PORT_STATUS_READY) != 0;
+  while(PortReady == FALSE)
   {
     MicroSecondDelay(100);
-    Timeout += 100;
-    if(Timeout >= 250000) {
-      PortReady = FALSE;
+    PortReady = (MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_STATUS) & PORT_STATUS_READY) != 0;
+    if(PortReady == TRUE || i >= 2500) {
       break;
     }
+    i++;
   }
-  Timeout = 0;
+
+  i = 0;
   if(PortReady == FALSE) {
     DEBUG((DEBUG_ERROR, "%a - port %d ready signal timed out\n", __FUNCTION__, PciePortInfo->DevicePortIndex));
     return EFI_TIMEOUT;
   }
 
+  DEBUG((DEBUG_INFO, "%a - port %d is ready\n", __FUNCTION__, PciePortInfo->DevicePortIndex));
+
   MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_LTSSMCTL, PORT_LTSSMCTL_START);
 
-  while(!(MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_LINKSTS) & PORT_LINKSTS_UP))
+  LinkUp = (MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_LINKSTS) & PORT_LINKSTS_UP) != 0;
+
+  while(LinkUp == FALSE)
   {
     MicroSecondDelay(100);
-    Timeout += 100;
-    if(Timeout >= 100000) {
-      LinkUp = FALSE;
+    LinkUp = (MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_LINKSTS) & PORT_LINKSTS_UP) != 0;
+    if(LinkUp == TRUE || i >= 1000) {
       break;
     }
+    i++;
   }
+  i = 0;
+  // if(LinkUp == FALSE) {
+  //   DEBUG((DEBUG_ERROR, "%a - port %d link up timed out\n", __FUNCTION__, PciePortInfo->DevicePortIndex));
+  //   return EFI_TIMEOUT;
+  // }
 
   switch(PcdGet32(PcdAppleSocIdentifier)) {
     case 0x6020:
     case 0x6021:
     case 0x6022:
-      PhyLaneCfg = MmioRead32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
-      PhyLaneCfg = PhyLaneCfg | PHY_LANE_CFG_REFCLKCGEN;
-      MmioWrite32(PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG, PhyLaneCfg);
+      AppleSiliconPcieSetBits(PHY_LANE_CFG_REFCLKCGEN, PciePortInfo->DevicePhyBaseAddress + PHY_LANE_CFG);
       break;
     default:
-      PortRefClk = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_REFCLK);
-      PortRefClk = PortRefClk & (~(PORT_REFCLK_CGDIS));
-      MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_REFCLK, PortRefClk);
+      AppleSiliconPcieClearBits(PORT_REFCLK_CGDIS, PciePortInfo->DeviceBaseAddress + PORT_REFCLK);
       break;
   }
-  PortAppClkValue = MmioRead32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK);
-  PortAppClkValue = PortAppClkValue & (~(PORT_APPCLK_CGDIS));
-  MmioWrite32(PciePortInfo->DeviceBaseAddress + PORT_APPCLK, PortAppClkValue);
 
+  AppleSiliconPcieClearBits(PORT_APPCLK_CGDIS, PciePortInfo->DeviceBaseAddress + PORT_APPCLK);
+  
   DEBUG((DEBUG_INFO, "%a - PCIe port %d setup done\n", __FUNCTION__, PciePortInfo->DevicePortIndex));
   return EFI_SUCCESS;
 }
