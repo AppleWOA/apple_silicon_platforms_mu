@@ -159,7 +159,7 @@ STATIC VOID AppleAsmediaWriteRegister(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInsta
 
 STATIC EFI_STATUS AppleAsmediaSendMessage(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInstance, UINT64 MessageToSend) {
     UINT8 Operation;
-    UINT32 MessageLow = (UINT32)MessageToSend;
+    UINT32 MessageLow = MessageToSend & 0xFFFFFFFF;
     UINT32 MessageHigh = (MessageToSend >> 32);
     CONST UINT8 WriteOperation = ASMEDIA_CONFIGURATION_CONTROL_WRITE_BIT;
     EFI_STATUS Status;
@@ -175,6 +175,7 @@ STATIC EFI_STATUS AppleAsmediaSendMessage(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolI
       DEBUG((DEBUG_INFO, "%a - Failed to read operation message from mailbox. Status - %r\n", __FUNCTION__, Status));
       ASSERT_EFI_ERROR(Status);
     }
+    DEBUG((DEBUG_INFO, "%a - Operation parameter is 0x%llx\n", __FUNCTION__, Operation));
     if(Operation & ASMEDIA_CONFIGURATION_CONTROL_WRITE_BIT) {
         DEBUG((DEBUG_INFO, "%a: Mailbox write timed out, data to write: 0x%llx\n", __FUNCTION__, MessageToSend));
         return EFI_TIMEOUT;
@@ -201,8 +202,8 @@ STATIC EFI_STATUS AppleAsmediaSendMessage(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolI
 
 STATIC EFI_STATUS AppleAsmediaReceiveMessage(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInstance, IN UINT64 *MessageToReceive) {
     UINT8 Operation;
-    UINT32 MessageLow = 0;
-    UINT32 MessageHigh = 0;
+    UINT32 MessageLow;
+    UINT32 MessageHigh;
     CONST UINT8 ReadOperation = ASMEDIA_CONFIGURATION_CONTROL_READ_BIT;
     EFI_STATUS Status;
 
@@ -217,6 +218,7 @@ STATIC EFI_STATUS AppleAsmediaReceiveMessage(IN EFI_PCI_IO_PROTOCOL *PciIoProtoc
       DEBUG((DEBUG_INFO, "%a - Failed to read operation message from mailbox. Status - %r\n", __FUNCTION__, Status));
       ASSERT_EFI_ERROR(Status);
     }
+    DEBUG((DEBUG_INFO, "%a - Operation parameter is 0x%llx\n", __FUNCTION__, Operation));
     if(Operation & ASMEDIA_CONFIGURATION_CONTROL_READ_BIT) {
         DEBUG((DEBUG_INFO, "%a: Mailbox read timed out\n", __FUNCTION__));
         return EFI_TIMEOUT;
@@ -228,7 +230,7 @@ STATIC EFI_STATUS AppleAsmediaReceiveMessage(IN EFI_PCI_IO_PROTOCOL *PciIoProtoc
     }
     Status = PciIoProtocolInstance->Pci.Read(PciIoProtocolInstance, EfiPciIoWidthUint32, ASMEDIA_CONFIGURATION_DATA_READ_REG_1, 1, ((VOID *)&MessageHigh));
     if (EFI_ERROR(Status)) {
-      DEBUG((DEBUG_INFO, "%a - Failed to read low part of message from mailbox. Status - %r\n", __FUNCTION__, Status));
+      DEBUG((DEBUG_INFO, "%a - Failed to read high part of message from mailbox. Status - %r\n", __FUNCTION__, Status));
       ASSERT_EFI_ERROR(Status);
     }
     Status = PciIoProtocolInstance->Pci.Write(PciIoProtocolInstance, EfiPciIoWidthUint8, ASMEDIA_CONFIGURATION_CONTROL_REG, 1, ((VOID *)&ReadOperation));
@@ -251,7 +253,6 @@ STATIC EFI_STATUS AppleAsmediaReceiveMessage(IN EFI_PCI_IO_PROTOCOL *PciIoProtoc
 //   EFI_ABORTED in case an error occurred.
 //
 STATIC EFI_STATUS AppleAsmediaGetFirmwareVersion(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInstance, OUT UINT64 *FirmwareVersionStored) {
-    UINT64 FirmwareVersion;
     EFI_STATUS Status;
     UINT64 Command;
     
@@ -267,15 +268,15 @@ STATIC EFI_STATUS AppleAsmediaGetFirmwareVersion(IN EFI_PCI_IO_PROTOCOL *PciIoPr
     if (EFI_ERROR(Status)) {
         return EFI_ABORTED;
     }
+    Status = AppleAsmediaReceiveMessage(PciIoProtocolInstance, FirmwareVersionStored);
+    if (EFI_ERROR(Status)) {
+        return EFI_ABORTED;
+    }
+    DEBUG((DEBUG_INFO, "%a - current firmware version is 0x%llx\n", __FUNCTION__, *FirmwareVersionStored));
     if (Command != ASMEDIA_COMMAND_GET_FIRMWARE_VERSION) {
         DEBUG((DEBUG_INFO, "%a: Unexpected command 0x%llx\n", __FUNCTION__, Command));
         return EFI_ABORTED;
     }
-    Status = AppleAsmediaReceiveMessage(PciIoProtocolInstance, &FirmwareVersion);
-    if (EFI_ERROR(Status)) {
-        return EFI_ABORTED;
-    }
-    *FirmwareVersionStored = FirmwareVersion;
     return EFI_SUCCESS;
 }
 
@@ -285,8 +286,9 @@ STATIC BOOLEAN AppleAsmediaCheckFirmwareIsLoaded(IN EFI_PCI_IO_PROTOCOL *PciIoPr
     Status = AppleAsmediaGetFirmwareVersion(PciIoProtocolInstance, &FirmwareVersion);
     if(EFI_ERROR(Status)) {
       DEBUG((DEBUG_ERROR, "%a - Error occurred when getting firmware version\n", __FUNCTION__));
-      ASSERT(FALSE);
+      ASSERT_EFI_ERROR(Status);
     }
+    DEBUG((DEBUG_INFO, "%a - ASMedia firmware version currently is 0x%llx\n", __FUNCTION__, FirmwareVersion));
     return FirmwareVersion != ASMEDIA_ROM_FIRMWARE_REVISION;
 }
 
