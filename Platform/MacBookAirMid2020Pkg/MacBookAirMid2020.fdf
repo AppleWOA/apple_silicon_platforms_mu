@@ -59,7 +59,7 @@ DATA = {
   0x01, 0x00, 0x00, 0x10,                         # code0: adr x1, .
   0xff, 0x1f, 0x00, 0x14,                         # code1: b 0x8000
   0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, # text_offset: 512 KB
-  0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, # image_size: 4 MB
+  0x00, 0x00, 0x0e, 0x10, 0x00, 0x00, 0x00, 0x00, # image_size: 30 MB
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, # flags
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, # res2
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, # res3
@@ -146,9 +146,10 @@ READ_LOCK_STATUS   = TRUE
   #
   # PCIe Support
   #
-  #Commented out for now due to lack of processor-specific host bridge library
-  #INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
-  #INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  INF ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
+  INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
+  INF MdeModulePkg/Bus/Pci/NonDiscoverablePciDeviceDxe/NonDiscoverablePciDeviceDxe.inf
 
   #NVMe Support
   #TODO: ANS2/SART driver
@@ -229,6 +230,7 @@ READ_LOCK_STATUS   = TRUE
   #
   # Bds
   #
+  INF AppleSiliconPkg/Drivers/ColorbarsDxe/ColorbarsDxe.inf
   INF MdeModulePkg/Universal/PrintDxe/PrintDxe.inf
   INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
   INF MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
@@ -243,10 +245,10 @@ READ_LOCK_STATUS   = TRUE
   }
 
   # Embedded RAMDisk (IMG format)
-  FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
-  SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
-  SECTION UI = "Embedded RAMDisk"  
-}
+#   FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
+#   SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
+#   SECTION UI = "Embedded RAMDisk"  
+# }
   
 !include AppleSiliconPkg/FrontpageFdf.inc
 

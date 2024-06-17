@@ -25,6 +25,7 @@
         // Note: there is a state where the cluster can be powered off, unsure how to use so not implemented.
         // If all cores in a cluster are in "deep WFI" mode, the cluster enters "deep WFI" as well.
         //
+
         Name (CLPI, Package() {
             0, // Version
             0, // Level Index
@@ -283,7 +284,8 @@
 
         //
         // Die 1, only present on multi die SoCs.
-        // TODO: make this an SSDT, only being placed in DSDT because reasons.
+        // TODO: make this an SSDT, only being placed in DSDT because testing on an T6002.
+        //
 
         Device(DIE1) {
             Name(_HID, "ACPI0010") // all "processor containers" must have this HID
@@ -425,10 +427,6 @@
                 }
             }
         }
-        //
-        // Die 1 is included in T6002 specific SSDT
-        // (Should this be an ifdef in the DSDT, or an SSDT?)
-        //
     }
  }
 

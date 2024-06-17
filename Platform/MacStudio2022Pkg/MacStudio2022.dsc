@@ -38,29 +38,28 @@
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=6000
-  *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
+  #*_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
 
 
 [PcdsFixedAtBuild.common]
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"Mac Studio (2022)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac13,1/Mac13,2"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"Mac Studio (Mac13,1/Mac13,2)"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
   #will be changed later on, default values
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
+  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
+  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
+  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
   
 [PcdsDynamicDefault.common]
-  #borrowed from SurfaceDuoPkg
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|1920
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1080
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|300
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
-  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
-  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
+  # #borrowed from SurfaceDuoPkg
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|1920
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1080
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|300
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
 
 [Components.common]
 
