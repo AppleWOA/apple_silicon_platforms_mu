@@ -25,6 +25,8 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion|0|UINT8|0x00004411
   # RAM reservation (128 MB reserved for EFI FD image)
   gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000|UINT32|0x00004404
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarLimit|0x0|UINT64|0x00004717
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarSize|0x0|UINT64|0x00004718
 
   # Stack stuff (128k stack by default)
   #Fallback stack base in case ModuleEntryPoint setup won't work.

@@ -100,6 +100,8 @@
   gArmTokenSpaceGuid.PcdPciMmio64Size|0x20000000
 
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0x590000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarSize|0x1000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarLimit|0x590FFFFFF
   #
   # This shouldn't get used.
   #

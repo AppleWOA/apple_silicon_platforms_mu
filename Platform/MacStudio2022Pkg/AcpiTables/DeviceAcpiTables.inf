@@ -38,3 +38,14 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId              ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId         ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision        ## CONSUMES
+  gArmTokenSpaceGuid.PcdPciBusMin
+  gArmTokenSpaceGuid.PcdPciBusMax
+  gArmTokenSpaceGuid.PcdPciMmio32Base
+  gArmTokenSpaceGuid.PcdPciMmio32Size
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio32Translation
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio64Translation
+  gArmTokenSpaceGuid.PcdPciMmio64Base
+  gArmTokenSpaceGuid.PcdPciMmio64Size
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarSize
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarLimit

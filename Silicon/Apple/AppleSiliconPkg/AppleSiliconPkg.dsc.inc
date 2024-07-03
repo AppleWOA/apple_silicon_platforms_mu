@@ -69,6 +69,7 @@
 !endif
 
   gPcBdsPkgTokenSpaceGuid.PcdLowResolutionInternalShell|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdPciDisableBusEnumeration|FALSE
 
 !if $(ARCH) == AARCH64
   gArmTokenSpaceGuid.PcdVFPEnabled|1
