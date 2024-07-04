@@ -5,22 +5,21 @@
 # Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
-import os
+import datetime
 import logging
-import io
-import shutil
-import glob
-import time
-import xml.etree.ElementTree
-import tempfile
+import os
 import uuid
+from io import StringIO
+from pathlib import Path
 
 from edk2toolext.environment import shell_environment
 from edk2toolext.environment.uefi_build import UefiBuilder
 from edk2toolext.invocables.edk2_platform_build import BuildSettingsManager
-from edk2toolext.invocables.edk2_setup import SetupSettingsManager, RequiredSubmodule
-from edk2toolext.invocables.edk2_update import UpdateSettingsManager
 from edk2toolext.invocables.edk2_pr_eval import PrEvalSettingsManager
+from edk2toolext.invocables.edk2_setup import (RequiredSubmodule,
+                                               SetupSettingsManager)
+from edk2toolext.invocables.edk2_update import UpdateSettingsManager
+from edk2toolext.invocables.edk2_parse import ParseSettingsManager
 from edk2toollib.utility_functions import RunCmd
 
 
@@ -152,13 +151,6 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
         if args.build_arch.upper() != "AARCH64":
             raise Exception("Invalid Arch Specified.  Please see comments in PlatformBuild.py::PlatformBuilder::AddCommandLineOptions")
 
-        shell_environment.GetBuildVars().SetValue(
-            "TARGET_ARCH", args.build_arch.upper(), "From CmdLine")
-
-        shell_environment.GetBuildVars().SetValue(
-            "ACTIVE_PLATFORM", "MacStudio2022Pkg/MacStudio2022.dsc", "From CmdLine")
-
-
     def GetWorkspaceRoot(self):
         ''' get WorkspacePath '''
         return CommonPlatform.WorkspaceRoot
@@ -196,10 +188,10 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
         self.env.SetValue("PRODUCT_NAME", "MacStudio2022", "Platform Hardcoded")
         self.env.SetValue("ACTIVE_PLATFORM", "MacStudio2022Pkg/MacStudio2022.dsc", "Platform Hardcoded")
         self.env.SetValue("TARGET_ARCH", "AARCH64", "Platform Hardcoded")
-        self.env.SetValue("TOOL_CHAIN_TAG", "CLANG38", "set default to clang38")
-        # self.env.SetValue("EMPTY_DRIVE", "FALSE", "Default to false")
-        # self.env.SetValue("RUN_TESTS", "FALSE", "Default to false")
-        # self.env.SetValue("SHUTDOWN_AFTER_RUN", "FALSE", "Default to false")
+        self.env.SetValue("TOOL_CHAIN_TAG", "CLANGPDB", "set default to clangpdb")
+        self.env.SetValue("EMPTY_DRIVE", "FALSE", "Default to false")
+        self.env.SetValue("RUN_TESTS", "FALSE", "Default to false")
+        self.env.SetValue("SHUTDOWN_AFTER_RUN", "FALSE", "Default to false")
         # needed to make FV size build report happy
         # self.env.SetValue("BLD_*_BUILDID_STRING", "Unknown", "Default")
         # # Default turn on build reporting.
