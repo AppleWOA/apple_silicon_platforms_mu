@@ -1,0 +1,52 @@
+#/** @file
+#
+#  Copyright (c) 2016 Linaro Ltd. All rights reserved.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+#**/
+# MU_CHANGE [BEGIN]: Make instance compatible with PEIM, PEI_CORE, and SEC to accommodate
+#                    page table memory pre-allocation
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = ArmMmuPeiLib
+  FILE_GUID                      = b50d8d53-1ad1-44ea-9e69-8c89d4a6d08b
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = ArmMmuLib | PEIM PEI_CORE SEC
+
+[Defines.AARCH64]
+  CONSTRUCTOR                    = ArmMmuBaseLibConstructor
+
+[Sources.AARCH64]
+  ArmMmuLibInternal.h
+  AArch64/ArmMmuLibCore.c
+  AArch64/ArmMmuLibReplaceEntry.S    | GCC
+  AArch64/ArmMmuLibReplaceEntry.masm | MSFT
+  AArch64/ArmMmuLibPageTableAllocPei.c
+
+[Sources.ARM]
+  ArmMmuLibInternal.h
+  Arm/ArmMmuLibConvert.c
+  Arm/ArmMmuLibCore.c
+  Arm/ArmMmuLibUpdate.c
+  Arm/ArmMmuLibV7Support.S   |GCC
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  ArmLib
+  CacheMaintenanceLib
+  HobLib
+  MemoryAllocationLib
+
+[Guids]
+  gArmMmuReplaceLiveTranslationEntryFuncGuid
+
+[Pcd.ARM]
+  gArmTokenSpaceGuid.PcdNormalMemoryNonshareableOverride
+# MU_CHANGE [END]: Make instance compatible with PEIM, PEI_CORE, and SEC

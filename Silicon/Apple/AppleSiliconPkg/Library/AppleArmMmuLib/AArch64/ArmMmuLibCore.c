@@ -20,16 +20,27 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/HobLib.h>
+#include "ArmMmuLibInternal.h"    // MU_CHANGE: Add function pointer type
 
-STATIC
-VOID (
-  EFIAPI  *mReplaceLiveEntryFunc
-  )(
-    IN  UINT64  *Entry,
-    IN  UINT64  Value,
-    IN  UINT64  RegionStart,
-    IN  BOOLEAN DisableMmu
-    ) = ArmReplaceLiveTranslationEntry;
+// MU_CHANGE [BEGIN]: Add function pointer type
+STATIC  ARM_REPLACE_LIVE_TRANSLATION_ENTRY  mReplaceLiveEntryFunc = ArmReplaceLiveTranslationEntry;
+// MU_CHANGE [END]: Add function pointer type
+
+// MU_CHANGE START: Add functionality for pre-allocating memory for page table entries
+
+/**
+  Allocates pages for the page table from a reserved pool.
+
+  @param[in]  Pages  The number of pages to allocate
+
+  @return A pointer to the allocated buffer or NULL if allocation fails
+**/
+VOID *
+AllocatePageTableMemory (
+  IN UINTN  Pages
+  );
+
+// MU_CHANGE END
 
 #define HCR_EL2_E2H BIT34
 
@@ -40,35 +51,50 @@ ArmMemoryAttributeToPageAttribute (
   IN ARM_MEMORY_REGION_ATTRIBUTES  Attributes
   )
 {
+  UINT64  Permissions;
+
+  switch (Attributes) {
+    case ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK_RO:
+      Permissions = TT_AP_NO_RO;
+      break;
+
+    case ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK_XP:
+    case ARM_MEMORY_REGION_ATTRIBUTE_DEVICE:
+      if (ArmReadCurrentEL () == AARCH64_EL2) {
+        Permissions = TT_XN_MASK;
+      } else {
+        Permissions = TT_UXN_MASK | TT_PXN_MASK;
+      }
+
+      break;
+    default:
+      Permissions = 0;
+      break;
+  }
+
   switch (Attributes) {
     case ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK_NONSHAREABLE:
-    case ARM_MEMORY_REGION_ATTRIBUTE_NONSECURE_WRITE_BACK_NONSHAREABLE:
       return TT_ATTR_INDX_MEMORY_WRITE_BACK;
 
     case ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK:
-    case ARM_MEMORY_REGION_ATTRIBUTE_NONSECURE_WRITE_BACK:
-      return TT_ATTR_INDX_MEMORY_WRITE_BACK | TT_SH_INNER_SHAREABLE;
+    case ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK_RO:
+    case ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK_XP:
+      return TT_ATTR_INDX_MEMORY_WRITE_BACK | TT_SH_INNER_SHAREABLE | Permissions;
 
     case ARM_MEMORY_REGION_ATTRIBUTE_WRITE_THROUGH:
-    case ARM_MEMORY_REGION_ATTRIBUTE_NONSECURE_WRITE_THROUGH:
       return TT_ATTR_INDX_MEMORY_WRITE_THROUGH | TT_SH_INNER_SHAREABLE;
 
     // Uncached and device mappings are treated as outer shareable by default,
     case ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED:
-    case ARM_MEMORY_REGION_ATTRIBUTE_NONSECURE_UNCACHED_UNBUFFERED:
       return TT_ATTR_INDX_MEMORY_NON_CACHEABLE;
 
     default:
       ASSERT (0);
     case ARM_MEMORY_REGION_ATTRIBUTE_DEVICE:
-    case ARM_MEMORY_REGION_ATTRIBUTE_NONSECURE_DEVICE:
-      if (ArmReadCurrentEL () == AARCH64_EL2) {
-        return TT_ATTR_INDX_DEVICE_MEMORY | TT_XN_MASK;
-      } else {
-        return TT_ATTR_INDX_DEVICE_MEMORY | TT_UXN_MASK | TT_PXN_MASK;
-      }
+      return TT_ATTR_INDX_DEVICE_MEMORY | Permissions;
   }
 }
+
 
 #define MIN_T0SZ        16
 #define BITS_PER_LEVEL  9
@@ -268,7 +294,10 @@ UpdateRegionMappingRecursive (
         // No table entry exists yet, so we need to allocate a page table
         // for the next level.
         //
-        TranslationTable = AllocatePages (1);
+        // MU_CHANGE START: Use reserved page table memory pool
+        // TranslationTable = AllocatePages (1);
+        TranslationTable = AllocatePageTableMemory (1);
+        // MU_CHANGE END
         if (TranslationTable == NULL) {
           return EFI_OUT_OF_RESOURCES;
         }
@@ -378,6 +407,13 @@ UpdateRegionMapping (
   UINTN  T0SZ;
 
   if (((RegionStart | RegionLength) & EFI_PAGE_MASK) != 0) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "%a RegionStart: 0x%llx or RegionLength: 0x%llx are not page aligned!\n",
+      __func__,
+      RegionStart,
+      RegionLength
+      )); // MU_CHANGE: Better memory attribute protocol logging
     return EFI_INVALID_PARAMETER;
   }
 
@@ -458,11 +494,45 @@ GcdAttributeToPageAttribute (
   return PageAttributes;
 }
 
+/**
+  Set the requested memory permission attributes on a region of memory.
+
+  BaseAddress and Length must be aligned to EFI_PAGE_SIZE.
+
+  If Attributes contains a memory type attribute (EFI_MEMORY_UC/WC/WT/WB), the
+  region is mapped according to this memory type, and additional memory
+  permission attributes (EFI_MEMORY_RP/RO/XP) are taken into account as well,
+  discarding any permission attributes that are currently set for the region.
+  AttributeMask is ignored in this case, and must be set to 0x0.
+
+  If Attributes contains only a combination of memory permission attributes
+  (EFI_MEMORY_RP/RO/XP), each page in the region will retain its existing
+  memory type, even if it is not uniformly set across the region. In this case,
+  AttributesMask may be set to a mask of permission attributes, and memory
+  permissions omitted from this mask will not be updated for any page in the
+  region. All attributes appearing in Attributes must appear in AttributeMask
+  as well. (Attributes & ~AttributeMask must produce 0x0)
+
+  @param[in]  BaseAddress     The physical address that is the start address of
+                              a memory region.
+  @param[in]  Length          The size in bytes of the memory region.
+  @param[in]  Attributes      Mask of memory attributes to set.
+  @param[in]  AttributeMask   Mask of memory attributes to take into account.
+
+  @retval EFI_SUCCESS           The attributes were set for the memory region.
+  @retval EFI_INVALID_PARAMETER BaseAddress or Length is not suitably aligned.
+                                Invalid combination of Attributes and
+                                AttributeMask.
+  @retval EFI_OUT_OF_RESOURCES  Requested attributes cannot be applied due to
+                                lack of system resources.
+
+**/
 EFI_STATUS
 ArmSetMemoryAttributes (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length,
-  IN UINT64                Attributes
+  IN UINT64                Attributes,
+  IN UINT64                AttributeMask
   )
 {
   UINT64  PageAttributes;
@@ -476,9 +546,25 @@ ArmSetMemoryAttributes (
     // No memory type was set in Attributes, so we are going to update the
     // permissions only.
     //
-    PageAttributes   &= TT_AP_MASK | TT_UXN_MASK | TT_PXN_MASK;
+    PageAttributes   &= TT_AP_MASK | TT_UXN_MASK | TT_PXN_MASK | TT_AF;
     PageAttributeMask = ~(TT_ADDRESS_MASK_BLOCK_ENTRY | TT_AP_MASK |
-                          TT_PXN_MASK | TT_XN_MASK);
+                          TT_PXN_MASK | TT_XN_MASK | TT_AF);
+    if (AttributeMask != 0) {
+      if (((AttributeMask & ~(UINT64)(EFI_MEMORY_RP|EFI_MEMORY_RO|EFI_MEMORY_XP)) != 0) ||
+          ((Attributes & ~AttributeMask) != 0))
+      {
+        return EFI_INVALID_PARAMETER;
+      }
+
+      // Add attributes omitted from AttributeMask to the set of attributes to preserve
+      PageAttributeMask |= GcdAttributeToPageAttribute (~AttributeMask) &
+                           (TT_AP_MASK | TT_UXN_MASK | TT_PXN_MASK | TT_AF);
+    }
+  } else {
+    ASSERT (AttributeMask == 0);
+    if (AttributeMask != 0) {
+      return EFI_INVALID_PARAMETER;
+    }
   }
 
   return UpdateRegionMapping (
@@ -488,142 +574,6 @@ ArmSetMemoryAttributes (
            PageAttributeMask,
            ArmGetTTBR0BaseAddress (),
            TRUE
-           );
-}
-
-STATIC
-EFI_STATUS
-SetMemoryRegionAttribute (
-  IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
-  IN  UINT64                Length,
-  IN  UINT64                Attributes,
-  IN  UINT64                BlockEntryMask
-  )
-{
-  return UpdateRegionMapping (
-           BaseAddress,
-           Length,
-           Attributes,
-           BlockEntryMask,
-           ArmGetTTBR0BaseAddress (),
-           TRUE
-           );
-}
-
-EFI_STATUS
-ArmSetMemoryRegionNoExec (
-  IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
-  IN  UINT64                Length
-  )
-{
-  UINT64  Val;
-
-  if (ArmReadCurrentEL () == AARCH64_EL1) {
-    Val = TT_PXN_MASK | TT_UXN_MASK;
-  } else {
-    Val = TT_XN_MASK;
-  }
-
-  return SetMemoryRegionAttribute (
-           BaseAddress,
-           Length,
-           Val,
-           ~TT_ADDRESS_MASK_BLOCK_ENTRY
-           );
-}
-
-EFI_STATUS
-ArmClearMemoryRegionNoExec (
-  IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
-  IN  UINT64                Length
-  )
-{
-  UINT64  Mask;
-
-  // XN maps to UXN in the EL1&0 translation regime
-  Mask = ~(TT_ADDRESS_MASK_BLOCK_ENTRY | TT_PXN_MASK | TT_XN_MASK);
-
-  return SetMemoryRegionAttribute (
-           BaseAddress,
-           Length,
-           0,
-           Mask
-           );
-}
-
-/**
-  Convert a region of memory to read-protected, by clearing the access flag.
-
-  @param  BaseAddress           The start of the region.
-  @param  Length                The size of the region.
-
-  @retval EFI_SUCCESS           The attributes were set successfully.
-  @retval EFI_OUT_OF_RESOURCES  The operation failed due to insufficient memory.
-
-**/
-EFI_STATUS
-ArmSetMemoryRegionNoAccess (
-  IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
-  IN  UINT64                Length
-  )
-{
-  return SetMemoryRegionAttribute (
-           BaseAddress,
-           Length,
-           0,
-           ~(TT_ADDRESS_MASK_BLOCK_ENTRY | TT_AF)
-           );
-}
-
-/**
-  Convert a region of memory to read-enabled, by setting the access flag.
-
-  @param  BaseAddress           The start of the region.
-  @param  Length                The size of the region.
-
-  @retval EFI_SUCCESS           The attributes were set successfully.
-  @retval EFI_OUT_OF_RESOURCES  The operation failed due to insufficient memory.
-
-**/
-EFI_STATUS
-ArmClearMemoryRegionNoAccess (
-  IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
-  IN  UINT64                Length
-  )
-{
-  return SetMemoryRegionAttribute (
-           BaseAddress,
-           Length,
-           TT_AF,
-           ~TT_ADDRESS_MASK_BLOCK_ENTRY
-           );
-}
-
-EFI_STATUS
-ArmSetMemoryRegionReadOnly (
-  IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
-  IN  UINT64                Length
-  )
-{
-  return SetMemoryRegionAttribute (
-           BaseAddress,
-           Length,
-           TT_AP_NO_RO,
-           ~TT_ADDRESS_MASK_BLOCK_ENTRY
-           );
-}
-
-EFI_STATUS
-ArmClearMemoryRegionReadOnly (
-  IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
-  IN  UINT64                Length
-  )
-{
-  return SetMemoryRegionAttribute (
-           BaseAddress,
-           Length,
-           TT_AP_NO_RW,
-           ~(TT_ADDRESS_MASK_BLOCK_ENTRY | TT_AP_MASK)
            );
 }
 
@@ -674,13 +624,17 @@ ArmConfigureMmu (
      * Apple silicon platforms from the A14/M1 and onwards enforce HCR_EL2.E2H on.
      * 
      * As a result, the normal EDK2 ArmMmuLib TCR calculation needs to be modified on these platforms
-     * to set TCR_EL2.IPS[34:32] to the physical address size of the platform.
+     * to set TCR_EL2.IPS[34:32] to the physical address size of the platform, in order to avoid a hang after turning on the MMU.
      * 
      * Right now, Apple 64-bit platforms have only had 36 and 42 bit physical address sizes, so only
      * check for those right now. (This will be updated as newer platforms have higher address sizes)
      * 
+     * Note: H16 and newer seem to *only* have 42-bit address size, regardless of device form factor or SoC variant.
+     * 
      * Earlier Apple platforms that don't implement EL2 are unaffected by this, so gate behind whether E2H is
      * set or not.
+     * 
+     * TODO: upstream this.
      * 
      */
 
@@ -774,7 +728,10 @@ ArmConfigureMmu (
   ArmSetTCR (TCR);
 
   // Allocate pages for translation table
-  TranslationTable = AllocatePages (1);
+  // MU_CHANGE START: Use reserved page table memory pool
+  // TranslationTable = AllocatePages (1);
+  TranslationTable = AllocatePageTableMemory (1);
+  // MU_CHANGE END
   if (TranslationTable == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -850,7 +807,7 @@ ArmMmuBaseLibConstructor (
 
   Hob = GetFirstGuidHob (&gArmMmuReplaceLiveTranslationEntryFuncGuid);
   if (Hob != NULL) {
-    mReplaceLiveEntryFunc = *(VOID **)GET_GUID_HOB_DATA (Hob);
+    mReplaceLiveEntryFunc = *(ARM_REPLACE_LIVE_TRANSLATION_ENTRY *)GET_GUID_HOB_DATA (Hob); // MU_CHANGE: Add function pointer type
   } else {
     //
     // The ArmReplaceLiveTranslationEntry () helper function may be invoked

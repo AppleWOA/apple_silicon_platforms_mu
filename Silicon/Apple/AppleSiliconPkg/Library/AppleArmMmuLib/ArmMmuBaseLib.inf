@@ -16,16 +16,17 @@
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   # MU_CHANGE - Can't be fully BASE, because it doesn't work in MM_STANDALONE.
-  LIBRARY_CLASS                  = ArmMmuLib | DXE_DRIVER PEIM PEI_CORE DXE_CORE DXE_RUNTIME_DRIVER SEC
+  LIBRARY_CLASS                  = ArmMmuLib | DXE_DRIVER DXE_CORE DXE_RUNTIME_DRIVER
 
 [Defines.AARCH64]
   CONSTRUCTOR                    = ArmMmuBaseLibConstructor
 
 [Sources.AARCH64]
+  ArmMmuLibInternal.h                 # MU_CHANGE: Add function pointer type
   AArch64/ArmMmuLibCore.c
   AArch64/ArmMmuLibReplaceEntry.S    | GCC
   AArch64/ArmMmuLibReplaceEntry.masm | MSFT
-
+  AArch64/ArmMmuLibPageTableAlloc.c # MU_CHANGE
 
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -37,6 +38,10 @@
   CacheMaintenanceLib
   HobLib
   MemoryAllocationLib
+  UefiBootServicesTableLib # MU_CHANGE: Add UefiBootServicesTableLib to get page table allocation service
 
 [Guids]
   gArmMmuReplaceLiveTranslationEntryFuncGuid
+
+[Pcd.ARM]
+  gArmTokenSpaceGuid.PcdNormalMemoryNonshareableOverride
