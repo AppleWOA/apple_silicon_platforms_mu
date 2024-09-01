@@ -29,13 +29,16 @@ ASM_FUNC(_ModuleEntryPoint)
 _ModuleEntrySetupStack:
 
   // Compute Top of System Memory
-  ldr   x1, PcdGet64 (PcdSystemMemoryBase)
-  ldr   x2, PcdGet64 (PcdSystemMemorySize)
+  ldr   x1, =PcdGet64 (PcdSystemMemoryBase)
+  ldr   x1, [x1]
+  ldr   x2, =PcdGet64 (PcdSystemMemorySize)
+  ldr   x2, [x2]
   sub   x2, x2, #1
   add   x1, x1, x2      // x1 = SystemMemoryTop = PcdSystemMemoryBase + PcdSystemMemorySize
 
   //calculate top of FD image
-  ldr   x2, PcdGet64 (PcdFdBaseAddress)
+  ldr   x2, =PcdGet64 (PcdFdBaseAddress)
+  ldr   x2, [x2]
   MOV64 (x3, FixedPcdGet32 (PcdFdSize) - 1)
   add   x3, x3, x2      // x3 = FdTop = PcdFdBaseAddress + PcdFdSize
 
@@ -140,7 +143,8 @@ ASM_PFX(DiscoverDramFromDt):
   // by the platform.
   //
   cbnz  x0, 0f
-  ldr   x0, PcdGet64 (PcdFdtPointer)
+  ldr   x0, =PcdGet64 (PcdFdtPointer)
+  ldr   x0, [x0]
 
 0:mov   x28, x30            // preserve LR
   mov   x27, x0             // preserve FDT pointer

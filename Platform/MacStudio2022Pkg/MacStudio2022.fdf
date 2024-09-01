@@ -33,8 +33,8 @@ Size          = 0x00001E00000|gArmTokenSpaceGuid.PcdFdSize         # The size in
 ErasePolarity = 1
 
 
-BlockSize     = 0x1000
-NumBlocks     = 0x1E00
+BlockSize     = 0x4000
+NumBlocks     = 0x780
 
 ################################################################################
 #
@@ -89,7 +89,7 @@ FV = FVMAIN_COMPACT
 
 [FV.FvMain]
 BlockSize          = 0x40
-FvAlignment        = 8         # FV alignment and FV attributes setting.
+FvAlignment        = 16         # FV alignment and FV attributes setting.
 ERASE_POLARITY     = 1
 MEMORY_MAPPED      = TRUE
 STICKY_WRITE       = TRUE
@@ -195,10 +195,6 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   # Some miscellaneous Mu modules
   #
   INF  MsCorePkg/Universal/StatusCodeHandler/Serial/Dxe/SerialStatusCodeHandlerDxe.inf
-!if $(SECURE_BOOT_ENABLE) == TRUE
-  INF  MsCorePkg/MuCryptoDxe/MuCryptoDxe.inf
-  INF  CryptoPkg/Driver/CryptoDxe.inf
-!endif
   INF  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
 
   #
@@ -274,7 +270,7 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 !include AppleSiliconPkg/FrontpageFdf.inc
 
 [FV.FVMAIN_COMPACT]
-FvAlignment        = 8
+FvAlignment        = 16
 ERASE_POLARITY     = 1
 MEMORY_MAPPED      = TRUE
 STICKY_WRITE       = TRUE

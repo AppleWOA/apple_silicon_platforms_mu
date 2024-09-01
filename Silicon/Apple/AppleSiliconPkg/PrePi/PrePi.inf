@@ -41,7 +41,6 @@
   DebugAgentLib
   SerialPortLib
   MemoryAllocationLib
-  PrePiMemoryAllocationLib
   PerformanceLib
   PeCoffLib
   HobLib

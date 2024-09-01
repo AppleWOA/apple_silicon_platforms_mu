@@ -90,6 +90,12 @@ UINT32 EFIAPI AppleAicGetNumInterrupts(
     {
         NumIrqs = MmioRead32(AicBase + AIC_V1_HW_INFO) & AIC_V2_NUM_AND_MAX_IRQS_MASK;
     }
+    //
+    // TODO: add the AICv3 case once I get a device that has it.
+    //
+    else {
+        NumIrqs = 0;
+    }
     return NumIrqs;
 }
 
@@ -112,6 +118,9 @@ UINT32 EFIAPI AppleAicGetMaxInterrupts(
     {
         //AICv1 is hard capped to 1024 IRQs
         MaxIrqs = 0x400;
+    }
+    else {
+        MaxIrqs = 0;
     }
     return MaxIrqs;
 }

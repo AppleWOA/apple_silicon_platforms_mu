@@ -915,7 +915,7 @@ DeviceBootManagerPriorityBoot (
   BOOLEAN     FrontPageBoot;
   BOOLEAN     UFPBoot;
   BOOLEAN     AltDeviceBoot;
-  EFI_STATUS  Status;
+  EFI_STATUS  Status = EFI_SUCCESS;
 
   FrontPageBoot = MsBootPolicyLibIsSettingsBoot ();
   UFPBoot = FALSE;
@@ -929,11 +929,12 @@ DeviceBootManagerPriorityBoot (
   //   3. AltDeviceBoot                load alternate boot order
   //   4. Both indicators are present  Load NetworkUnlock
 
-  if (UFPBoot) {
+  // if (UFPBoot) {
     // Front Page Boot Option
     //DEBUG ((DEBUG_INFO, "[Bds] enter UFP\n"));
     //Status = SdBootOptionsLibGetUFPMenu (BootOption, "VOL-");
-  } else if (AltDeviceBoot) {
+  // } else 
+  if (AltDeviceBoot) {
     // Alternate boot or Network Unlock option
     if (FrontPageBoot) {
       DEBUG ((DEBUG_INFO, "[Bds] both detected. NetworkUnlock\n"));

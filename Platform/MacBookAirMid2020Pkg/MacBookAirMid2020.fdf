@@ -186,10 +186,6 @@ READ_LOCK_STATUS   = TRUE
   # Some miscellaneous Mu modules
   #
   INF  MsCorePkg/Universal/StatusCodeHandler/Serial/Dxe/SerialStatusCodeHandlerDxe.inf
-!if $(SECURE_BOOT_ENABLE) == TRUE
-  INF  MsCorePkg/MuCryptoDxe/MuCryptoDxe.inf
-  INF  CryptoPkg/Driver/CryptoDxe.inf
-!endif
   INF  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
 
   #

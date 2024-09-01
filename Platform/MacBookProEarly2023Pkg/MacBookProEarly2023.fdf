@@ -183,10 +183,6 @@ FvNameGuid         = 02e6c12f-69f7-4626-b5de-e3cfd6c0dc56
   # Some miscellaneous Mu modules
   #
   INF  MsCorePkg/Universal/StatusCodeHandler/Serial/Dxe/SerialStatusCodeHandlerDxe.inf
-!if $(SECURE_BOOT_ENABLE) == TRUE
-  INF  MsCorePkg/MuCryptoDxe/MuCryptoDxe.inf
-  INF  CryptoPkg/Driver/CryptoDxe.inf
-!endif
   INF  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
 
   #

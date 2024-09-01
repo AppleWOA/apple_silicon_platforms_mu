@@ -483,7 +483,7 @@
                     0x00000000,
                     FixedPcdGet32(PcdPciMmio32Base),
                     FixedPcdGet32(PcdPciMmio32Base) + FixedPcdGet32(PcdPciMmio32Size) - 1,
-                    FixedPcdGet32(PcdPciMmio32Translation),
+                    FixedPcdGet64(PcdPciMmio32Translation),
                     FixedPcdGet32(PcdPciMmio32Size)
                     )
 

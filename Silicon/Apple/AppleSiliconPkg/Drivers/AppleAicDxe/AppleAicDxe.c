@@ -48,7 +48,6 @@ InterruptDxeInitialize (
       //
       // TODO: add AICv3 support, seen in M3 and A17 based SoCs.
       //
-      break;
     default:
       DEBUG((DEBUG_INFO, "Unsupported AIC revision, exiting\n"));
       Status = EFI_UNSUPPORTED;
