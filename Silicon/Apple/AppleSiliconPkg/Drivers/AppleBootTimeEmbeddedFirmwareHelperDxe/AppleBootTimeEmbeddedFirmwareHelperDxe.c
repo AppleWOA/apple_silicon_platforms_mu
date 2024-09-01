@@ -140,7 +140,7 @@ STATIC VOID AppleAsmediaWriteRegister(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInsta
   }
 
   if(Wait == FALSE) {
-    DEBUG((DEBUG_INFO, "%a - Register write successful\n"));
+    DEBUG((DEBUG_INFO, "%a - Register write successful\n", __FUNCTION__));
     return;
   }
   
@@ -343,6 +343,36 @@ STATIC VOID AppleAsmediaLoadFirmware(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInstan
     CONST UINT8 SramAccessEnable = ASMEDIA_CONFIGURATION_SRAM_ACCESS_ENABLE_BIT;
     CONST UINT8 SramAccessDisable = 0;
     INT32 i = 0;
+    UINT64 OriginalPciAttributes;
+    UINT64 Supports;
+    
+    DEBUG((DEBUG_INFO, "%a - checking XHCI attributes\n", __FUNCTION__));
+
+    Status = PciIoProtocolInstance->Attributes (
+                      PciIoProtocolInstance,
+                      EfiPciIoAttributeOperationGet,
+                      0,
+                      &OriginalPciAttributes
+                      );
+
+    DEBUG((DEBUG_INFO, "%a - XHCI attributes (original) - 0x%llx\n", __FUNCTION__, OriginalPciAttributes));
+
+    Status = PciIoProtocolInstance->Attributes (
+                      PciIoProtocolInstance,
+                      EfiPciIoAttributeOperationSupported,
+                      0,
+                      &Supports
+                      );
+    if (!EFI_ERROR (Status)) {
+      DEBUG((DEBUG_INFO, "%a - XHCI attributes supported - 0x%llx, setting EFI_PCI_DEVICE_ENABLE\n", __FUNCTION__, Supports));
+      Supports &= (UINT64)EFI_PCI_DEVICE_ENABLE;
+      Status    = PciIoProtocolInstance->Attributes (
+                          PciIoProtocolInstance,
+                          EfiPciIoAttributeOperationEnable,
+                          Supports,
+                          NULL
+                          );
+    }
 
     DEBUG((DEBUG_INFO, "%a - Resetting MMIO interface of XHCI controller\n", __FUNCTION__));
     AppleAsmediaWriteRegister(PciIoProtocolInstance, ASMEDIA_MMIO_CPU_MODE_NEXT, ASMEDIA_MMIO_CPU_MODE_HALFSPEED, FALSE);

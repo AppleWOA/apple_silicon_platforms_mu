@@ -400,7 +400,7 @@ STATIC EFI_STATUS EFIAPI AppleAicV2GetIrqTriggerType(
 {
     VOID* FdtBlob = (VOID *)(PcdGet64(PcdFdtPointer));
     INT32 MsiRangesLength = 0;
-    UINTN PcieMsiNodeOffset = fdt_path_offset(FdtBlob, "/soc/pcie0");;
+    UINTN PcieMsiNodeOffset = fdt_path_offset(FdtBlob, "/soc/pcie");;
     CONST INT32* PcieMsiRangesProp = fdt_getprop(FdtBlob, PcieMsiNodeOffset, "msi-ranges", &MsiRangesLength);;
     UINT32 EdgeTriggeredIrqNumStart = fdt32_to_cpu(PcieMsiRangesProp[2]);
     UINT32 EdgeTriggeredIrqNums = fdt32_to_cpu(PcieMsiRangesProp[3]);

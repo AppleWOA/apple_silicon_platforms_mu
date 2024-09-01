@@ -281,6 +281,7 @@ AppleEmbeddedGpioControllerDxeInitialize(
     DEBUG((DEBUG_INFO, "%a - getting pinctrl_ap for die 0\n", __FUNCTION__));
     //
     // NOTE: this will change on future SoCs, needs to be updated
+    // THIS NEEDS TO CHANGE TO BE SOC AGNOSTIC
     //
     PinCtrlApNode = fdt_path_offset((VOID*)FdtBlob, "/soc/pinctrl@39b028000");
     // }

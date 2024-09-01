@@ -1,0 +1,64 @@
+#
+#  Copyright (c) 2024, AppleWOA authors. All rights reserved.
+#
+#  Module Name:
+#    AppleDartIoMmuDxe.inf
+#  
+#  Abstract:
+#    Platform specific driver for Apple silicon platforms to set up the DARTs.
+#    Note that the DARTs as of right now are being configured in bypass mode, so
+#    security of device memory acccesses is not as strong as it could be.
+#
+#  Environment:
+#    UEFI Driver Execution Environment (DXE)
+#
+#  License:
+#    SPDX-License-Identifier: (BSD-2-Clause-Patent OR MIT) AND GPL-2.0+
+#
+#
+
+[Defines]
+  INF_VERSION                    = 0x0001001c
+  BASE_NAME                      = AppleDartIoMmuDxe
+  FILE_GUID                      = f7b773c7-660a-4da6-b641-75e9ee06bd41
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AppleDartIoMmuDxeInitialize
+
+[Sources]
+  AppleDartIoMmuDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ArmPkg/ArmPkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  CacheMaintenanceLib
+  UefiLib
+  UefiBootServicesTableLib
+  DebugLib
+  PrintLib
+  MemoryAllocationLib
+  UefiDriverEntryPoint
+  DxeServicesLib
+  IoLib
+  PcdLib
+  UefiLib
+  FdtLib
+  ArmLib
+  TimerLib
+
+[Pcd]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
+
+[Protocols]
+  gEdkiiIoMmuProtocolGuid # Produces
+
+[Depex]
+  TRUE

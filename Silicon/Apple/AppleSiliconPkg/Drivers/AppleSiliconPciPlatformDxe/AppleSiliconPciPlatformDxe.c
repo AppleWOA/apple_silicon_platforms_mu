@@ -230,13 +230,6 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   //
   // Per Asahi U-Boot, this is to assert PERST#
   //
-
-  //
-  // NOTE: The "SetPull" call is NOT to set the pull state of the GPIO, this is currently being used as a hack
-  // to set just the output value of 0 or 1 without changing the other bits.
-  //
-  // The SetPull method will be reverted to the proper behavior later.
-  //
   Status = GpioProtocol->Get(GpioProtocol, ResetGpioStruct.GpioNum, &RetrievedGpioValue);
   DEBUG((DEBUG_INFO, "%a - GPIO value before asserting PERST# is 0x%llx\n", __FUNCTION__, RetrievedGpioValue));
   Status = GpioProtocol->Set(GpioProtocol, ResetGpioStruct.GpioNum, GPIO_MODE_OUTPUT_0);

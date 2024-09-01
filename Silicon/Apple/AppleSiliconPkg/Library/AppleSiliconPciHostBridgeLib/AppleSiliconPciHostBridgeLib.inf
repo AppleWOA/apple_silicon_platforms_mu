@@ -34,6 +34,7 @@
   ArmPkg/ArmPkg.dec
   MdeModulePkg/MdeModulePkg.dec
   MdePkg/MdePkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
 
 [LibraryClasses]
   DebugLib
@@ -47,6 +48,7 @@
   gArmTokenSpaceGuid.PcdPciMmio32Size
   gArmTokenSpaceGuid.PcdPciMmio64Base
   gArmTokenSpaceGuid.PcdPciMmio64Size
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio32Translation
 
 [Depex]
   TRUE

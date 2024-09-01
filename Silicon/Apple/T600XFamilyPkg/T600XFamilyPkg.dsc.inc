@@ -80,7 +80,7 @@
   # Host Bridge Library settings.
   # 
   gArmTokenSpaceGuid.PcdPciBusMin|0x0
-  gArmTokenSpaceGuid.PcdPciBusMax|0x4
+  gArmTokenSpaceGuid.PcdPciBusMax|0xFF
   #
   # Apple chips don't seem to use "x86-style" I/O accesses, so use placeholder values here, and don't reference them in the host bridge driver.
   #

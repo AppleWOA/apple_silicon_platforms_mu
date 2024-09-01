@@ -105,7 +105,9 @@ STATIC PCI_ROOT_BRIDGE  mRootBridge = {
   {
     FixedPcdGet32 (PcdPciMmio32Base),
     FixedPcdGet32 (PcdPciMmio32Base) + FixedPcdGet32 (PcdPciMmio32Size) - 1,
+    FixedPcdGet32 (PcdPciMmio32Base) - (FixedPcdGet32 (PcdPciMmio32Base) + FixedPcdGet64 (PcdPciMmio32Translation))
   },
+  // { MAX_UINT64,                                                             0  },
 
   /* PCI_ROOT_BRIDGE_APERTURE MemAbove4G; MMIO aperture above 4GB which can be
      used by the root bridge.
@@ -114,6 +116,7 @@ STATIC PCI_ROOT_BRIDGE  mRootBridge = {
     FixedPcdGet64 (PcdPciMmio64Base),
     FixedPcdGet64 (PcdPciMmio64Base) + FixedPcdGet64 (PcdPciMmio64Size) - 1
   },
+  // { MAX_UINT64,                                                             0  },
 
   /* PCI_ROOT_BRIDGE_APERTURE PMem; Prefetchable MMIO aperture below 4GB which
      can be used by the root bridge.
@@ -124,6 +127,10 @@ STATIC PCI_ROOT_BRIDGE  mRootBridge = {
 
   /* PCI_ROOT_BRIDGE_APERTURE PMemAbove4G; Prefetchable MMIO aperture above 4GB
      which can be used by the root bridge. */
+  // {
+  //   FixedPcdGet64 (PcdPciMmio64Base),
+  //   FixedPcdGet64 (PcdPciMmio64Base) + FixedPcdGet64 (PcdPciMmio64Size) - 1
+  // },
   { MAX_UINT64,                                                             0  },
   /* EFI_DEVICE_PATH_PROTOCOL *DevicePath; Device path. */
   (EFI_DEVICE_PATH_PROTOCOL *)&mEfiPciRootBridgeDevicePath,

@@ -12,7 +12,7 @@
 [BuildOptions.common]
   # use Clang to compile, try to use GCC5 otherwise
   *_CLANGPDB_AARCH64_CC_FLAGS = -Wno-unused-const-variable -Wno-sometimes-uninitialized -D CLANG
-  *_CLANGPDB_AARCH64_DLINK_FLAGS = /ALIGN:16384 /FILEALIGN:16384 # a hack to force 4k alignment - changing FDF rules was not working for whatever reason...
+  *_CLANGPDB_AARCH64_DLINK_FLAGS = /ALIGN:4096 /FILEALIGN:4096 # a hack to force 4k alignment - changing FDF rules was not working for whatever reason...
   *_GCC5_AARCH64_CC_FLAGS = -Wno-unused-const-variable -Wno-sometimes-uninitialized -D GCC
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS -march=armv8.2-a+crypto+rcpc -Wno-error=unaligned-access
   # TODO: add MSVC flags
@@ -24,6 +24,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|TRUE
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportUpdateCapsuleReset|TRUE
   gEmbeddedTokenSpaceGuid.PcdPrePiProduceMemoryTypeInformationHob|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdRequireIommu|FALSE
 
 [PcdsFixedAtBuild.common]
 
@@ -517,6 +518,7 @@
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+  #AppleSiliconPkg/Drivers/AppleDartIoMmuDxe/AppleDartIoMmuDxe.inf
 
   # Fake Variable Services
   MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
