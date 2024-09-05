@@ -440,11 +440,11 @@ MsBootPolicyLibGetBootSequence (
   }
 
   if (AltBootRequest) {
-    *BootSequence = BootSequenceUPH;
+    *BootSequence = BootSequenceHUP;
     DEBUG ((DEBUG_INFO, "%a - returing alt boot sequence\n", __FUNCTION__));
   } else {
     DEBUG ((DEBUG_INFO, "%a - returing normal sequence\n", __FUNCTION__));
-    *BootSequence = BootSequenceHUP;
+    *BootSequence = BootSequenceUPH;
   }
 
   return EFI_SUCCESS;

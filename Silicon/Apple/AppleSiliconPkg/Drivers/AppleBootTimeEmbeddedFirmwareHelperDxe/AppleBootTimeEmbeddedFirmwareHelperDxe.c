@@ -58,6 +58,7 @@ BOOLEAN gUsbFirmwareFound = FALSE;
 VOID *UsbFirmwarePointer;
 VOID *NewUsbFirmwareBlobPointer;
 UINTN UsbFirmwareSize;
+EFI_DRIVER_BINDING_PROTOCOL  gAppleBootTimeEmbeddedFirmwareBindingBinding;
 
 //
 // *********************************************************
@@ -293,7 +294,7 @@ STATIC BOOLEAN AppleAsmediaCheckFirmwareIsLoaded(IN EFI_PCI_IO_PROTOCOL *PciIoPr
 }
 
 STATIC EFI_STATUS AppleAsmediaWaitReset(IN EFI_PCI_IO_PROTOCOL *PciIoProtocolInstance) {
-  UINT32 OperationRegOffset = 0;
+  UINT8 OperationRegOffset = 0;
   EFI_STATUS Status;
   UINT32 XhciOperationRegValue;
   CONST UINT8 SramAccessEnable = ASMEDIA_CONFIGURATION_SRAM_ACCESS_ENABLE_BIT;
@@ -539,6 +540,13 @@ CloseProtocolAndExit:
   // if(UsbFirmwareLoadSuccessful != TRUE) {
   //   FreePool(NewUsbFirmwareBlobPointer);
   // }
+
+  //
+  // Uninstall the driver binding so that we don't attempt to execute again.
+  //
+  if (UsbFirmwareLoadSuccessful == TRUE) {
+    EfiLibUninstallDriverBinding(&gAppleBootTimeEmbeddedFirmwareBindingBinding);
+  }
 
   //
   // Returning unsupported here allows the normal XHCI driver to take over

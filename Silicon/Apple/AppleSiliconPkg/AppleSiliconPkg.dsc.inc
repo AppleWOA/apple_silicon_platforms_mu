@@ -20,11 +20,16 @@
 [PcdsFeatureFlag.common]
 
   #MdeModulePkg feature flags
-  gEfiMdeModulePkgTokenSpaceGuid.PcdTurnOffUsbLegacySupport|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdTurnOffUsbLegacySupport|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|TRUE
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportUpdateCapsuleReset|TRUE
   gEmbeddedTokenSpaceGuid.PcdPrePiProduceMemoryTypeInformationHob|TRUE
-  gEfiMdeModulePkgTokenSpaceGuid.PcdRequireIommu|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdRequireIommu|TRUE
+
+  gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdDriverDiagnosticsDisable|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdComponentName2Disable|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdDriverDiagnostics2Disable|TRUE
 
 [PcdsFixedAtBuild.common]
 
@@ -518,7 +523,7 @@
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
-  #AppleSiliconPkg/Drivers/AppleDartIoMmuDxe/AppleDartIoMmuDxe.inf
+  AppleSiliconPkg/Drivers/AppleDartIoMmuDxe/AppleDartIoMmuDxe.inf
 
   # Fake Variable Services
   MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf

@@ -84,7 +84,7 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuMap(
     APPLE_DART_MAPPING *DartMappingInfo;
     UINTN NumBytes = *NumberOfBytes;
 
-    DEBUG((DEBUG_INFO, "%a - mapping memory into IOMMU page tables\n", __FUNCTION__));
+    // DEBUG((DEBUG_INFO, "%a - mapping memory into IOMMU page tables, with host address 0x%p\n", __FUNCTION__, HostAddress));
 
     switch(Operation) {
         //
@@ -103,20 +103,15 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuMap(
             //
             // since the USB-A controller doesn't support bypass mode, the below code MUST work correctly.
             //
-
             DartMappingInfo = AllocateZeroPool(sizeof(APPLE_DART_MAPPING));
-
             DartMappingInfo->HostAddr = (PHYSICAL_ADDRESS)HostAddress;
-
             PhysAddr = ALIGN_DOWN((PHYSICAL_ADDRESS)HostAddress, DART_PAGE_SIZE);
             DartMappingInfo->PhysAddress = PhysAddr;
             Off = (PHYSICAL_ADDRESS)HostAddress - PhysAddr;
             DartMappingInfo->Offset = Off;
             PhysSize = ALIGN(NumBytes + Off, DART_PAGE_SIZE);
             DartMappingInfo->PhysicalSize = PhysSize;
-
-            DmaVirtAddr = (PHYSICAL_ADDRESS)AllocateAlignedPages(PhysSize, DART_PAGE_SIZE);
-
+            DmaVirtAddr = (PHYSICAL_ADDRESS)HostAddress;
             DartMappingInfo->DmaVirtualAddr = DmaVirtAddr;
 
             DartMappingInfo->NumBytes = *NumberOfBytes;
@@ -127,12 +122,13 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuMap(
                 DartInfo->L2[idx + i] = (PhysAddr >> DartInfo->Shift) | DART_L2_VALID | DART_L2_START(0LL) | DART_L2_END(~0LL);
                 PhysAddr += DART_PAGE_SIZE;
             }
-
             WriteBackInvalidateDataCacheRange((VOID *)DartInfo->L2[idx], ((UINTN)DartInfo->L2[idx + i] - (UINTN)DartInfo->L2[idx]));
+
 
             DartInfo->TlbFlush((VOID *)DartInfo);
 
             *DeviceAddress = DmaVirtAddr + Off;
+            // DEBUG((DEBUG_INFO, "%a - device address is 0x%llx, Off = 0x%llx\n", __FUNCTION__, (DmaVirtAddr + Off), Off));
             *Mapping = DartMappingInfo;
             break;
 
@@ -158,7 +154,7 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuUnmap(IN EDKII_IOMMU_PROTOCOL *This, IN V
 
     DartMappingInfo = (APPLE_DART_MAPPING *)Mapping;
 
-    DEBUG((DEBUG_INFO, "%a - Unmapping memory from IOMMU page tables\n", __FUNCTION__));
+    // DEBUG((DEBUG_INFO, "%a - Unmapping memory from IOMMU page tables\n", __FUNCTION__));
 
     //
     // if we are in bypass mode, there is no conception of unmapping, we're done.
@@ -218,8 +214,8 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuAllocateBuffer (
     // HACK: if this is needed, then because EFI is always allocating pages in increments of 4k, always map 4 times the number
     // of pages requested, so that we always end up with 16k pages from the IOMMU perspective.
     //
-    //NewPages = 4 * Pages;
-    DEBUG((DEBUG_INFO, "%a - Allocating DMA buffer with %d pages\n", __FUNCTION__, NewPages));
+    NewPages = 4 * Pages;
+    // DEBUG((DEBUG_INFO, "%a - Allocating DMA buffer with %d pages\n", __FUNCTION__, NewPages));
     if (MemoryType == EfiBootServicesData) {
         *HostAddress = AllocateAlignedPages (NewPages, DART_PAGE_SIZE);
     } else if (MemoryType == EfiRuntimeServicesData) {
@@ -227,6 +223,8 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuAllocateBuffer (
     } else {
         return EFI_INVALID_PARAMETER;
     }
+
+    // DEBUG((DEBUG_INFO, "%a - HostAddress new value is 0x%p\n", __FUNCTION__, *HostAddress));
 
     if (*HostAddress == NULL) {
         return EFI_OUT_OF_RESOURCES;
@@ -247,14 +245,14 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuFreeBuffer (
     // HACK: if this is needed, then because EFI is always allocating pages in increments of 4k, always map 4 times the number
     // of pages requested, so that we always end up with 16k pages from the IOMMU perspective.
     //
-    //NewPages = 4 * Pages;
+    NewPages = 4 * Pages;
 
-    DEBUG((DEBUG_INFO, "%a - Freeing DMA buffer at 0x%p, %d pages\n", __FUNCTION__, HostAddress, NewPages));
+    // DEBUG((DEBUG_INFO, "%a - Freeing DMA buffer at 0x%p, %d pages\n", __FUNCTION__, HostAddress, NewPages));
     if (HostAddress == NULL) {
         return EFI_INVALID_PARAMETER;
     }
 
-    FreePages (HostAddress, NewPages);
+    FreeAlignedPages (HostAddress, NewPages);
     return EFI_SUCCESS;
 }
 
@@ -285,7 +283,6 @@ AppleDartIoMmuDxeInitialize(
   IN EFI_SYSTEM_TABLE  *SystemTable
 )
 {
-    EFI_STATUS Status;
     UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
     UINT32 Midr = ArmReadMidr();
     INT32 DartNode;
@@ -297,10 +294,6 @@ AppleDartIoMmuDxeInitialize(
     INT32 NL1, NL2;
     INT32 sid, i;
     UINT32 Params2;
-    //
-    // HACKHACKHACK REMOVE AFTER DEMO: related to XHCI IOMMU mapping.
-    //
-    VOID *XhciBar0Addr = (VOID *)
     //UINT32 Params4;
 
     DartInfo = AllocateZeroPool(sizeof(APPLE_DART_INFO));
@@ -394,11 +387,11 @@ AppleDartIoMmuDxeInitialize(
     NL2 = DIV_ROUND_UP(Ntte, DART_PAGE_SIZE / sizeof(UINT64));
     NL1 = DIV_ROUND_UP(NL2, DART_PAGE_SIZE / sizeof(UINT64));
 
-    DartInfo->L2 = AllocateAlignedPages(DART_PAGE_SIZE, NL2 * DART_PAGE_SIZE);
+    DartInfo->L2 = AllocateAlignedPages(NL2 * DART_PAGE_SIZE, DART_PAGE_SIZE);
     memset(DartInfo->L2, 0, NL2 * DART_PAGE_SIZE);
     WriteBackInvalidateDataCacheRange((VOID *)DartInfo->L2, NL2 * DART_PAGE_SIZE);
 
-    DartInfo->L1 = AllocateAlignedPages(DART_PAGE_SIZE, NL1 * DART_PAGE_SIZE);
+    DartInfo->L1 = AllocateAlignedPages(NL1 * DART_PAGE_SIZE, DART_PAGE_SIZE);
     memset(DartInfo->L1, 0, NL1 * DART_PAGE_SIZE);
     L2 = (PHYSICAL_ADDRESS)DartInfo->L2;
     for(i = 0; i < NL2; i++) {
@@ -424,19 +417,11 @@ AppleDartIoMmuDxeInitialize(
         MmioWrite32(DartInfo->BaseAddress + DART_TCR(DartInfo, sid), DartInfo->TcrTranslateEnable);
     }
 
-    Status = gBS->InstallMultipleProtocolInterfaces (
+    return gBS->InstallMultipleProtocolInterfaces (
                     &ImageHandle,
                     &gEdkiiIoMmuProtocolGuid,
                     &mAppleDartIoMmuProtocol,
                     NULL
                     );
-
-    //
-    // HACKHACKHACK REMOVE THIS AFTER DEMO: map the XHCI controller PCIe BAR region into IOMMU page tables.
-    // (since EDK2 isn't using the IOMMU for whatever godforsaken reason despite forcing it to be enabled.)
-    //
-
-    // DEBUG((DEBUG_INFO, "HACKHACKHACK: mapping XHCI controller to IOMMU page tables\n"));
-    // mAppleDartIoMmuProtocol.Map(&mAppleDartIoMmuProtocol, )
 
 }
