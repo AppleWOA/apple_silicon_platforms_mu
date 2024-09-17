@@ -102,6 +102,8 @@
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0x590000000
   gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarSize|0x1000000
   gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarLimit|0x590FFFFFF
+
+  gEmbeddedTokenSpaceGuid.PcdDmaDeviceOffset|0xFFFFFFFB00000000
   #
   # This shouldn't get used.
   #

@@ -42,12 +42,22 @@
 
 APPLE_DART_INFO *DartInfo;
 
+STATIC
+PHYSICAL_ADDRESS
+HostToDeviceAddress (
+  IN  VOID  *Address
+  )
+{
+  //return (PHYSICAL_ADDRESS)(UINTN)Address;
+  return (PHYSICAL_ADDRESS)(UINTN)Address + PcdGet64 (PcdDmaDeviceOffset);
+}
+
 //
 // Description:
 //   Sets an attribute over memory that the DART manages.
 //
 // Return values:
-//   EFI_UNSUPPORTED - unsupported for now.
+//   EFI_SUCCESS - attribute is set successfully.
 //
 
 STATIC EFI_STATUS EFIAPI AppleDartIoMmuSetAttribute (
@@ -57,7 +67,10 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuSetAttribute (
     IN UINT64 IoMmuAccess
     ) 
 {
-    return EFI_UNSUPPORTED;
+    //
+    // Not sure of a way to do this on DART, for now, pass through the operation and return success.
+    //
+    return EFI_SUCCESS;
 }
 
 //
@@ -88,9 +101,14 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuMap(
 
     switch(Operation) {
         //
-        // hack atm
+        // Treat everything as "common buffer" for now.
         //
-        default:
+        case EdkiiIoMmuOperationBusMasterRead:
+        case EdkiiIoMmuOperationBusMasterRead64:
+        case EdkiiIoMmuOperationBusMasterWrite:
+        case EdkiiIoMmuOperationBusMasterWrite64:
+        case EdkiiIoMmuOperationBusMasterCommonBuffer:
+        case EdkiiIoMmuOperationBusMasterCommonBuffer64:
             //
             // if we are in bypass mode, just return the address verbatim.
             //
@@ -127,9 +145,13 @@ STATIC EFI_STATUS EFIAPI AppleDartIoMmuMap(
 
             DartInfo->TlbFlush((VOID *)DartInfo);
 
-            *DeviceAddress = DmaVirtAddr + Off;
+            *DeviceAddress = HostToDeviceAddress((VOID *)DmaVirtAddr + Off);
             // DEBUG((DEBUG_INFO, "%a - device address is 0x%llx, Off = 0x%llx\n", __FUNCTION__, (DmaVirtAddr + Off), Off));
             *Mapping = DartMappingInfo;
+            break;
+        
+        default:
+            // if we have an invalid operation, just return
             break;
 
     }

@@ -37,6 +37,7 @@
 
 #include <Protocol/PciIo.h>
 #include <Drivers/AppleBootTimeEmbeddedFirmwareHelperXhciDxe.h>
+#include <Drivers/XhciFirmwareBlob.h>
 
 //
 // This driver's main purpose is to load firmware blobs embedded in the FV
@@ -54,10 +55,10 @@
 // Global variables.
 // Mainly for recording if a firmware blob is found and should be loaded.
 //
-BOOLEAN gUsbFirmwareFound = FALSE;
-VOID *UsbFirmwarePointer;
-VOID *NewUsbFirmwareBlobPointer;
-UINTN UsbFirmwareSize;
+// BOOLEAN gUsbFirmwareFound = FALSE;
+// VOID *UsbFirmwarePointer;
+// VOID *NewUsbFirmwareBlobPointer;
+// UINTN UsbFirmwareSize;
 EFI_DRIVER_BINDING_PROTOCOL  gAppleBootTimeEmbeddedFirmwareBindingBinding;
 
 //
@@ -523,7 +524,7 @@ STATIC EFI_STATUS EFIAPI AppleBootTimeEmbeddedFirmwareDriverBindingSupported(
     goto CloseProtocolAndExit;
   }
   DEBUG((DEBUG_INFO, "%a - uploading XHCI controller firmware\n", __FUNCTION__));
-  AppleAsmediaLoadFirmware(PciIoProtocol, NewUsbFirmwareBlobPointer, UsbFirmwareSize, &UsbFirmwareLoadSuccessful);
+  AppleAsmediaLoadFirmware(PciIoProtocol, XhciFirmwareBlob, ARRAY_SIZE(XhciFirmwareBlob), &UsbFirmwareLoadSuccessful);
   //
   // Double check that the firmware we loaded is actually the one from RAM.
   //
@@ -615,24 +616,24 @@ AppleBootTimeEmbeddedFirmwareHelperDxeInitialize(
   IN EFI_SYSTEM_TABLE  *SystemTable
 )
 {
-    EFI_STATUS Status;
+    // EFI_STATUS Status;
 
     DEBUG((DEBUG_INFO, "%a: AppleBootTimeEmbeddedFirmwareHelperDxe started\n", __FUNCTION__));
     //
     // Load the section of the FV that contains the USB firmware blob.
     //
-    Status = GetSectionFromAnyFv(&gAppleSiliconPkgEmbeddedUsbFirmwareGuid, EFI_SECTION_RAW, 0, &UsbFirmwarePointer, &UsbFirmwareSize);
-    if(EFI_ERROR(Status)) {
-        DEBUG((DEBUG_ERROR, "%a: loading FV embedded firmware failed, status %r, exiting\n", __FUNCTION__, Status));
-        return Status;
-    }
-    gUsbFirmwareFound = TRUE;
-    if(gUsbFirmwareFound == TRUE) {
-        //
-        // Allocate a new 256K buffer for the firmware and copy it in, then load the firmware.
-        //
-        NewUsbFirmwareBlobPointer = AllocateCopyPool(SIZE_256KB, UsbFirmwarePointer);
-    }
+    // Status = GetSectionFromAnyFv(&gAppleSiliconPkgEmbeddedUsbFirmwareGuid, EFI_SECTION_RAW, 0, &UsbFirmwarePointer, &UsbFirmwareSize);
+    // if(EFI_ERROR(Status)) {
+    //     DEBUG((DEBUG_ERROR, "%a: loading FV embedded firmware failed, status %r, exiting\n", __FUNCTION__, Status));
+    //     return Status;
+    // }
+    // gUsbFirmwareFound = TRUE;
+    // if(gUsbFirmwareFound == TRUE) {
+    //     //
+    //     // Allocate a new 256K buffer for the firmware and copy it in, then load the firmware.
+    //     //
+    //     // NewUsbFirmwareBlobPointer = AllocateCopyPool(SIZE_256KB, UsbFirmwarePointer);
+    // }
     //
     // Register the driver binding to start the firmware load.
     //
