@@ -48,8 +48,8 @@ HostToDeviceAddress (
   IN  VOID  *Address
   )
 {
-  //return (PHYSICAL_ADDRESS)(UINTN)Address;
-  return (PHYSICAL_ADDRESS)(UINTN)Address + PcdGet64 (PcdDmaDeviceOffset);
+  return (PHYSICAL_ADDRESS)(UINTN)Address;
+//   return (PHYSICAL_ADDRESS)(UINTN)Address + PcdGet64 (PcdDmaDeviceOffset);
 }
 
 //
