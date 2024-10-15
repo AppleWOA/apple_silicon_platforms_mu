@@ -111,10 +111,10 @@ typedef struct AppleDartMapping {
 #define  DART_T8110_TTBR_VALID			BIT(0)
 
 #define DART_SID_ENABLE(DartInfo, idx) \
-	((DartInfo)->SidEnableBase + 4 * (idx))
-#define DART_TCR(DartInfo, sid)	((DartInfo)->TcrBase + 4 * (sid))
+	((DartInfo).SidEnableBase + 4 * (idx))
+#define DART_TCR(DartInfo, sid)	((DartInfo).TcrBase + 4 * (sid))
 #define DART_TTBR(DartInfo, sid, idx)	\
-	((DartInfo)->TtbrBase + 4 * (DartInfo)->Nttbr * (sid) + 4 * (idx))
+	((DartInfo).TtbrBase + 4 * (DartInfo).Nttbr * (sid) + 4 * (idx))
 #define  DART_TTBR_SHIFT	12
 
 #define DART_ALL_STREAMS(DartInfo)	((1U << (DartInfo)->Nsid) - 1)

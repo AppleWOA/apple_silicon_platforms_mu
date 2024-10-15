@@ -1,0 +1,68 @@
+#
+#  Copyright (c) 2024, AppleWOA authors. All rights reserved.
+#
+#  Module Name:
+#    AppleUsbTypeCBringupDxe.inf
+#  
+#  Abstract:
+#    Platform specific driver for Apple silicon platforms to bring up the USB-C ports.
+#
+#  Environment:
+#    UEFI Driver Execution Environment (DXE)
+#
+#  License:
+#    SPDX-License-Identifier: (BSD-2-Clause-Patent OR MIT) AND GPL-2.0+
+#    Original code basis is from the Asahi Linux u-boot project, original copyright and author notices below.
+#    Copyright (C) 2022 Mark Kettenis <kettenis@openbsd.org>
+#
+#    Parts of DWC3 bringup code brought in from edk2-platforms, original copyright notice below.
+#    Copyright 2017, 2020 NXP
+#
+
+[Defines]
+  INF_VERSION                    = 0x0001000c
+  BASE_NAME                      = AppleUsbTypeCBringupDxe
+  FILE_GUID                      = a7a8b3f7-b8bb-42ff-a5d1-07ce43734461
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AppleUsbTypeCBringupDxeInitialize
+
+[Sources]
+  AppleUsbTypeCBringupDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ArmPkg/ArmPkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  CacheMaintenanceLib
+  UefiLib
+  UefiBootServicesTableLib
+  DebugLib
+  PrintLib
+  MemoryAllocationLib
+  NonDiscoverableDeviceRegistrationLib
+  UefiDriverEntryPoint
+  DxeServicesLib
+  IoLib
+  PcdLib
+  UefiLib
+  FdtLib
+  ArmLib
+  TimerLib
+
+[Pcd]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Controllers
+
+[Guids]
+  gEfiEndOfDxeEventGroupGuid
+
+[Depex]
+  TRUE
