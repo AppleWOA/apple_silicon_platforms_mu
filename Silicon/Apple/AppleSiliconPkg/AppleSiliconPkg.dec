@@ -44,6 +44,14 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080|UINT32|0x00004402
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30|UINT32|0x00004403
   gAppleSiliconPkgTokenSpaceGuid.PcdXhciPcieDeviceNumber|0|UINT32|0x00004700
+  #
+  # needed for the USB-C DART driver.
+  #
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Darts|4|UINT32|0x00004702
+  #
+  # Number of DWC3 controllers on the SoC.
+  #
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Controllers|1|UINT32|0x00004703
   #File name GUID for frontpage app
   gAppleSiliconPkgTokenSpaceGuid.PcdUIApplicationFile|{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }|VOID*|0x00004408
 

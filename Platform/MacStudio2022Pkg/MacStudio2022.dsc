@@ -45,6 +45,8 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"Mac Studio (2022)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac13,1/Mac13,2"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"Mac Studio (Mac13,1/Mac13,2)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Controllers|4 # M1 Max case is hardcoded for now.
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Darts|8 # M1 Max case is hardcoded for now.
   #will be changed later on, default values
   # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
   # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
@@ -64,7 +66,10 @@
 [Components.common]
 
   MacStudio2022Pkg/AcpiTables/DeviceAcpiTables.inf
-  AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
+  #
+  # Temporary hack: disable PCIe support while debugging why the ASMedia controller isn't working
+  #
+  #AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
 
 
 !include T600XFamilyPkg/T600XFamilyPkg.dsc.inc
