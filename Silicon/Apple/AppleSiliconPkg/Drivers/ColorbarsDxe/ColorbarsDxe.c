@@ -60,6 +60,9 @@ InitializeColorbars(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 
   State = 0;
 
+  //
+  // in our case for now, secure boot is always off.
+  //
   if (!IsSecureBootOn()) {
     State |= DEVICE_STATE_SECUREBOOT_OFF;
   }
@@ -67,11 +70,12 @@ InitializeColorbars(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
   State |= DEVICE_STATE_PLATFORM_MODE_0;
   State |= DEVICE_STATE_DEVELOPMENT_BUILD_ENABLED;
   State |= DEVICE_STATE_MANUFACTURING_MODE;
+  State |= DEVICE_STATE_UNIT_TEST_MODE;
 
   //
-  // TODO: should we check device fuse status here?
+  // TODO: add support for reading security fuses, and warning the user via a color bar if their
+  // device has a non-production SoC.
   //
-  State |= DEVICE_STATE_UNIT_TEST_MODE;
 
 
   AddDeviceState(State);
