@@ -58,6 +58,9 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
   gEmbeddedTokenSpaceGuid.PcdDmaDeviceOffset
 
+[FixedPcd]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Darts
+
 [Protocols]
   gEdkiiIoMmuProtocolGuid # Produces
 
