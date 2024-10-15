@@ -15,7 +15,7 @@
  * License:
  *     SPDX-License-Identifier: (BSD-2-Clause-Patent OR MIT) AND GPL-2.0
  * 
- *     Some code understanding is borrowed from the Asahi Linux project, copyright The Asahi Linux Contributors.
+ *     Some code understanding is borrowed from the Asahi Linux project, Copyright (c) The Asahi Linux Contributors.
  * 
 */
 
@@ -280,8 +280,7 @@ AppleEmbeddedGpioControllerDxeInitialize(
     // else {
     DEBUG((DEBUG_INFO, "%a - getting pinctrl_ap for die 0\n", __FUNCTION__));
     //
-    // NOTE: this will change on future SoCs, needs to be updated
-    // THIS NEEDS TO CHANGE TO BE SOC AGNOSTIC
+    // TODO: change this to be SoC agnostic.
     //
     PinCtrlApNode = fdt_path_offset((VOID*)FdtBlob, "/soc/pinctrl@39b028000");
     // }
