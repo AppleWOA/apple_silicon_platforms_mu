@@ -11,15 +11,14 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = DeviceAcpiTables
-  FILE_GUID                      = 3ff4732c-9411-4e10-a10c-8b39df282e83
+  BASE_NAME                      = GenericAcpiTables
+  FILE_GUID                      = a57bccf6-0ca5-439a-b8a6-eb40ff035827
   MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
 
 [Sources]
-  DBG2.aslc
-  FADT.aslc
-  DSDT.asl
+  GTDT.aslc
+
 
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -35,14 +34,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId              ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId         ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision        ## CONSUMES
-  gArmTokenSpaceGuid.PcdPciBusMin
-  gArmTokenSpaceGuid.PcdPciBusMax
-  gArmTokenSpaceGuid.PcdPciMmio32Base
-  gArmTokenSpaceGuid.PcdPciMmio32Size
-  gEfiMdePkgTokenSpaceGuid.PcdPciMmio32Translation
-  gEfiMdePkgTokenSpaceGuid.PcdPciMmio64Translation
-  gArmTokenSpaceGuid.PcdPciMmio64Base
-  gArmTokenSpaceGuid.PcdPciMmio64Size
-  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
-  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarSize
-  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarLimit
+  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum                    ## CONSUMES
+  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum                       ## CONSUMES
+  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum                    ## CONSUMES
+  gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum                   ## CONSUMES

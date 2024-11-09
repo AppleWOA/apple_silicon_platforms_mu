@@ -115,8 +115,12 @@
         //     Name (_ADR, Zero)
         //     Name (_UID, "PCI0")
         // }
+
+        //
+        // All known Apple devices to date have used the Samsung based UART that debuted on the 8900 (or a compatible implementation).
+        //
         Device(COM0) {
-            Name(_HID, "APPL8900") // naming it APPL8900 since the Samsung based UART was used since the 8900
+            Name(_HID, "APPL8900") // naming it APPL8900 since the Samsung based UART was used since the S5L8900
             Name(_UID, Zero)
             Name (_CRS, ResourceTemplate () {
                 QWordMemory (
@@ -432,101 +436,101 @@
         // PCIe root complex (because just implementing it in the host bridge library is not enough apparently...)
         // Code adapted from QemuSbsaPkg DSDT in mu_tiano_platforms
         //
-        Device(PCI0) {
-            Name (_HID, EISAID ("PNP0A08")) // PCI Express Root Bridge
-            Name (_CID, EISAID ("PNP0A03")) // Compatible PCI Root Bridge
-            Name (_SEG, Zero) // PCI Segment Group number
-            Name (_BBN, Zero) // PCI Base Bus Number
-            Name (_ADR, Zero)
-            Name (_UID, "PCI0")
-            Name (_CCA, One) // per FDT, Apple PCIe is DMA coherent
+        // Device(PCI0) {
+        //     Name (_HID, EISAID ("PNP0A08")) // PCI Express Root Bridge
+        //     Name (_CID, EISAID ("PNP0A03")) // Compatible PCI Root Bridge
+        //     Name (_SEG, Zero) // PCI Segment Group number
+        //     Name (_BBN, Zero) // PCI Base Bus Number
+        //     Name (_ADR, Zero)
+        //     Name (_UID, "PCI0")
+        //     Name (_CCA, One) // per FDT, Apple PCIe is DMA coherent
 
-            Method (_STA) {
-                Return (0xF)
-            }
-            Method (_CBA, 0, NotSerialized) {
-                return (FixedPcdGet32 (PcdPciExpressBaseAddress))
-            }
+        //     Method (_STA) {
+        //         Return (0xF)
+        //     }
+        //     Method (_CBA, 0, NotSerialized) {
+        //         return (FixedPcdGet32 (PcdPciExpressBaseAddress))
+        //     }
 
-            //
-            // TODO: Add _PRT method
-            //
+        //     //
+        //     // TODO: Add _PRT method
+        //     //
 
-            //
-            // Root complex settings/resources
-            //
+        //     //
+        //     // Root complex settings/resources
+        //     //
 
-            Method (_CRS, 0, Serialized) {
-            Name (RBUF, ResourceTemplate() {
-                WordBusNumber(
-                    ResourceProducer, //ResourceUsage (whether bus range is consumed or produced)
-                    MinFixed, // IsMinFixed - is lowest bus number fixed?
-                    MaxFixed, // IsMaxFixed - is highest bus number fixed?
-                    PosDecode, //Decode - decode positive or negative?
-                    0, // AddressGranularity
-                    FixedPcdGet32(PcdPciBusMin), //AddressMinimum
-                    FixedPcdGet32(PcdPciBusMax), //AddressMaximum
-                    0, //AddressTranslation
-                    4 //RangeLength - number of buses
-                )
+        //     Method (_CRS, 0, Serialized) {
+        //     Name (RBUF, ResourceTemplate() {
+        //         WordBusNumber(
+        //             ResourceProducer, //ResourceUsage (whether bus range is consumed or produced)
+        //             MinFixed, // IsMinFixed - is lowest bus number fixed?
+        //             MaxFixed, // IsMaxFixed - is highest bus number fixed?
+        //             PosDecode, //Decode - decode positive or negative?
+        //             0, // AddressGranularity
+        //             FixedPcdGet32(PcdPciBusMin), //AddressMinimum
+        //             FixedPcdGet32(PcdPciBusMax), //AddressMaximum
+        //             0, //AddressTranslation
+        //             4 //RangeLength - number of buses
+        //         )
 
-                //
-                // 32-bit PCIe BARs
-                //
-                DWordMemory(
-                    ResourceProducer,
-                    PosDecode,
-                    MinFixed,
-                    MaxFixed,
-                    NonCacheable,
-                    ReadWrite,
-                    0x00000000,
-                    FixedPcdGet32(PcdPciMmio32Base),
-                    FixedPcdGet32(PcdPciMmio32Base) + FixedPcdGet32(PcdPciMmio32Size) - 1,
-                    FixedPcdGet64(PcdPciMmio32Translation),
-                    FixedPcdGet32(PcdPciMmio32Size)
-                    )
+        //         //
+        //         // 32-bit PCIe BARs
+        //         //
+        //         DWordMemory(
+        //             ResourceProducer,
+        //             PosDecode,
+        //             MinFixed,
+        //             MaxFixed,
+        //             NonCacheable,
+        //             ReadWrite,
+        //             0x00000000,
+        //             FixedPcdGet32(PcdPciMmio32Base),
+        //             FixedPcdGet32(PcdPciMmio32Base) + FixedPcdGet32(PcdPciMmio32Size) - 1,
+        //             FixedPcdGet64(PcdPciMmio32Translation),
+        //             FixedPcdGet32(PcdPciMmio32Size)
+        //             )
 
-                //
-                // 64-bit PCIe BARs
-                //
-                QWordMemory(
-                    ResourceProducer,
-                    PosDecode,
-                    MinFixed,
-                    MaxFixed,
-                    Prefetchable,
-                    ReadWrite,
-                    0x00000000,
-                    FixedPcdGet64(PcdPciMmio64Base),
-                    FixedPcdGet64(PcdPciMmio64Base) + FixedPcdGet32(PcdPciMmio64Size) - 1,
-                    FixedPcdGet64(PcdPciMmio64Translation),
-                    FixedPcdGet64(PcdPciMmio64Size)
-                    )
-                }) //Name(RBUF)
+        //         //
+        //         // 64-bit PCIe BARs
+        //         //
+        //         QWordMemory(
+        //             ResourceProducer,
+        //             PosDecode,
+        //             MinFixed,
+        //             MaxFixed,
+        //             Prefetchable,
+        //             ReadWrite,
+        //             0x00000000,
+        //             FixedPcdGet64(PcdPciMmio64Base),
+        //             FixedPcdGet64(PcdPciMmio64Base) + FixedPcdGet32(PcdPciMmio64Size) - 1,
+        //             FixedPcdGet64(PcdPciMmio64Translation),
+        //             FixedPcdGet64(PcdPciMmio64Size)
+        //             )
+        //         }) //Name(RBUF)
 
-                Return (RBUF)
-            } //Method(_CRS)
+        //         Return (RBUF)
+        //     } //Method(_CRS)
 
-            Device (RES0)
-            {
-                Name (_HID, "PNP0C02" /* PNP Motherboard Resources */)  // _HID: Hardware ID
-                Name (_CRS, ResourceTemplate ()  // _CRS: Current Resource Settings
-                {
-                QWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed, NonCacheable, ReadWrite,
-                0x0000000000000000,                       // Granularity
-                FixedPcdGet64 (PcdPciExpressBaseAddress), // Range Minimum
-                FixedPcdGet64 (PcdPciExpressBarLimit),    // Range Maximum
-                0x0000000000000000,                       // Translation Offset
-                FixedPcdGet64 (PcdPciExpressBarSize),     // Length
-                ,, , AddressRangeMemory, TypeStatic)
-                })
-                Method (_STA) {
-                Return (0xF)
-                }
-            }
+        //     Device (RES0)
+        //     {
+        //         Name (_HID, "PNP0C02" /* PNP Motherboard Resources */)  // _HID: Hardware ID
+        //         Name (_CRS, ResourceTemplate ()  // _CRS: Current Resource Settings
+        //         {
+        //         QWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed, NonCacheable, ReadWrite,
+        //         0x0000000000000000,                       // Granularity
+        //         FixedPcdGet64 (PcdPciExpressBaseAddress), // Range Minimum
+        //         FixedPcdGet64 (PcdPciExpressBarLimit),    // Range Maximum
+        //         0x0000000000000000,                       // Translation Offset
+        //         FixedPcdGet64 (PcdPciExpressBarSize),     // Length
+        //         ,, , AddressRangeMemory, TypeStatic)
+        //         })
+        //         Method (_STA) {
+        //         Return (0xF)
+        //         }
+        //     }
 
-        }
+        // }
     }
 }
 

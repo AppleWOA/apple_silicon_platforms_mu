@@ -567,6 +567,11 @@
   #
   AppleSiliconPkg/Drivers/AppleUsbTypeCBringupDxe/AppleUsbTypeCBringupDxe.inf
 
+  #
+  # Generic ACPI tables. (Basically just GTDT, but FADT can likely be shoved in here too)
+  #
+  AppleSiliconPkg/AcpiTables/GenericAcpiTables.inf
+
   # BDS
   MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
   MdeModulePkg/Universal/PrintDxe/PrintDxe.inf

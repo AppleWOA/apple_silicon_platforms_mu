@@ -17,8 +17,9 @@
   VERSION_STRING                 = 1.0
 
 [Sources]
-  GTDT.aslc
   #CSRT.aslc
+  MADT.aslc
+  #BERT.aslc
 
 
 [Packages]
