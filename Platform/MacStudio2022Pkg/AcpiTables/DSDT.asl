@@ -131,8 +131,8 @@
                 NonCacheable,         // Cacheable
                 ReadWrite,            // ReadAndWrite
                 0x0000000000000000,   // AddressGranularity - GRA
-                FixedPcdGet64(PcdAppleUartBase),   // AddressMinimum - MIN
-                (FixedPcdGet64(PcdAppleUartBase) + 0xFFF),   // AddressMaximum - MAX
+                0x39b200000,   // AddressMinimum - MIN
+                0x39b200fff,   // AddressMaximum - MAX
                 0x0000000000000000,   // AddressTranslation - TRA
                 0x0000000000001000    // RangeLength - LEN
                 )
@@ -306,7 +306,7 @@
                 //
                 // Bootstrap cluster, E-core 0
                 //
-                Device(CPU10) {
+                Device(CPUA) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0xA)
                     // Method (_LPI, 0, NotSerialized) {
@@ -319,7 +319,7 @@
                 //
                 // Bootstrap cluster, E-core 1
                 //
-                Device(CPU11) {
+                Device(CPUB) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0xB)
                     // Method (_LPI, 0, NotSerialized) {
@@ -339,7 +339,7 @@
                 // Method (_LPI, 0, NotSerialized) {
                 //     return(CLPI)
                 // }
-                Device(CPU12) {
+                Device(CPUC) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0xC)
                     // Method (_LPI, 0, NotSerialized) {
@@ -349,7 +349,7 @@
                         Return (0xF)
                     }
                 }
-                Device(CPU13) {
+                Device(CPUD) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0xD)
                     // Method (_LPI, 0, NotSerialized) {
@@ -359,7 +359,7 @@
                         Return (0xF)
                     }
                 }
-                Device(CPU14) {
+                Device(CPUE) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0xE)
                     // Method (_LPI, 0, NotSerialized) {
@@ -369,7 +369,7 @@
                         Return (0xF)
                     }
                 }
-                Device(CPU15) {
+                Device(CPUF) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0xF)
                     // Method (_LPI, 0, NotSerialized) {
@@ -389,7 +389,7 @@
                 // Method (_LPI, 0, NotSerialized) {
                 //     return(CLPI)
                 // }
-                Device(CPU16) {
+                Device(CU16) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0x10)
                     // Method (_LPI, 0, NotSerialized) {
@@ -399,7 +399,7 @@
                         Return (0xF)
                     }
                 }
-                Device(CPU17) {
+                Device(CU17) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0x11)
                     // Method (_LPI, 0, NotSerialized) {
@@ -409,7 +409,7 @@
                         Return (0xF)
                     }
                 }
-                Device(CPU18) {
+                Device(CU18) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0x12)
                     // Method (_LPI, 0, NotSerialized) {
@@ -419,7 +419,7 @@
                         Return (0xF)
                     }
                 }
-                Device(CPU19) {
+                Device(CU19) {
                     Name(_HID, "ACPI0007")
                     Name(_UID, 0x13)
                     // Method (_LPI, 0, NotSerialized) {
