@@ -116,4 +116,4 @@
 
 [Components.common]
 
-  T600XFamilyPkg/AcpiTables/CPUAcpiTables.inf
+  #T600XFamilyPkg/AcpiTables/CPUAcpiTables.inf

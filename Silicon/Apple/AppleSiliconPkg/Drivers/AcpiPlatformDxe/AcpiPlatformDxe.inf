@@ -43,6 +43,7 @@
 [Pcd]
   gAppleSiliconPkgTokenSpaceGuid.PcdDeviceAcpiTableStorageFile    ## CONSUMES
   gAppleSiliconPkgTokenSpaceGuid.PcdSocAcpiTableStorageFile       ## CONSUMES
+  gAppleSiliconPkgTokenSpaceGuid.PcdGenericAcpiTableStorageFile   ## CONSUMES
 
 [Depex]
   gEfiAcpiTableProtocolGuid

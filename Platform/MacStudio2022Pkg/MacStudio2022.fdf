@@ -225,8 +225,9 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
   INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
   INF AppleSiliconPkg/Drivers/AcpiPlatformDxe/AcpiPlatformDxe.inf
   INF MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
+  INF RuleOverride=ACPITABLE AppleSiliconPkg/AcpiTables/GenericAcpiTables.inf
   INF RuleOverride=ACPITABLE MacStudio2022Pkg/AcpiTables/DeviceAcpiTables.inf
-  INF RuleOverride=ACPITABLE T600XFamilyPkg/AcpiTables/CPUAcpiTables.inf
+  #INF RuleOverride=ACPITABLE T600XFamilyPkg/AcpiTables/CPUAcpiTables.inf
   #
   # SMBIOS Support
   #

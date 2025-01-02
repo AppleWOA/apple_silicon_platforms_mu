@@ -46,3 +46,4 @@
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
   gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarSize
   gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarLimit
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase
