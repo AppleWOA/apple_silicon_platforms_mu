@@ -173,7 +173,7 @@ FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 
   INF AppleSiliconPkg/Drivers/AppleEmbeddedGpioControllerDxe/AppleEmbeddedGpioControllerDxe.inf
   #
-  # Temporary hack: disable PCIe support while debugging why the ASMedia controller isn't working
+  # PCIe support is disabled for now.
   #
   #INF AppleSiliconPkg/Drivers/AppleSiliconPciPlatformDxe/AppleSiliconPciPlatformDxe.inf
   #INF AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf

@@ -67,7 +67,7 @@
 
   MacStudio2022Pkg/AcpiTables/DeviceAcpiTables.inf
   #
-  # Temporary hack: disable PCIe support while debugging why the ASMedia controller isn't working
+  # PCIe support is disabled for now.
   #
   #AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
 
