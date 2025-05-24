@@ -1,7 +1,7 @@
 ## @file
 #  Borrowed from edk2-platforms/JunoPkg and AmpereAltraPkg, original header below.
-#  Copyright (c) 2023, amarioguy (AppleWOA authors)
-#  ACPI table data and ASL sources required to boot the platform.
+#  Copyright (c) 2025, amarioguy (AppleWOA authors)
+#  ACPI table data and ASL sources required to boot the platform. (Device family specific)
 #
 #  Copyright (c) 2014-2017, ARM Ltd. All rights reserved.
 #
@@ -11,16 +11,13 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = DeviceAcpiTables
-  FILE_GUID                      = 3ff4732c-9411-4e10-a10c-8b39df282e83
+  BASE_NAME                      = DeviceFamilyAcpiTables
+  FILE_GUID                      = 03bd899c-16cd-4ab9-88e0-916b793c09f5
   MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
 
 [Sources]
-  #Bert.asl
-  DBG2.aslc
-  #EINJ.asl
-  DSDT.asl
+  FADT.aslc
 
 [Packages]
   ArmPkg/ArmPkg.dec

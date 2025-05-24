@@ -17,7 +17,7 @@
 */
 
 #include <Library/AcpiLib.h>
-#include <IndustryStandard/Acpi64.h>
+#include <IndustryStandard/Acpi.h>
 #include <Acpi/AcpiHeader.h>
 
 /**
@@ -25,12 +25,13 @@
  * which removes the need for most of the FADT variables.
  * 
  * PSCI for now will be an SMC event despite not being implemented on Apple, as we can trap SMCs to EL2 anyways.
- * (Directly handled by m1n1 hypervisor for hypervisor-assisted booting, 
- * may have to patch or trap SMC instructions to "genter" equivalents for bare-metal booting)
+ * The original intention was to use SPRR/GXF to bootstrap a custom secure monitor that can handle these calls, but with
+ * page tables having to be the same under the assumption of GXF, this is a more complicated endeavor put on hold for now.
+ * SMC PSCI calls will still be used, however we are not using Hyper-V for now so the recipient will be our custom hypervisor.
  * 
 */
 EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE Fadt = {
-    __ACPI_HEADER(EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE, EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE, EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE_REVISION),
+    __ACPI_HEADER(EFI_ACPI_6_5_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE, EFI_ACPI_6_5_FIXED_ACPI_DESCRIPTION_TABLE, EFI_ACPI_6_5_FIXED_ACPI_DESCRIPTION_TABLE_REVISION),
     0, //FIRMWARE_CTRL (UINT32)
     0, //DSDT (UINT32)
     EFI_ACPI_RESERVED_BYTE, //Reserved0
@@ -68,11 +69,11 @@ EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE Fadt = {
     0, //CENTURY (UINT8)
     0, //IAPC_BOOT_ARCH (Intel boot flags) (UINT16)
     0, //Reserved1 (UINT8)
-    ((EFI_ACPI_6_4_HW_REDUCED_ACPI) | (EFI_ACPI_6_4_LOW_POWER_S0_IDLE_CAPABLE) | (EFI_ACPI_6_3_PWR_BUTTON)), //ACPI feature flags (currently HW reduced, S0ix capable, power button as control) (UINT32)
+    ((EFI_ACPI_6_5_HW_REDUCED_ACPI) | (EFI_ACPI_6_5_LOW_POWER_S0_IDLE_CAPABLE) | (EFI_ACPI_6_5_PWR_BUTTON)), //ACPI feature flags (currently HW reduced, S0ix capable, power button as control) (UINT32)
     NULL_GAS, //Reset register (TODO: do we want to put the Apple watchdog timer register here?) (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
     0, //Reset value (UINT8)
-    ((EFI_ACPI_6_4_ARM_PSCI_COMPLIANT)), //ARM boot flags (using PSCI, NOT using HVC conduit (we trap SMCs to EL2 since EL3 not implemented, and more useful for bare metal booting))
-    EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE_REVISION, //Minor revision of FADT (UINT8)
+    ((EFI_ACPI_6_5_ARM_PSCI_COMPLIANT)), //ARM boot flags (using PSCI, NOT using HVC conduit (we trap SMCs to EL2 since EL3 not implemented, and more useful for bare metal booting))
+    EFI_ACPI_6_5_FIXED_ACPI_DESCRIPTION_TABLE_REVISION, //Minor revision of FADT (UINT8)
     0, //extended FIRMWARE_CTRL (UINT64)
     0, //extended DSDT address (UINT64) (probably necessary but not decided yet)
     NULL_GAS, //extended PM1A event reg block address (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)

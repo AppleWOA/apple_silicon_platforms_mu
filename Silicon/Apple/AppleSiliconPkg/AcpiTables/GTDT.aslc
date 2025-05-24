@@ -6,7 +6,7 @@
  * 
  * Abstract:
  *     Generic Timer Descriptor Table. This source file implements the GTDT table for
- *     "Jade" (M1 Pro/Max/Ultra) SoCs. (This could probably just work for all supported Apple platforms.)
+ *     Apple ARM64 SoCs.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -22,8 +22,8 @@
 #include <Acpi/AcpiHeader.h>
 
 //
-// Apple chips since at least the A13/Cebu use a non memory-mapped timer that fires FIQs (on a per core basis, they all come from the same timer). 
-// Just treat this as the ARM generic timer similar to how the Ampere Altra does things because this *is* the generic timer.
+// Most recent Apple ARM64 SoCs use a non memory-mapped timer that fires FIQs (on a per core basis, they all come from the same timer). 
+// Just treat this as the ARM generic timer similar to how other ARM64 SoCs do things.
 //
 // Note that on older chips, the timer interrupt is delivered by the AIC proper and is an IRQ, those platforms may well need a different GTDT file.
 // In both cases, the interrupt itself is level-triggered, active high.

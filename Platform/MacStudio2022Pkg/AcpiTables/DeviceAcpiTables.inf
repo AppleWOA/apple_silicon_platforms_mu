@@ -18,7 +18,6 @@
 
 [Sources]
   DBG2.aslc
-  FADT.aslc
   DSDT.asl
 
 [Packages]

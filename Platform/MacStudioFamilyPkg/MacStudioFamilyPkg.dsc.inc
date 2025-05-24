@@ -21,3 +21,10 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
+
+
+[Components.common]
+  #
+  # This is mainly for FADT, but for multi-platform, this helps with porting to other variants of the same platform
+  #
+  MacStudioFamilyPkg/AcpiTables/DeviceFamilyAcpiTables.inf

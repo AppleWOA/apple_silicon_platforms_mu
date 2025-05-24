@@ -16,11 +16,21 @@
  * 
 */
 
+#include <Library/AcpiLib.h>
+#include <Library/ArmLib.h>
+#include <Library/PcdLib.h>
+#include <IndustryStandard/Acpi.h>
 
 /**
  * Why do we need a CSRT?
  * 
  * Apple platforms implement some non-standard core sytem resources, namely the interrupt controller and IOMMU. This ACPI
  * table is to indicate to the OS that these things are present so that it can handle these cases correctly.
+ * 
+ * Since the HAL no longer recognizes CSRT tables for interrupt controllers (and probably only supports the ARM SMMU) - we'll need to
+ * have the hypervisor intercept the call and patch the kernel on demand to parse this. 
+ * We still should use this to define the SmartIO DMA controller though.
 */
+
+
 

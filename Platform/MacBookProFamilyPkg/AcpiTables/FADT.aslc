@@ -6,7 +6,7 @@
  * 
  * Abstract:
  *     Fixed ACPI Descripton Table. This source file implements the FADT table
- *     for the MacBook Air (2020) platform.
+ *     for MacBook Pros.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -25,8 +25,9 @@
  * which removes the need for most of the FADT variables.
  * 
  * PSCI for now will be an SMC event despite not being implemented on Apple, as we can trap SMCs to EL2 anyways.
- * (Directly handled by m1n1 hypervisor for hypervisor-assisted booting, 
- * may have to patch or trap SMC instructions to "genter" equivalents for bare-metal booting)
+ * The original intention was to use SPRR/GXF to bootstrap a custom secure monitor that can handle these calls, but with
+ * page tables having to be the same under the assumption of GXF, this is a more complicated endeavor put on hold for now.
+ * SMC PSCI calls will still be used, however we are not using Hyper-V for now so the recipient will be our custom hypervisor.
  * 
 */
 EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE Fadt = {
@@ -34,7 +35,7 @@ EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE Fadt = {
     0, //FIRMWARE_CTRL (UINT32)
     0, //DSDT (UINT32)
     EFI_ACPI_RESERVED_BYTE, //Reserved0
-    EFI_ACPI_6_4_PM_PROFILE_MOBILE, //preferred power management profile
+    EFI_ACPI_6_4_PM_PROFILE_MOBILE, //preferred power management profile (do we want the workstation profile for MacBook Pros?)
     0, //SCI interrupt num (UINT16)
     0, //SMI Command (UINT32)
     0, //ACPI enable (UINT8)

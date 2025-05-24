@@ -6,7 +6,8 @@
  * 
  * Abstract:
  *     Core System Resource Table. This source file implements the CSRT table for
- *     "Jade" (M1 Pro/Max/Ultra) SoCs.
+ *     "Rhodes" (M2 Pro/Max/Ultra) SoCs.
+ *     CSRT basis from edk2-platforms/RaspberryPi platform.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -16,7 +17,26 @@
  * 
 */
 
+#include <Library/AcpiLib.h>
+#include <Library/ArmLib.h>
+#include <Library/PcdLib.h>
+#include <IndustryStandard/Acpi.h>
 
+//
+// We need to define CSRT definitions here.
+//
+
+#define EFI_ACPI_6_3_CSRT_REVISION            0x00000000
+
+typedef enum
+{
+  EFI_ACPI_CSRT_RESOURCE_TYPE_RESERVED,           // 0
+  EFI_ACPI_CSRT_RESOURCE_TYPE_INTERRUPT,          // 1
+  EFI_ACPI_CSRT_RESOURCE_TYPE_TIMER,              // 2
+  EFI_ACPI_CSRT_RESOURCE_TYPE_DMA,                // 3
+  EFI_ACPI_CSRT_RESOURCE_TYPE_CACHE,              // 4
+}
+CSRT_RESOURCE_TYPE;
 /**
  * Why do we need a CSRT?
  * 
