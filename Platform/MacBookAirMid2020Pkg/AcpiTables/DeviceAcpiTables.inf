@@ -12,7 +12,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = DeviceAcpiTables
-  FILE_GUID                      = ba58756d-918b-4638-8ef1-69ab5a5a1539
+  FILE_GUID                      = 3ff4732c-9411-4e10-a10c-8b39df282e83
   MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
 
@@ -36,3 +36,15 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId              ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId         ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision        ## CONSUMES
+  gArmTokenSpaceGuid.PcdPciBusMin
+  gArmTokenSpaceGuid.PcdPciBusMax
+  gArmTokenSpaceGuid.PcdPciMmio32Base
+  gArmTokenSpaceGuid.PcdPciMmio32Size
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio32Translation
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio64Translation
+  gArmTokenSpaceGuid.PcdPciMmio64Base
+  gArmTokenSpaceGuid.PcdPciMmio64Size
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarSize
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarLimit
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleUartBase
