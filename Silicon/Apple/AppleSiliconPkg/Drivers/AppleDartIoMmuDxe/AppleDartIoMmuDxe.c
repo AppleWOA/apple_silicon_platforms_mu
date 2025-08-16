@@ -305,6 +305,15 @@ STATIC VOID AppleDartT8020TlbFlush(VOID *DartInformation) {
     }
 }
 
+STATIC VOID AppleDartT8110TlbFlush(VOID *DartInformation) {
+    APPLE_DART_INFO *DartInfoStruct = (APPLE_DART_INFO *)DartInformation;
+    __asm__("dsb sy");
+    MmioWrite32(DartInfoStruct->BaseAddress + DART_T8110_TLB_CMD_FLUSH_ALL, DART_T8110_TLB_CMD_FLUSH_ALL);
+    while((MmioRead32(DartInfoStruct->BaseAddress + DART_T8110_TLB_CMD)) & DART_T8110_TLB_CMD_BUSY) {
+        continue;
+    }
+}
+
 EFI_STATUS EFIAPI 
 AppleDartIoMmuDxeInitialize(
   IN EFI_HANDLE        ImageHandle,
@@ -317,6 +326,7 @@ AppleDartIoMmuDxeInitialize(
     UINT64 DartReg[FixedPcdGet32(PcdAppleNumDwc3Darts)];
     CONST INT32 *DartRegNode[FixedPcdGet32(PcdAppleNumDwc3Darts)];
     UINT32 DartIndex;
+    UINT32 Params4; // U-Boot does this
     // PHYSICAL_ADDRESS Address;
     // PHYSICAL_ADDRESS L2;
     // INT32 Ntte;
@@ -404,6 +414,64 @@ AppleDartIoMmuDxeInitialize(
       case 0x6001:
       case 0x6020:
       case 0x6021:
+        //
+        // T6020 and T6021 have 4 DWC3 controllers, 2 DARTs per controller.
+        //
+        for(DartIndex = 0; DartIndex < FixedPcdGet32(PcdAppleNumDwc3Darts); DartIndex++) {
+            switch(DartIndex) {
+                case 0:
+                case 1:
+                case 4:
+                case 5:
+                    //
+                    // avoid breaking the UART proxy - skip for now.
+                    //
+                    break;
+                // case 0:
+                //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@702f00000");
+                //     break;
+                // case 1:
+                //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@702f80000");
+                //     break; 
+                case 2:
+                    DEBUG((DEBUG_INFO, "2\n"));
+                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@b02f00000");
+                    break;
+                case 3:
+                    DEBUG((DEBUG_INFO, "3\n"));
+                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@b02f80000");
+                    break;
+                // case 4:
+                //     // DEBUG((DEBUG_INFO, "4\n"));
+                //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@f02f00000");
+                //     break;
+                // case 5:
+                //     // DEBUG((DEBUG_INFO, "5\n"));
+                //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@f02f80000");
+                //     break;
+                case 6:
+                    // DEBUG((DEBUG_INFO, "6\n"));
+                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@1302f00000");
+                    break;
+                case 7:
+                    // DEBUG((DEBUG_INFO, "7\n"));
+                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@1302f80000");
+                    break;
+                default:
+                    DEBUG((DEBUG_INFO, "No DARTs left\n"));
+                    break;
+
+            }
+            if((DartIndex == 0) || (DartIndex == 1) || (DartIndex == 4) || (DartIndex == 5)) {
+                continue;
+            }
+            DartNode[DartIndex] = fdt_path_offset((VOID*)FdtBlob, DartNodeName);
+            DartRegNode[DartIndex] = fdt_getprop((VOID *)FdtBlob, DartNode[DartIndex], "reg", NULL);
+            DartReg[DartIndex] = fdt32_to_cpu(DartRegNode[DartIndex][0]);
+            DartReg[DartIndex] = (DartReg[DartIndex] << 32) | fdt32_to_cpu(DartRegNode[DartIndex][1]);
+            DEBUG((DEBUG_INFO, "AppleDartIoMmuDxeInitialize: USB DART%d (%d total): 0x%llx\n", DartIndex, FixedPcdGet32(PcdAppleNumDwc3Darts), DartReg[DartIndex]));
+        }
+        break;
       case 0x6030:
       case 0x6031:
       case 0x6034:
@@ -533,14 +601,28 @@ AppleDartIoMmuDxeInitialize(
         //
         // to avoid killing the serial console from UART proxy - leave darts for DFU ports alone.
         //
-        if(DartIndex == 0 || DartIndex == 1) {
+        if(DartIndex == 0 || DartIndex == 1 || DartIndex == 4 || DartIndex == 5) {
+            DEBUG((DEBUG_INFO, "Skipping DFU port DART %d\n", DartIndex));
             continue;
         }
+        //DEBUG((DEBUG_INFO, "Test0\n"));
         DartInfo[DartIndex].BaseAddress = DartReg[DartIndex];
         if(fdt_node_check_compatible((VOID*)FdtBlob, DartNode[DartIndex], "apple,t8110-dart") == 0) {
             //
-            // fill this in later.
+            // T8110 compatible DARTs have different setup.
             //
+            Params4 = MmioRead32(DartInfo[DartIndex].BaseAddress + DART_T8110_PARAMS4);
+            DartInfo[DartIndex].Nsid = Params4 & DART_T8110_PARAMS4_NSID_MASK;
+            DartInfo[DartIndex].Nttbr = 1;
+            DartInfo[DartIndex].SidEnableBase = DART_T8110_SID_ENABLE_BASE;
+            DartInfo[DartIndex].TcrBase = DART_T8110_TCR_BASE;
+            DartInfo[DartIndex].TcrTranslateEnable = DART_T8110_TCR_TRANSLATE_ENABLE;
+            DartInfo[DartIndex].TcrBypass = (DART_T8110_TCR_BYPASS_DAPF | DART_T8110_TCR_BYPASS_DART);
+            DartInfo[DartIndex].TtbrBase = DART_T8110_TTBR_BASE;
+            DartInfo[DartIndex].TtbrIsValid = DART_T8110_TTBR_VALID;
+            DartInfo[DartIndex].BypassMode = FALSE; // Assume there's no bypass mode by default.
+            DartInfo[DartIndex].TlbFlush = AppleDartT8110TlbFlush;
+
         }
         else {
             DEBUG((DEBUG_INFO, "%a - Setting up T8020-compatible DART\n", __FUNCTION__));
@@ -633,5 +715,6 @@ AppleDartIoMmuDxeInitialize(
         //                 NULL
         //                 );
     }
+    DEBUG((DEBUG_INFO, "All done\n"));
     return EFI_SUCCESS;
 }
