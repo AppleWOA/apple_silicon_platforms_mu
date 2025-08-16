@@ -1,0 +1,13 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = MacBookProFamilyPkg
+  PACKAGE_GUID                   = 9e431ff8-55d6-4abc-94e7-9d6b5a1d40fb
+  PACKAGE_VERSION                = 1.0
+
+[Includes.common]
+  Include
+
+[Guids.common]
+  #a4298582-e8de-4f33-99a8-8601662110b9
+  gMacBookProFamilyPkgTokenSpaceGuid = { 0xa4298582, 0xe8de, 0x4f33, { 0x99, 0xa8, 0x86, 0x01, 0x66, 0x21, 0x10, 0xb9 } }
+
