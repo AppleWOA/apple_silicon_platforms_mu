@@ -27,8 +27,8 @@
 BaseAddress   = 0x10030000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired address of firmware (will always be loaded from RAM)
 Size          = 0x00001E00000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 ErasePolarity = 1
-BlockSize     = 0x1000
-NumBlocks     = 0x1E00
+BlockSize     = 0x4000
+NumBlocks     = 0x780
 
 ################################################################################
 #
@@ -81,8 +81,8 @@ FV = FVMAIN_COMPACT
 ################################################################################
 
 [FV.FvMain]
-BlockSize          = 0x1000
-FvAlignment        = 8         # FV alignment and FV attributes setting.
+BlockSize          = 0x40
+FvAlignment        = 16         # FV alignment and FV attributes setting.
 ERASE_POLARITY     = 1
 MEMORY_MAPPED      = TRUE
 STICKY_WRITE       = TRUE
@@ -103,7 +103,7 @@ FvNameGuid         = 02e6c12f-69f7-4626-b5de-e3cfd6c0dc56
   !include AppleSiliconPkg/Include/DXEApriori.fdf.inc
   
 
-  #Main DXE core
+   #Main DXE core
   INF MdeModulePkg/Core/Dxe/DxeMain.inf
 
   #
@@ -118,6 +118,7 @@ FvNameGuid         = 02e6c12f-69f7-4626-b5de-e3cfd6c0dc56
   INF MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   INF EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   INF EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+  INF AppleSiliconPkg/Drivers/AppleDartIoMmuDxe/AppleDartIoMmuDxe.inf
 
   INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
 !if $(SECURE_BOOT_ENABLE) == TRUE
@@ -142,11 +143,12 @@ FvNameGuid         = 02e6c12f-69f7-4626-b5de-e3cfd6c0dc56
   INF AppleSiliconPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
 
   #
-  # PCIe Support
+  # PCIe Support (required to bring up USB-A among other fun stuff)
   #
-  #Commented out for now due to lack of processor-specific host bridge library
-  #INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
-  #INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  INF ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
+  INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
+  INF MdeModulePkg/Bus/Pci/NonDiscoverablePciDeviceDxe/NonDiscoverablePciDeviceDxe.inf
 
   #NVMe Support
   #TODO: ANS2/SART driver
@@ -161,6 +163,18 @@ FvNameGuid         = 02e6c12f-69f7-4626-b5de-e3cfd6c0dc56
 
   # FV FileSystem
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
+
+  INF AppleSiliconPkg/Drivers/AppleEmbeddedGpioControllerDxe/AppleEmbeddedGpioControllerDxe.inf
+  #
+  # PCIe support is disabled for now.
+  #
+  #INF AppleSiliconPkg/Drivers/AppleSiliconPciPlatformDxe/AppleSiliconPciPlatformDxe.inf
+  #INF AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
+
+  #
+  # DWC3 bringup module.
+  #
+  INF AppleSiliconPkg/Drivers/AppleUsbTypeCBringupDxe/AppleUsbTypeCBringupDxe.inf
 
   #
   # Usb Support
@@ -204,8 +218,10 @@ FvNameGuid         = 02e6c12f-69f7-4626-b5de-e3cfd6c0dc56
   INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
   INF AppleSiliconPkg/Drivers/AcpiPlatformDxe/AcpiPlatformDxe.inf
   INF MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
-  #Uncomment once ACPI tables exist
-  #INF RuleOverride=ACPITABLE T602XFamilyPkg/AcpiTables/AcpiTables.inf
+  INF RuleOverride=ACPITABLE AppleSiliconPkg/AcpiTables/GenericAcpiTables.inf
+  INF RuleOverride=ACPITABLE MacBookProEarly2023Pkg/AcpiTables/DeviceAcpiTables.inf
+  INF RuleOverride=ACPITABLE MacBookProFamilyPkg/AcpiTables/DeviceFamilyAcpiTables.inf
+  INF RuleOverride=ACPITABLE T602XFamilyPkg/AcpiTables/CPUAcpiTables.inf
   #
   # SMBIOS Support
   #
@@ -232,26 +248,23 @@ FvNameGuid         = 02e6c12f-69f7-4626-b5de-e3cfd6c0dc56
   INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
 
   # DT
-  # commented out because ACPI is being done now.
   #INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
-  #FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
-	#SECTION RAW = MacBookProEarly2023Pkg/DeviceTree/t6002-j375d.dtb
-	#SECTION UI = "FirmwareDeviceTree"
-#}
+
+  FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
+    SECTION RAW = MacBookAirMid2020Pkg/Resources/RegulatoryLogos.png
+  }
 
   # Embedded RAMDisk (ISO format)
   #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
   #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.iso
   #SECTION UI = "Embedded RAMDisk"  
 #}
-  FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
-    SECTION RAW = MacBookProEarly2023Pkg/Include/Resources/RegulatoryLogos.png
-  }
 
-  FILE APPLICATION = C57AD6B7-0515-40A8-9D21-551652854E37 {
-  SECTION PE32 = AppleSiliconPkg/RAMDisk/BOOTAA64.EFI
-  SECTION UI = "EdkShell"
-}
+  # Embedded RAMDisk (IMG format)
+  #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
+  #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
+  #SECTION UI = "Embedded RAMDisk"  
+#}
   
 !include AppleSiliconPkg/FrontpageFdf.inc
 

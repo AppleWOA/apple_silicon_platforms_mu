@@ -1,0 +1,118 @@
+/**
+ * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * 
+ * Module Name:
+ *     MADT_Static.aslc
+ * 
+ * Abstract:
+ *     Multiple APIC Description Table. Implements the
+ *     MADT table for the MacBook Pro (Early 2023) platform -
+ *     This is only a temporary implementation 
+ *     until dynamic allocations in AcpiPlatformDxe are implemented.
+ * 
+ * Environment:
+ *     UEFI firmware/runtime services.
+ * 
+ * License:
+ *     SPDX-License-Identifier: BSD-2-Clause-Patent OR MIT
+ * 
+*/
+
+#include <Library/AcpiLib.h>
+#include <Library/ArmLib.h>
+#include <Library/PcdLib.h>
+#include <IndustryStandard/Acpi63.h>
+#include <Acpi/AcpiHeader.h>
+
+//
+// pulled from mu_tiano_platforms, since there's no equivalent GICR initializer.
+//
+#define MADT_GICR_INIT()  {                                           \
+   EFI_ACPI_6_0_GICR,                        /* Type */                        \
+   sizeof (EFI_ACPI_6_0_GICR_STRUCTURE),     /* Length */                      \
+   EFI_ACPI_RESERVED_WORD,                   /* Reserved */                    \
+   FixedPcdGet32 (PcdGicRedistributorsBase), /* DiscoveryRangeBaseAddress */   \
+   0x20000 * FixedPcdGet32(PcdCoreCount)                   /* DiscoveryRangeLength */        \
+   }
+
+#pragma pack (1)
+
+typedef struct {
+EFI_ACPI_6_3_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER   Header;
+EFI_ACPI_6_3_GIC_STRUCTURE                            GicInterfaces[FixedPcdGet32 (PcdCoreCount)];
+EFI_ACPI_6_3_GIC_DISTRIBUTOR_STRUCTURE                GicDistributor;
+EFI_ACPI_6_3_GICR_STRUCTURE                           GicRedistributor;
+} MULTIPLE_APIC_DESCRIPTION_TABLE;
+
+#pragma pack ()
+
+MULTIPLE_APIC_DESCRIPTION_TABLE Madt = {
+{
+    __ACPI_HEADER (
+    EFI_ACPI_6_3_MULTIPLE_APIC_DESCRIPTION_TABLE_SIGNATURE,
+    MULTIPLE_APIC_DESCRIPTION_TABLE,
+    EFI_ACPI_6_3_MULTIPLE_APIC_DESCRIPTION_TABLE_REVISION
+    ),
+    //
+    // MADT specific fields
+    //
+    0, // LocalApicAddress
+    0, // Flags
+},
+{
+    // Format: EFI_ACPI_5_1_GICC_STRUCTURE_INIT(GicId, AcpiCpuUid, Flags, PmuIrq, GicBase, GicVBase, GicHBase,
+    //                                          GsivId, GicRBase, Mpidr)
+    // Note: The GIC Structure of the primary CPU must be the first entry (see note in 5.2.12.14 GICC Structure of
+    //       ACPI v5.1).
+    //
+    // Cores are ordered by cluster. (Bootstrap first, then successive P-core/E-core clusters.)
+    //
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Blizzard-0 (Bootstrap)
+        0, 0, GET_MPID(0, 0), EFI_ACPI_6_3_GIC_ENABLED, 50, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Blizzard-1 (Bootstrap)
+        1, 1, GET_MPID(0, 1),  EFI_ACPI_6_3_GIC_ENABLED, 54, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Blizzard-2 (Bootstrap)
+        2, 2, GET_MPID(0, 2),  EFI_ACPI_6_3_GIC_ENABLED, 54, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Blizzard-2 (Bootstrap)
+        3, 3, GET_MPID(0, 3),  EFI_ACPI_6_3_GIC_ENABLED, 54, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Avalanche-0 (P-core cluster 0)
+        4, 4, GET_MPID(1, 0),  EFI_ACPI_6_3_GIC_ENABLED, 58, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Avalanche-1 (P-core cluster 0)
+        5, 5, GET_MPID(1, 1),  EFI_ACPI_6_3_GIC_ENABLED, 62, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Avalanche-2 (P-core cluster 0)
+        6, 6, GET_MPID(1, 2),  EFI_ACPI_6_3_GIC_ENABLED, 34, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // // Avalanche-3 (P-core cluster 0)
+        7, 7, GET_MPID(1, 3),  EFI_ACPI_6_3_GIC_ENABLED, 38, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Avalanche-4 (P-core cluster 1)
+        8, 8, GET_MPID(2, 0),  EFI_ACPI_6_3_GIC_ENABLED, 38, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Avalanche-5 (P-core cluster 1)
+        9, 9, GET_MPID(2, 1),  EFI_ACPI_6_3_GIC_ENABLED, 38, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Avalanche-6 (P-core cluster 1)
+        10, 10, GET_MPID(2, 2),  EFI_ACPI_6_3_GIC_ENABLED, 38, 0,
+        0, 0, 25, 0 /* GicRBase */),
+    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Avalanche-7 (P-core cluster 1)
+        11, 11, GET_MPID(2, 3),  EFI_ACPI_6_3_GIC_ENABLED, 38, 0,
+        0, 0, 25, 0 /* GicRBase */),
+},
+EFI_ACPI_6_0_GIC_DISTRIBUTOR_INIT(0, FixedPcdGet64 (PcdGicDistributorBase), 0, 3),
+// Format: EFI_ACPI_6_3_GIC_MSI_FRAME_INIT(GicMsiFrameId, PhysicalBaseAddress, Flags, SPICount, SPIBase)
+
+MADT_GICR_INIT(),
+
+};
+
+//
+// Reference the table being generated to prevent the optimizer from removing the
+// data structure from the executable
+//
+VOID* CONST ReferenceAcpiTable = &Madt;

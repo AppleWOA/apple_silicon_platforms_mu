@@ -39,30 +39,14 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"MacBook Pro (Early 2023)"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"Mac14,5/Mac14,6/Mac14,9/Mac14,10"
   gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook Pro (Early 2023) (Mac14,5/Mac14,6/Mac14,9/Mac14,10)"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
-  #will be changed later on, default values
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|3456
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|2234
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
-
-[PcdsPatchableInModule.common]
-
-[PcdsDynamicDefault.common]
-  #borrowed from SurfaceDuoPkg
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|3456
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|2234
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|3456
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|2234
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|300
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
-  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
-  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Controllers|3 # M2 Pro case is hardcoded for now.
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Darts|6 # M2 Pro case is hardcoded for now.
 
 [Components.common]
 
   MacBookProEarly2023Pkg/AcpiTables/DeviceAcpiTables.inf
 
-
+!include MacBookProFamilyPkg/MacBookProFamilyPkg.dsc.inc
 !include T602XFamilyPkg/T602XFamilyPkg.dsc.inc
 !include AppleSiliconPkg/AppleSiliconPkg.dsc.inc
 !include AppleSiliconPkg/FrontpageDsc.inc

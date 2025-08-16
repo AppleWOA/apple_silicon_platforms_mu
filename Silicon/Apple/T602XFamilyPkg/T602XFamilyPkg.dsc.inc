@@ -22,7 +22,7 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x400000000 #16GB RAM space by default
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000 # TODO: verify this hack still works on T6020
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10220000000 # TODO: verify this hack still works on T6020
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize|0x0
 
@@ -43,10 +43,15 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x10300000000
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion|3
   gAppleSiliconPkgTokenSpaceGuid.PcdXhciPcieDeviceNumber|3
+  #number of cores (right now we are assuming the lowest common denominator - this will change later)
+  gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount|12|UINT32|0x00004406
+  #all Rhodes chips have three clusters, "boot", P-core/E-core clusters
+  # for multi-die systems, this cluster setup is duplicated on the second die
+  gAppleSiliconPkgTokenSpaceGuid.PcdClusterCount|3|UINT32|0x00004407
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #
-  # if GIC is used, it's expected to be virtualized by trusted firmware at the below addresses 
+  # if GIC is used, it's expected to be virtualized by EL2 at the below addresses 
   # as Rhodes/T602x has no onboard GIC. (but does contain the MSRs to do accelerated virt)
   #
   gArmTokenSpaceGuid.PcdGicDistributorBase|0x5000000000
@@ -99,7 +104,7 @@
   gArmTokenSpaceGuid.PcdPciMmio64Base|0x5A0000000
   gArmTokenSpaceGuid.PcdPciMmio64Size|0x20000000
 
-  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0x590000000
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0x580000000
   #
   # This shouldn't get used.
   #

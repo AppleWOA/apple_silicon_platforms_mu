@@ -57,6 +57,12 @@
 
   ## GUIDs for ACPI tables
   # @Prompt FFS name of ACPI tables storage.
+
+  #
+  # 2f0f9a5f-f300-420a-9284-41898e9c376a
+  # 3ff4732c-9411-4e10-a10c-8b39df282e83
+  # d1430d86-24a4-4c2f-8f22-d24376e2e888
+  gAppleSiliconPkgTokenSpaceGuid.PcdDeviceFamilyAcpiTableStorageFile|{ 0x5f, 0x9a, 0x0f, 0x2f, 0x00, 0xf3, 0x0a, 0x42, 0x92, 0x84, 0x41, 0x89, 0x8e, 0x9c, 0x37, 0x6a}|VOID*|0x00004503
   gAppleSiliconPkgTokenSpaceGuid.PcdDeviceAcpiTableStorageFile|{ 0x2c, 0x73, 0xf4, 0x3f, 0x11, 0x94, 0x10, 0x4e, 0xa1, 0x0c, 0x8b, 0x39, 0xdf, 0x28, 0x2e, 0x83 }|VOID*|0x00004500
   gAppleSiliconPkgTokenSpaceGuid.PcdSocAcpiTableStorageFile|{ 0x86, 0x0d, 0x43, 0xd1, 0xa4, 0x24, 0x2f, 0x4c, 0x8f, 0x22, 0xd2, 0x43, 0x76, 0xe2, 0xe8, 0x88 }|VOID*|0x00004501
   gAppleSiliconPkgTokenSpaceGuid.PcdGenericAcpiTableStorageFile|{ 0xf6, 0xcc, 0x7b, 0xa5, 0xa5, 0x0c, 0x9a, 0x43, 0xb8, 0xa6, 0xeb, 0x40, 0xff, 0x03, 0x58, 0x27 }|VOID*|0x00004502
@@ -71,7 +77,10 @@
   #Framebuffer (this will be filled in by iBoot)
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0|UINT64|0x00004400
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize|0x0|UINT64|0x00004410
+
+[PcdsPatchableInModule.common, PcdsFixedAtBuild.common]
   #
-  # Number of cores (this is a default value that SoC specific files override.
+  # Number of cores (this is a default value that SoC specific files override.)
   #
   gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount|1|UINT32|0x00004406
+  gAppleSiliconPkgTokenSpaceGuid.PcdClusterCount|1|UINT32|0x00004407

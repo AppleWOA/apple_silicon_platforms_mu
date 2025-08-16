@@ -23,7 +23,7 @@
 #include <IndustryStandard/Acpi.h>
 
 //
-// We need to define CSRT definitions here.
+// We need to define CSRT ACPI definitions here, as AcpiLib doesn't have them.
 //
 
 #define EFI_ACPI_6_3_CSRT_REVISION            0x00000000
@@ -37,10 +37,10 @@ typedef enum
   EFI_ACPI_CSRT_RESOURCE_TYPE_CACHE,              // 4
 }
 CSRT_RESOURCE_TYPE;
-/**
- * Why do we need a CSRT?
- * 
- * Apple platforms implement some non-standard core sytem resources, namely the interrupt controller and IOMMU. This ACPI
- * table is to indicate to the OS that these things are present so that it can handle these cases correctly.
-*/
 
+
+//
+// The non-standard system resources we need to support here are mainly the IOMMU and
+// the AIC
+// TODO: implement this
+//
