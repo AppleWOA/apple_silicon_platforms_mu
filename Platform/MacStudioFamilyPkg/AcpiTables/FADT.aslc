@@ -6,7 +6,7 @@
  * 
  * Abstract:
  *     Fixed ACPI Descripton Table. This source file implements the FADT table
- *     for the Mac Studio (2022) platform.
+ *     for the Mac Studio family.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
