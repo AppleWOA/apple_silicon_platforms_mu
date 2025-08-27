@@ -22,7 +22,7 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x400000000 #16GB RAM space by default
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10A00000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10220000000
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize|0x0
 

@@ -38,7 +38,7 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
         //
         // TODO: remove the HACK, instead infer this information from ADT or FDT.
         //
-        if ((FixedPcdGet32(PcdAppleSocIdentifier) == 0x6000) || (FixedPcdGet32(PcdAppleSocIdentifier) == 0x8112))
+        if ((FixedPcdGet32(PcdAppleSocIdentifier) == 0x6000) || (FixedPcdGet32(PcdAppleSocIdentifier) == 0x8112) || (FixedPcdGet32(PcdAppleSocIdentifier) == 0x6020))
         {
             mAicVersion = APPLE_AIC_VERSION_2;
             return APPLE_AIC_VERSION_2;

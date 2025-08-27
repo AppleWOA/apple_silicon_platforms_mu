@@ -49,11 +49,13 @@ STATIC VOID InitMmu(IN ARM_MEMORY_REGION_DESCRIPTOR *MemoryTable)
         &MemoryTranslationTableBase, &MemoryTranslationTableSize)
         );
     StatusCode = ArmConfigureMmu(MemoryTable, &MemoryTranslationTableBase, &MemoryTranslationTableSize);
-    DEBUG((DEBUG_INFO, "MMU enable successful\n"));
 
     if(EFI_ERROR(StatusCode))
     {
-        DEBUG((DEBUG_ERROR | DEBUG_INFO, "MemoryInitPeiLib: MMU enable failed!! Status: %llx\n", StatusCode));
+      DEBUG((DEBUG_ERROR | DEBUG_INFO, "MemoryInitPeiLib: MMU enable failed!! Status: %llx\n", StatusCode));
+    }
+    else {
+      DEBUG((DEBUG_INFO, "MMU enable successful\n"));
     }
 }
 
@@ -440,7 +442,13 @@ VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
 
   //Framebuffer
   VirtualMemoryTable[++Index].PhysicalBase = PcdGet64(PcdFrameBufferAddress);
-  VirtualMemoryTable[Index].VirtualBase    = PcdGet64(PcdFrameBufferAddress);
+  //
+  // HACK: force the framebuffer base address to be page aligned.
+  //
+  if(((VirtualMemoryTable[Index].PhysicalBase) & EFI_PAGE_MASK) != 0) {
+    VirtualMemoryTable[Index].PhysicalBase = (((VirtualMemoryTable[Index].PhysicalBase) + 0x1000) & (~(EFI_PAGE_MASK)));
+  }
+  VirtualMemoryTable[Index].VirtualBase    = VirtualMemoryTable[Index].PhysicalBase;
   VirtualMemoryTable[Index].Length         = PcdGet64(PcdFrameBufferSize);
   VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED;
 

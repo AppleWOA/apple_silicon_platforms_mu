@@ -204,7 +204,7 @@ ASM_PFX(DiscoverDramFromDt):
   //
 
   adr   x8, PcdGet64 (PcdFdtPointer)
-  MOV64(x26, 0x10A00000000)
+  MOV64(x26, 0x10220000000)
   str   x26, [x8]
 
   mov   x0, x26

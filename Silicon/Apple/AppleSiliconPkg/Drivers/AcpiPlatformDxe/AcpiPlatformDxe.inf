@@ -42,6 +42,7 @@
 
 [Pcd]
   gAppleSiliconPkgTokenSpaceGuid.PcdDeviceAcpiTableStorageFile    ## CONSUMES
+  gAppleSiliconPkgTokenSpaceGuid.PcdDeviceFamilyAcpiTableStorageFile    ## CONSUMES
   gAppleSiliconPkgTokenSpaceGuid.PcdSocAcpiTableStorageFile       ## CONSUMES
   gAppleSiliconPkgTokenSpaceGuid.PcdGenericAcpiTableStorageFile   ## CONSUMES
 

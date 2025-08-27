@@ -216,7 +216,7 @@ AppleUsbTypeCBringupDxeBringupCallback(IN EFI_EVENT Event, IN VOID *Context)
   NumDwc3Controllers = PcdGet32(PcdAppleNumDwc3Controllers);
 
   for(UINT32 Dwc3Index = 0; Dwc3Index < NumDwc3Controllers; Dwc3Index++) {
-    if(Dwc3Index == 0) {
+    if((Dwc3Index == 0) || (Dwc3Index == 2)) {
       //
       // skip DWC3 0, it seems to be in charge of the DFU port.
       //
@@ -246,7 +246,6 @@ AppleUsbTypeCBringupDxeBringupCallback(IN EFI_EVENT Event, IN VOID *Context)
         //
         switch(Dwc3Index) {
           case 0:
-            DEBUG((DEBUG_INFO, "AppleUsbTypeCBringupDxeBringupCallback: setting up /soc@200000000/usb@702280000\n"));
             AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc@200000000/usb@702280000");
             break;
           case 1:
@@ -271,6 +270,30 @@ AppleUsbTypeCBringupDxeBringupCallback(IN EFI_EVENT Event, IN VOID *Context)
           //
           // DWC3 controllers 2 and 3 *do* exist on die 1, but are unused, so don't consider them here.
           //
+          default:
+            break;
+        }
+        break;
+      case 0x6020:
+      case 0x6021:
+      case 0x6022:
+        //
+        // T602x SoCs (Rhodes family) - we do not support the multi-die configurations right now,
+        // so we configure only things on die 0.
+        //
+        switch(Dwc3Index) {
+          case 0:
+            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc/usb@702280000");
+            break;
+          case 1:
+            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc/usb@b02280000");
+            break;
+          case 2:
+            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc/usb@f02280000");
+            break;
+          case 3:
+            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc/usb@1302280000");
+            break;
           default:
             break;
         }

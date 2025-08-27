@@ -190,7 +190,7 @@
   ArmDisassemblerLib|ArmPkg/Library/ArmDisassemblerLib/ArmDisassemblerLib.inf
 !if $(AIC_BUILD) == FALSE
   ArmGicLib  |ArmPkg/Drivers/ArmGic/ArmGicLib.inf
-  ArmGicArchLib|ArmPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
+  ArmGicArchLib|AppleSiliconPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
 !else
   AppleAicLib  |AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicLib.inf
 !endif
@@ -568,7 +568,7 @@
   AppleSiliconPkg/Drivers/AppleUsbTypeCBringupDxe/AppleUsbTypeCBringupDxe.inf
 
   #
-  # Generic ACPI tables. (Basically just GTDT, but FADT can likely be shoved in here too)
+  # Generic ACPI tables. (Basically just GTDT)
   #
   AppleSiliconPkg/AcpiTables/GenericAcpiTables.inf
 
