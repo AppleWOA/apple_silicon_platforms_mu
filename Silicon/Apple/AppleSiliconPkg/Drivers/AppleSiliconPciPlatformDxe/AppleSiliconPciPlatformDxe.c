@@ -40,7 +40,6 @@
 #include <Library/PciExpressLib.h>
 #include <IndustryStandard/Pci.h>
 #include <Library/TimerLib.h>
-#include <Include/libfdt.h>
 #include <Protocol/EmbeddedGpio.h>
 #include <Drivers/AppleSiliconPciPlatformDxe.h>
 
@@ -68,78 +67,16 @@
 // Return values:
 //   EFI_SUCCESS - GPIO number found
 
-STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(INT32 SubNode, INT32 Index, APPLE_PCIE_GPIO_DESC *Desc) {
-  UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-  CONST INT32 *GpioCellsNode;
-  INT32 PinCtrlApNode;
-  UINT32 NumGpioCells;
-  CONST INT32 *ResetGpiosPtr;
-  INT32 ResetGpiosLength;
-  
-
+STATIC EFI_STATUS AppleSiliconPciePlatformDxeGetResetGpios(dt_node_t *SubNode, INT32 Index, APPLE_PCIE_GPIO_DESC *Desc) {
+  UINTN len;
   //
-  // HACK - currently the GPIO address needs to be specified by base address in devicetree (the aliases don't seem to work?)
-  // ask marcan, et al how those aliases can be used
-  //
-  switch (PcdGet32(PcdAppleSocIdentifier)) {
-    case 0x8103:
-    case 0x8112:
-      PinCtrlApNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pinctrl@23c100000");
-      break;
-    case 0x8122:
-    case 0x6000:
-    case 0x6001:
-    case 0x6002:
-    case 0x6020:
-    case 0x6021:
-    case 0x6022:
-      PinCtrlApNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pinctrl@39b028000");
-      break;
-  }
-
-  //
-  // Find the number of GPIO cells (this has been 2 in most Asahi Linux device trees) (after sanity checking)
-  //
-
-  if ( (PinCtrlApNode == (-FDT_ERR_BADPATH)) 
-  || (PinCtrlApNode == (-FDT_ERR_NOTFOUND)) 
-  || (PinCtrlApNode == (-FDT_ERR_BADMAGIC)) 
-  || (PinCtrlApNode == (-FDT_ERR_BADVERSION)) 
-  || (PinCtrlApNode == (-FDT_ERR_BADSTATE)) 
-  || (PinCtrlApNode == (-FDT_ERR_BADSTRUCTURE)) 
-  || (PinCtrlApNode == (-FDT_ERR_TRUNCATED))
-  )
-  {
-      DEBUG((DEBUG_ERROR, "FDT path offset finding failed!!\n"));
-      DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-PinCtrlApNode)));
-      ASSERT(PinCtrlApNode != (-FDT_ERR_BADPATH));
-      ASSERT(PinCtrlApNode != (-FDT_ERR_NOTFOUND));
-      ASSERT(PinCtrlApNode != (-FDT_ERR_BADMAGIC));
-      ASSERT(PinCtrlApNode != (-FDT_ERR_BADVERSION));
-      ASSERT(PinCtrlApNode != (-FDT_ERR_BADSTATE));
-      ASSERT(PinCtrlApNode != (-FDT_ERR_BADSTRUCTURE));
-      ASSERT(PinCtrlApNode != (-FDT_ERR_TRUNCATED));
-  }
-
-  //
-  // This is probably just temporary debugging code, will be removed later.
-  //
-  
-  GpioCellsNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNode, "#gpio-cells", NULL);
-  NumGpioCells = fdt32_to_cpu(GpioCellsNode[0]);
-  DEBUG((DEBUG_INFO, "%a - there are %d gpio-cells in the devicetree\n", __FUNCTION__, NumGpioCells));
-
-  //
-  // END temporary debug code
-  //
-
+  UINT32 *FunctionPerst = (UINT32 *)dt_node_prop(SubNode, "function-perst", &len);
   //
   // Get the reset GPIO values from the node.
   //
-  ResetGpiosPtr = fdt_getprop((VOID *)FdtBlob, SubNode, "reset-gpios", &ResetGpiosLength);
-  DEBUG((DEBUG_INFO, "%a - length of reset-gpios is 0x%x\n", __FUNCTION__, ResetGpiosLength));
-  Desc->GpioNum = fdt32_to_cpu(ResetGpiosPtr[1]);
-  Desc->GpioActivePolarity = fdt32_to_cpu(ResetGpiosPtr[2]);
+
+  Desc->GpioNum = FunctionPerst[2];
+  Desc->GpioActivePolarity = FunctionPerst[3] == 0;//TODO: properly handle this 
   DEBUG((DEBUG_INFO, "%a - GPIO found is 0x%x, polarity is 0x%x\n", __FUNCTION__, Desc->GpioNum, Desc->GpioActivePolarity));
   return EFI_SUCCESS;
 
@@ -166,7 +103,9 @@ STATIC VOID AppleSiliconPcieClearBits(UINT32 BitsToClear, UINTN Address) {
   DEBUG((DEBUG_INFO, "%a - MMIO value for 0x%llx that was read back is 0x%x\n", __FUNCTION__, Address, NewValue));
 }
 
-STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_INFO *PcieComplex, INT32 SubNode, UINT32 PortIndex) {
+STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_INFO *PcieComplex, dt_node_t *SubNode, UINT32 PortIndex) {
+  if(SubNode == NULL)
+    return EFI_SUCCESS;
   APPLE_PCIE_DEVICE_PORT_INFO *PciePortInfo = AllocateZeroPool(sizeof(APPLE_PCIE_DEVICE_PORT_INFO));
   EFI_STATUS Status;
   // CONST INT32 *IndexPtr;
@@ -175,7 +114,7 @@ STATIC EFI_STATUS AppleSiliconPciePlatformDxeSetupPciePort(APPLE_PCIE_COMPLEX_IN
   APPLE_PCIE_GPIO_DESC ResetGpioStruct;
   EMBEDDED_GPIO *GpioProtocol;
   UINTN RetrievedGpioValue;
-  // UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
+
   BOOLEAN RefClk0Acked;
   BOOLEAN RefClk1Acked;
   BOOLEAN PortReady;
@@ -408,14 +347,12 @@ AppleSiliconPciPlatformDxeInitialize(
   IN EFI_SYSTEM_TABLE  *SystemTable
 ) 
 {
-    UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-    INT32 Length;
-    INT32 PcieNode = fdt_path_offset((VOID *)FdtBlob, "/soc/pcie");
-    CONST INT32 *PcieRegs = fdt_getprop((VOID *)FdtBlob, PcieNode, "reg", &Length);
+    dt_node_t *ApcieNode = dt_get("apcie");
     APPLE_PCIE_COMPLEX_INFO *PcieComplexInfoStruct = AllocateZeroPool(sizeof(APPLE_PCIE_COMPLEX_INFO));
+    CHAR8 PcieBridgeName[31];
     // CONST CHAR8 *PortStatus;
     // INT32 PortStatusLength;
-    INT32 PcieSubNode;
+    dt_node_t *PcieSubNode;
     EFI_STATUS Status;
     UINT32 PciePortIndex = 0;
 
@@ -424,7 +361,7 @@ AppleSiliconPciPlatformDxeInitialize(
     // so we just need to bring up root ports here so that DXE can detect the devices on the ports, including the XHCI controller.
     //
 
-    DEBUG((DEBUG_INFO, "%a - started, FDT pointer: 0x%llx\n", __FUNCTION__, FdtBlob));
+    DEBUG((DEBUG_INFO, "%a - started\n", __FUNCTION__));
 
     //
     // Pull the ECAM base address from the FDT. Ditto for "rc" base address.
@@ -432,36 +369,57 @@ AppleSiliconPciPlatformDxeInitialize(
     // but if this ever changes (as will be the case when booting right from iBoot using ADT), this approach will need to change too.
     // TODO: see how to do this with ADT on embedded or non-m1n1 case.
     //
-    PcieComplexInfoStruct->EcamCfgRegionBase = fdt32_to_cpu(PcieRegs[0]);
-    PcieComplexInfoStruct->EcamCfgRegionBase = ((PcieComplexInfoStruct->EcamCfgRegionBase) << 32) | (fdt32_to_cpu(PcieRegs[1]));
-    PcieComplexInfoStruct->EcamCfgRegionSize = fdt32_to_cpu(PcieRegs[3]);
+
+    // 00000090 06000000 00000010 00000000 0
+
+    // 00000080 06000000 00400000 00000000 1
+
+    // 00000880 06000000 00000900 00000000 2
+    // 00000c80 06000000 00000200 00000000 3
+    // 0000008c 06000000 00400000 00000000 4
+    // 00c02b3d 00000000 00100000 00000000 5
+
+    // 00000081 06000000 00800000 00000000 6
+    // 00000181 06000000 00100000 00000000 7
+    // 00400880 06000000 00400000 00000000 8
+    // 00800c80 06000000 00800000 00000000 9
+    // 00c00081 06000000 00400000 00000000 10
+
+    // 00000082 06000000 00800000 00000000 11
+    // 00000182 06000000 00100000 00000000 12
+    // 00800880 06000000 00400000 00000000 13
+    // 00000d80 06000000 00800000 00000000 14
+    // 00c00082 06000000 00400000 00000000 15
+
+    // 00000083 06000000 00800000 00000000 16
+    // 00000183 06000000 00100000 00000000 17
+    // 00c00880 06000000 00400000 00000000 18
+    // 00800d80 06000000 00800000 00000000 19
+    // 00c00083 06000000 00400000 00000000 20
+
+
+    dt_node_reg(ApcieNode, 0, &PcieComplexInfoStruct->EcamCfgRegionBase, (UINTN*)&PcieComplexInfoStruct->EcamCfgRegionSize);
     DEBUG((DEBUG_INFO, "%a - PCIe ECAM base: 0x%llx, size 0x%x\n", __FUNCTION__, PcieComplexInfoStruct->EcamCfgRegionBase, PcieComplexInfoStruct->EcamCfgRegionSize));
-    PcieComplexInfoStruct->RcRegionBase = fdt32_to_cpu(PcieRegs[4]);
-    PcieComplexInfoStruct->RcRegionBase = ((PcieComplexInfoStruct->RcRegionBase) << 32) | (fdt32_to_cpu(PcieRegs[5]));
+    dt_node_reg(ApcieNode, 1, &PcieComplexInfoStruct->RcRegionBase, NULL);
     DEBUG((DEBUG_INFO, "%a - PCIe RC base: 0x%llx\n", __FUNCTION__, PcieComplexInfoStruct->RcRegionBase));
+    AppleSiliconPciePlatformDxeSetupPciePort(PcieComplexInfoStruct, NULL, 0);
 
     //
     // Pull the base address for each port
     //
     for(UINT32 i = 0; i <= 3; i++) {
-      PcieComplexInfoStruct->PortRegionBase[i] = fdt32_to_cpu(PcieRegs[8 + 4*i]);
-      PcieComplexInfoStruct->PortRegionBase[i] = ((PcieComplexInfoStruct->PortRegionBase[i]) << 32) | fdt32_to_cpu(PcieRegs[9 + 4*i]);
-      DEBUG((DEBUG_INFO, "%a - PCIe port %d base: 0x%llx\n", __FUNCTION__, i, PcieComplexInfoStruct->PortRegionBase[i]));
-      if((PcdGet32(PcdAppleSocIdentifier)) == 0x8103 && (i >= 2)) {
+      dt_node_reg(ApcieNode, 6 + i * 5, &PcieComplexInfoStruct->PortRegionBase[i], NULL);//TODO: check and improve
+      
+      AsciiSPrint(PcieBridgeName, ARRAY_SIZE(PcieBridgeName), "pci-bridge%d", PciePortIndex);
+      PcieSubNode = dt_get(PcieBridgeName);
+      if(PcieSubNode == NULL)
         break;
-      }
-    }
-    //
-    // NOTE: the following does NOT account for APCIe-GE devices such as the Mac Pros.
-    //
-    fdt_for_each_subnode(PcieSubNode, (VOID *)FdtBlob, PcieNode) {
-      // DEBUG((DEBUG_INFO, "Test1\n"));
-      // PortStatus = fdt_getprop((VOID *)FdtBlob, PcieSubNode, "status", &PortStatusLength);
-      // DEBUG((DEBUG_INFO, "%a - PCIe port status is %s", __FUNCTION__, PortStatus));
-      // if(!strcmp(PortStatus, "disabled")) {
-      //   DEBUG((DEBUG_INFO, "PCIe port disabled, continuing\n"));
-      //   continue;
-      // }
+      
+      DEBUG((DEBUG_INFO, "%a - PCIe port %d base: 0x%llx\n", __FUNCTION__, i, PcieComplexInfoStruct->PortRegionBase[i]));
+
+      //
+      // NOTE: the following does NOT account for APCIe-GE devices such as the Mac Pros.
+      //
       DEBUG((DEBUG_INFO, "%a - starting PCIe port setup\n", __FUNCTION__));
       Status = AppleSiliconPciePlatformDxeSetupPciePort(PcieComplexInfoStruct, PcieSubNode, PciePortIndex);
       if(EFI_ERROR(Status)) {

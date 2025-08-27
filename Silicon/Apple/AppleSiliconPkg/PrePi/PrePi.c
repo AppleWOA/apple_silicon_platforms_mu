@@ -57,7 +57,7 @@ VOID Main(IN VOID *StackBase, IN UINTN StackSize, IN VOID *DeviceTreePtr, IN UIN
        UefiMemoryBase, UefiMemoryLength, StackBase, StackSize));
     
     //Set the FdtPointer PCD to the set location we copied the FDT to during ModuleEntryPoint
-    PatchPcdSet64(PcdFdtPointer, (UINT64)DeviceTreePtr);
+    //PatchPcdSet64(PcdAdtPointer, (UINT64)DeviceTreePtr);//TODO: why it crashes and is it needed
 
 
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "Setting up DXE Hand-Off Blocks.\n"));
@@ -150,7 +150,7 @@ UINT32 InitializeUART(VOID)
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "If you can see this message, UART works\n"));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "FD Base Address - 0x%llx\n", PcdGet64(PcdFdBaseAddress)));
     DEBUG((EFI_D_INFO | EFI_D_LOAD, "FV Base Address - 0x%llx\n", PcdGet64(PcdFvBaseAddress)));
-    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current FDT Pointer: 0x%llx\n", PcdGet64(PcdFdtPointer)));
+    DEBUG((EFI_D_INFO | EFI_D_LOAD, "Current ADT Pointer: 0x%llx\n", PcdGet64(PcdAdtPointer)));
     return EFI_SUCCESS;
 }
 

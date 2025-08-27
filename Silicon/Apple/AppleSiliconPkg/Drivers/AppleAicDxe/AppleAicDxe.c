@@ -39,10 +39,8 @@ InterruptDxeInitialize (
   Version = AppleArmGetAicVersion();
   switch(Version) {
     case APPLE_AIC_VERSION_1:
-      Status = AppleAicV1DxeInit(ImageHandle, SystemTable);
-      break;
     case APPLE_AIC_VERSION_2:
-      Status = AppleAicV2DxeInit(ImageHandle, SystemTable);
+      Status = AppleAicV2DxeInit(ImageHandle, SystemTable, Version);
       break;
     case APPLE_AIC_VERSION_3:
       //

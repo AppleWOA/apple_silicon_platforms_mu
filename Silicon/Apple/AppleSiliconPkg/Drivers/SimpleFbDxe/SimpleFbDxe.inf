@@ -30,7 +30,7 @@
   CacheMaintenanceLib
   FrameBufferBltLib
   PcdLib
-  FdtLib
+  AppleDTLib
 
 [Protocols]
   gEfiGraphicsOutputProtocolGuid ## PRODUCES
@@ -44,10 +44,7 @@
   gEfiMdeModulePkgTokenSpaceGuid
 
 [Pcd]
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution
-  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution
-  gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdBootArgsPointer
 
 [Depex]
   gEfiCpuArchProtocolGuid

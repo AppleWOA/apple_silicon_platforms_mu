@@ -42,11 +42,11 @@
   IoLib
   HobLib
   CompilerIntrinsicsLib
-  FdtLib
   UefiLib
   MemoryAllocationLib
   UefiBootServicesTableLib
   DebugLib
+  AppleDTLib
 
 [FixedPcd]
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion

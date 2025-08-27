@@ -25,10 +25,9 @@
 #include <Library/ArmLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
-#include <Library/PcdLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/AppleAicLib.h>
-#include <Include/libfdt.h>
+#include <Library/AppleDTLib.h>
 
 #define APPLE_SART_MAX_ENTRIES 16
 #define SART_ALLOW_ALL_FLAG 0xff
@@ -248,43 +247,16 @@ BOOLEAN AppleSARTSetEntry(SART_DEVICE *SartDev, UINT32 Index, UINT8 Flags, VOID 
 EFI_STATUS EFIAPI AppleSARTLibInitialize(VOID) {
     UINT64 SARTBase = 0;
     SART_DEVICE *SartInstance;
-    UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-    INT32 SARTNode;
+    dt_node_t *SARTNode;
     UINT32 Length;
     UINT8 SARTVersion = FixedPcdGet8(PcdAppleSartVersion);
     //
     // Aside: why is the ANS controller on the second die on multi die systems...
     //
-    DEBUG((DEBUG_INFO, "FDT pointer: 0x%llx\n", FdtBlob));
 
-    if (fdt_check_header ((VOID *)FdtBlob) != 0) {
-        DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "no FDT supplied, exiting\n"));
-        return EFI_NOT_FOUND;
-    }
-    SARTNode = fdt_path_offset((VOID *)FdtBlob, "/soc/sart");
-    if ( (SARTNode == (-FDT_ERR_BADPATH)) 
-    || (SARTNode == (-FDT_ERR_NOTFOUND)) 
-    || (SARTNode == (-FDT_ERR_BADMAGIC)) 
-    || (SARTNode == (-FDT_ERR_BADVERSION)) 
-    || (SARTNode == (-FDT_ERR_BADSTATE)) 
-    || (SARTNode == (-FDT_ERR_BADSTRUCTURE)) 
-    || (SARTNode == (-FDT_ERR_TRUNCATED))
-    )
-    {
-        DEBUG((DEBUG_ERROR, "FDT path offset finding failed!!\n"));
-        DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-SARTNode)));
-        ASSERT(SARTNode != (-FDT_ERR_BADPATH));
-        ASSERT(SARTNode != (-FDT_ERR_NOTFOUND));
-        ASSERT(SARTNode != (-FDT_ERR_BADMAGIC));
-        ASSERT(SARTNode != (-FDT_ERR_BADVERSION));
-        ASSERT(SARTNode != (-FDT_ERR_BADSTATE));
-        ASSERT(SARTNode != (-FDT_ERR_BADSTRUCTURE));
-        ASSERT(SARTNode != (-FDT_ERR_TRUNCATED));
+    SARTNode = dt_get("sart-ans");
+    dt_node_reg(SARTNode, 0, &SARTBase, NULL);
 
-    }
-    CONST INT32 *SARTRegs = fdt_getprop((VOID *)FdtBlob, SARTNode, "reg", &Length);
-    SARTBase = fdt32_to_cpu(SARTRegs[0]);
-    SARTBase = (SARTBase << 32) | (fdt32_to_cpu(SARTRegs[1]));
     SartInstance = AllocateZeroPool(sizeof(SART_DEVICE));
     if(SartInstance == NULL) {
         DEBUG((DEBUG_INFO, "%a: Out of RAM, can't allocate space for SART device info, exiting\n", __FUNCTION__));

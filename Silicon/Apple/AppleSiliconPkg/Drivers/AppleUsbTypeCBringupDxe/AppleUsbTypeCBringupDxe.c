@@ -37,7 +37,7 @@
 #include <Library/DxeServicesLib.h>
 #include <Library/TimerLib.h>
 #include <Library/NonDiscoverableDeviceRegistrationLib.h>
-#include <Include/libfdt.h>
+#include <Library/AppleDTLib.h>
 
 #include <Drivers/AppleUsbTypeCBringupDxe.h>
 
@@ -201,9 +201,6 @@ AppleUsbTypeCBringupDxeBringupCallback(IN EFI_EVENT Event, IN VOID *Context)
   EFI_STATUS Status;
   UINT32 NumDwc3Controllers;
   UINT64 Dwc3ControllerBaseAddr;
-  UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-  INT32 Dwc3Node;
-  CONST INT32 *Dwc3RegNode;
   CHAR8 Dwc3RegNodeName[31];
   UINT32 Dwc3ControllerRegSize;
   //
@@ -222,88 +219,13 @@ AppleUsbTypeCBringupDxeBringupCallback(IN EFI_EVENT Event, IN VOID *Context)
       //
       continue;
     }
-    switch (PcdGet32(PcdAppleSocIdentifier)) {
-      //
-      // Single-die only SoCs, the ones used in iPads and base model Macs.
-      //
-      case 0x8103:
-        break;
-      case 0x8112:
-        break;
-      case 0x8122:
-        break;
-      case 0x8132:
-        break;
-      //
-      // Multi-die capable SoCs, the ones used in pro Macs.
-      //
-      case 0x6000:
-      case 0x6001:
-      case 0x6002:
-        //
-        // The T6002 (Jade 2C/M1 Ultra) is a multi-die SoC - since it's currently the only supported SoC for now,
-        // the entire T6000 case will go here for now.
-        //
-        switch(Dwc3Index) {
-          case 0:
-            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc@200000000/usb@702280000");
-            break;
-          case 1:
-            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc@200000000/usb@b02280000");
-            break;
-          case 2:
-            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc@200000000/usb@f02280000");
-            break;
-          case 3:
-            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc@200000000/usb@1302280000");
-            break;
-          //
-          // ignore die 1 for now
-          //
 
-          // case 4:
-          //   AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc@2200000000/usb@702280000");
-          //   break;
-          // case 5:
-          //   AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc@2200000000/usb@b02280000");
-          //   break;
-          //
-          // DWC3 controllers 2 and 3 *do* exist on die 1, but are unused, so don't consider them here.
-          //
-          default:
-            break;
-        }
-        break;
-      case 0x6020:
-      case 0x6021:
-      case 0x6022:
-        //
-        // T602x SoCs (Rhodes family) - we do not support the multi-die configurations right now,
-        // so we configure only things on die 0.
-        //
-        switch(Dwc3Index) {
-          case 0:
-            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc/usb@702280000");
-            break;
-          case 1:
-            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc/usb@b02280000");
-            break;
-          case 2:
-            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc/usb@f02280000");
-            break;
-          case 3:
-            AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "/soc/usb@1302280000");
-            break;
-          default:
-            break;
-        }
-        break;
-    }
-    Dwc3Node = fdt_path_offset((VOID*)FdtBlob, Dwc3RegNodeName);
-    Dwc3RegNode = fdt_getprop((VOID *)FdtBlob, Dwc3Node, "reg", NULL);
-    Dwc3ControllerBaseAddr = fdt32_to_cpu(Dwc3RegNode[0]);
-    Dwc3ControllerBaseAddr = (Dwc3ControllerBaseAddr << 32) | fdt32_to_cpu(Dwc3RegNode[1]);
-    Dwc3ControllerRegSize = fdt32_to_cpu(Dwc3RegNode[3]);
+    AsciiSPrint(Dwc3RegNodeName, ARRAY_SIZE(Dwc3RegNodeName), "usb-drd%d", Dwc3Index);
+    dt_node_t *Dwc3Node = dt_get(Dwc3RegNodeName);
+ 
+    dt_node_reg(Dwc3Node, 0, &Dwc3ControllerBaseAddr, NULL);
+
+    Dwc3ControllerRegSize = 0x100000;//TODO: get from ADT
     DEBUG((DEBUG_INFO, "AppleUsbTypeCBringupDxeBringupCallback: DWC3_%d base address: 0x%llx, size = 0x%x\n", Dwc3Index, Dwc3ControllerBaseAddr, Dwc3ControllerRegSize));
     
     //

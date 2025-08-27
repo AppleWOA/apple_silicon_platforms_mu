@@ -42,7 +42,6 @@ be found at http://opensource.org/licenses/bsd-license.php
 **/
 
 #include <Base.h>
-#include <libfdt.h>
 #include <Guid/SmBios.h>
 #include <IndustryStandard/SmBios.h>
 #include <Protocol/Smbios.h>
@@ -55,6 +54,7 @@ be found at http://opensource.org/licenses/bsd-license.php
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiDriverEntryPoint.h>
 #include <Library/UefiLib.h>
+#include <Library/AppleDTLib.h>
 
 /* Used to read chip serial number */
 //#include <Protocol/EFIChipInfo.h>
@@ -687,14 +687,13 @@ VOID BIOSInfoUpdateSmbiosType0(VOID)
         SMBIOS data update  TYPE1  System Information
 ************************************************************************/
 
-VOID SysInfoUpdateSmbiosType1(IN UINT64 FdtPtr)
+VOID SysInfoUpdateSmbiosType1(VOID)
 {
   CHAR8  serialNo[13];
   UINT64 serial;
-  UINT64 *FdtPointer = (UINT64 *)FdtPtr;
 
-  // Update serial number from FDT blob
-  // TODO: add FDT commands
+  // Update serial number from ADT blob
+  // TODO: add ADT commands
   
 
   LogSmbiosData(
@@ -704,14 +703,13 @@ VOID SysInfoUpdateSmbiosType1(IN UINT64 FdtPtr)
 /***********************************************************************
         SMBIOS data update  TYPE2  Board Information
 ************************************************************************/
-VOID BoardInfoUpdateSmbiosType2(IN UINT64 FdtPtr)
+VOID BoardInfoUpdateSmbiosType2(VOID)
 {
   CHAR8  serialNo[13];
   UINT32 serial;
-  UINT64 *FdtPointer = (UINT64 *)FdtPtr;
 
-  // Update serial number from FDT
-  // TODO: add FDT commands
+  // Update serial number from ADT
+  // TODO: add ADT commands
 
   LogSmbiosData(
       (EFI_SMBIOS_TABLE_HEADER *)&mBoardInfoType2, mBoardInfoType2Strings,
@@ -726,8 +724,8 @@ VOID EnclosureInfoUpdateSmbiosType3(VOID)
   CHAR8  serialNo[13];
   UINT32 serial;
 
-  // Update serial number from FDT
-  // TODO: add FDT info
+  // Update serial number from ADT
+  // TODO: add ADT info
 
   LogSmbiosData(
       (EFI_SMBIOS_TABLE_HEADER *)&mEnclosureInfoType3,
@@ -824,8 +822,8 @@ SmBiosTableDxeInitialize(
   EFI_STATUS Status;
 
   BIOSInfoUpdateSmbiosType0();
-  SysInfoUpdateSmbiosType1(PcdGet64(PcdFdtPointer));
-  BoardInfoUpdateSmbiosType2(PcdGet64(PcdFdtPointer));
+  SysInfoUpdateSmbiosType1();
+  BoardInfoUpdateSmbiosType2();
   EnclosureInfoUpdateSmbiosType3();
   ProcessorInfoUpdateSmbiosType4(PcdGet32(PcdCoreCount));
   CacheInfoUpdateSmbiosType7();

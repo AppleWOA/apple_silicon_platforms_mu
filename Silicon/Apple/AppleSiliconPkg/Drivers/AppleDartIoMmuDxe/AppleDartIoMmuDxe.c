@@ -40,13 +40,13 @@
 #include <Library/PcdLib.h>
 #include <Library/DxeServicesLib.h>
 #include <Library/TimerLib.h>
-#include <Include/libfdt.h>
+#include <Library/AppleDTLib.h>
 
 #include <Protocol/IoMmu.h>
 
 #include <Drivers/AppleDartIoMmuDxe.h>
 
-APPLE_DART_INFO DartInfo[FixedPcdGet32(PcdAppleNumDwc3Darts)];
+APPLE_DART_INFO DartInfo[FixedPcdGet32(PcdAppleNumDwc3Controllers) * 2];
 
 // STATIC
 // PHYSICAL_ADDRESS
@@ -320,12 +320,10 @@ AppleDartIoMmuDxeInitialize(
   IN EFI_SYSTEM_TABLE  *SystemTable
 )
 {
-    UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
     UINT32 Midr;
-    INT32 DartNode[FixedPcdGet32(PcdAppleNumDwc3Darts)];
-    UINT64 DartReg[FixedPcdGet32(PcdAppleNumDwc3Darts)];
-    CONST INT32 *DartRegNode[FixedPcdGet32(PcdAppleNumDwc3Darts)];
-    UINT32 DartIndex;
+    dt_node_t *DartNode[FixedPcdGet32(PcdAppleNumDwc3Controllers)];
+    UINT64 DartReg[FixedPcdGet32(PcdAppleNumDwc3Controllers) * 2];
+    UINT32 DartIndex = 0;
     UINT32 Params4; // U-Boot does this
     // PHYSICAL_ADDRESS Address;
     // PHYSICAL_ADDRESS L2;
@@ -349,7 +347,6 @@ AppleDartIoMmuDxeInitialize(
     // Also this driver is NOT a secure driver by virtue of setting up bypass mode.
     //
 
-    DEBUG((DEBUG_INFO, "%a - started, FDT pointer: 0x%llx\n", __FUNCTION__, FdtBlob));
 
     //
     // Verify that we are on an Apple SoC by reading MIDR and checking the vendor ID bit,
@@ -364,7 +361,7 @@ AppleDartIoMmuDxeInitialize(
     }
 
     //
-    // Get the base addresses from the FDT. Right now there's no good way I know of to test for:
+    // Get the base addresses from the ADT. Right now there's no good way I know of to test for:
     //   a. the number of dies a multi-die capable SoC has.
     //   b. how many DARTs a given SoC die has.
     // Given that this driver is mainly meant to bring up USB controller DARTs and was mostly designed for that purpose, for now
@@ -376,228 +373,29 @@ AppleDartIoMmuDxeInitialize(
     // USB-A DARTs used to be brought up in an earlier version of this driver, however due to issues with getting devices to enumerate
     // on the USB-A ports on supported devices, that code is disabled for the moment.
     //
-    switch (PcdGet32(PcdAppleSocIdentifier)) {
-        //
-        // We're on a single-die system for now if the Chip ID is not a T60xx chip ID.
-        //
-      case 0x8103:
-        //
-        // There are two DWC3 controllers on the T8103 (Tonga/M1), and 4 DARTs.
-        //
-        for(UINT32 DartIndex = 0; DartIndex < FixedPcdGet32(PcdAppleNumDwc3Darts); DartIndex++) {
-            switch(DartIndex) {
-                case 0:
-                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@382f00000");
-                    break;
-                case 1:
-                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@382f80000");
-                    break;
-                case 2:
-                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@502f00000");
-                    break;
-                case 3:
-                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@502f80000");
-                    break;
-            }
-            DartNode[DartIndex] = fdt_path_offset((VOID*)FdtBlob, DartNodeName);
-            DartRegNode[DartIndex] = fdt_getprop((VOID *)FdtBlob, DartNode[DartIndex], "reg", NULL);
-            DartReg[DartIndex] = fdt32_to_cpu(DartRegNode[DartIndex][0]);
-            DartReg[DartIndex] = (DartReg[DartIndex] << 32) | fdt32_to_cpu(DartRegNode[DartIndex][1]);
-            DEBUG((DEBUG_INFO, "AppleDartIoMmuDxeInitialize: USB DART%d: 0x%llx\n", DartIndex, DartReg[DartIndex]));
-        }
-        break;
-      case 0x8112:
-      case 0x8122:
-      case 0x8132:
-        break;
-      case 0x6000:
-      case 0x6001:
-      case 0x6020:
-      case 0x6021:
-        //
-        // T6020 and T6021 have 4 DWC3 controllers, 2 DARTs per controller.
-        //
-        for(DartIndex = 0; DartIndex < FixedPcdGet32(PcdAppleNumDwc3Darts); DartIndex++) {
-            switch(DartIndex) {
-                case 0:
-                case 1:
-                case 4:
-                case 5:
-                    //
-                    // avoid breaking the UART proxy - skip for now.
-                    //
-                    break;
-                // case 0:
-                //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@702f00000");
-                //     break;
-                // case 1:
-                //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@702f80000");
-                //     break; 
-                case 2:
-                    DEBUG((DEBUG_INFO, "2\n"));
-                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@b02f00000");
-                    break;
-                case 3:
-                    DEBUG((DEBUG_INFO, "3\n"));
-                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@b02f80000");
-                    break;
-                // case 4:
-                //     // DEBUG((DEBUG_INFO, "4\n"));
-                //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@f02f00000");
-                //     break;
-                // case 5:
-                //     // DEBUG((DEBUG_INFO, "5\n"));
-                //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@f02f80000");
-                //     break;
-                case 6:
-                    // DEBUG((DEBUG_INFO, "6\n"));
-                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@1302f00000");
-                    break;
-                case 7:
-                    // DEBUG((DEBUG_INFO, "7\n"));
-                    AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc/iommu@1302f80000");
-                    break;
-                default:
-                    DEBUG((DEBUG_INFO, "No DARTs left\n"));
-                    break;
 
-            }
-            if((DartIndex == 0) || (DartIndex == 1) || (DartIndex == 4) || (DartIndex == 5)) {
-                continue;
-            }
-            DartNode[DartIndex] = fdt_path_offset((VOID*)FdtBlob, DartNodeName);
-            DartRegNode[DartIndex] = fdt_getprop((VOID *)FdtBlob, DartNode[DartIndex], "reg", NULL);
-            DartReg[DartIndex] = fdt32_to_cpu(DartRegNode[DartIndex][0]);
-            DartReg[DartIndex] = (DartReg[DartIndex] << 32) | fdt32_to_cpu(DartRegNode[DartIndex][1]);
-            DEBUG((DEBUG_INFO, "AppleDartIoMmuDxeInitialize: USB DART%d (%d total): 0x%llx\n", DartIndex, FixedPcdGet32(PcdAppleNumDwc3Darts), DartReg[DartIndex]));
-        }
-        break;
-      case 0x6030:
-      case 0x6031:
-      case 0x6034:
-        // NumberOfCpuDies = 1;
-        // BaseSocSupportsMultipleDies = TRUE;
-        // break;
-      case 0x6002:
-        //
-        // The T6002 (Jade 2C/M1 Ultra) has 8 instances of the DWC3 controller, 4 for each T6001 die. The 3rd/4th controllers on die 1 go unused, so don't
-        // enable them here. Enable all the others. (12 DARTs in total) (Note: initial testing will use the 8 DARTs on die 0 only.)
-        // Note that the ordering here means we go through all DARTs on die 0 before iterating through the 4 DARTs on die 1.
-        //
-        for(DartIndex = 0; DartIndex < FixedPcdGet32(PcdAppleNumDwc3Darts); DartIndex++) {
-            if(DartIndex == 0) {
-                // AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@702f00000");
-                //
-                // to avoid breaking the UART proxy, skip
-                //
-                continue;
-            }
-            else if (DartIndex == 1) {
-                // AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@702f80000");
-                //
-                // to avoid breaking the UART proxy, skip
-                //
-                continue;
-            }
-            else if (DartIndex == 2) {
-                AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@b02f00000");
-            }
-            else if (DartIndex == 3) {
-                AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@b02f80000");
-            }
-            else if (DartIndex == 4) {
-                AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@f02f00000");
-            }
-            else if (DartIndex == 5) {
-                AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@f02f80000");
-            }
-            else if (DartIndex == 6) {
-                AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@1302f00000");
-            }
-            else if (DartIndex == 7) {
-                AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@1302f80000");
-            }
-            //
-            // ignore die 1 case for now
-            //
-
-            // else if (DartIndex == 8) {
-            //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@2200000000/iommu@702f00000");
-            // }
-            // else if (DartIndex == 9) {
-            //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@2200000000/iommu@702f80000");
-            // }
-            // else if (DartIndex == 10) {
-            //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@2200000000/iommu@b02f00000");
-            // }
-            // else if (DartIndex == 11) {
-            //     AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@2200000000/iommu@b02f80000");
-            // }
-            else {
-                DEBUG((DEBUG_INFO, "No DARTs left\n"));
-                break;
-            }
-            // switch(DartIndex) {
-            //     case 0:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@702f00000");
-            //         break;
-            //     case 1:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@702f80000");
-            //         break;
-            //     case 2:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@b02f00000");
-            //         break;
-            //     case 3:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@b02f80000");
-            //         break;
-            //     case 4:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@f02f00000");
-            //         break;
-            //     case 5:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@f02f80000");
-            //         break;
-            //     case 6:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@1302f00000");
-            //         break;
-            //     case 7:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@200000000/iommu@1302f80000");
-            //         break;
-            //     case 8:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@2200000000/iommu@702f00000");
-            //         break;
-            //     case 9:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@2200000000/iommu@702f80000");
-            //         break;
-            //     case 10:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@2200000000/iommu@b02f00000");
-            //         break;
-            //     case 11:
-            //         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "/soc@2200000000/iommu@b02f80000");
-            //         break;
-            //     default:
-            //         break;
-            // }
-            DartNode[DartIndex] = fdt_path_offset((VOID*)FdtBlob, DartNodeName);
-            DartRegNode[DartIndex] = fdt_getprop((VOID *)FdtBlob, DartNode[DartIndex], "reg", NULL);
-            DartReg[DartIndex] = fdt32_to_cpu(DartRegNode[DartIndex][0]);
-            DartReg[DartIndex] = (DartReg[DartIndex] << 32) | fdt32_to_cpu(DartRegNode[DartIndex][1]);
-            DEBUG((DEBUG_INFO, "AppleDartIoMmuDxeInitialize: USB DART%d (%d total): 0x%llx\n", DartIndex, FixedPcdGet32(PcdAppleNumDwc3Darts), DartReg[DartIndex]));
-            if(DartIndex >= 7) {
-                //
-                // this is a hack to stop the for loop early
-                DEBUG((DEBUG_INFO, "Stopping for loop early\n"));
-                break;
-            }
+    for(INT32 DartNodeIndex = 0; DartNodeIndex < FixedPcdGet32(PcdAppleNumDwc3Controllers); DartNodeIndex++) {
+        if((DartNodeIndex == 0) || (DartNodeIndex == 2)) {
+            DEBUG((DEBUG_INFO, "Skipping DFU port DWC %d\n", DartNodeIndex));
+            continue;
         }
 
-      case 0x6022:
-        // NumberOfCpuDies = 2;
-        // BaseSocSupportsMultipleDies = TRUE;
-        break;
+        AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "dart-usb%d", DartNodeIndex);
+        DartNode[DartNodeIndex] = dt_get(DartNodeName);
+
+        if(DartNode[DartNodeIndex] == NULL) {
+            DEBUG((DEBUG_INFO, "Did not find node %a\n\n", DartNodeName));
+            continue;
+        }
+
+        dt_node_reg(DartNode[DartNodeIndex], 0, &DartReg[DartIndex++], NULL);
+        DEBUG((DEBUG_INFO, "DART reg[0] for %a is 0x%llx \n", DartNodeName, DartReg[DartIndex - 1]));
+        dt_node_reg(DartNode[DartNodeIndex], 1, &DartReg[DartIndex++], NULL);
+        DEBUG((DEBUG_INFO, "DART reg[1] for %a is 0x%llx \n", DartNodeName, DartReg[DartIndex - 1]));
     }
 
-    for(UINT32 DartIndex = 0; DartIndex < FixedPcdGet32(PcdAppleNumDwc3Darts); DartIndex++) {
 
+    for(DartIndex = 0; DartIndex < FixedPcdGet32(PcdAppleNumDwc3Controllers) * 2; DartIndex++) {
         //
         // to avoid killing the serial console from UART proxy - leave darts for DFU ports alone.
         //
@@ -607,10 +405,16 @@ AppleDartIoMmuDxeInitialize(
         }
         //DEBUG((DEBUG_INFO, "Test0\n"));
         DartInfo[DartIndex].BaseAddress = DartReg[DartIndex];
-        if(fdt_node_check_compatible((VOID*)FdtBlob, DartNode[DartIndex], "apple,t8110-dart") == 0) {
+
+        char *CompatibleStr;
+        size_t CompatibleStrLength = 0;
+        CompatibleStr = dt_node_prop(DartNode[DartIndex / 2], "compatible", &CompatibleStrLength);
+
+        if( !AsciiStrCmp(CompatibleStr ,"dart,t8110")) {
             //
             // T8110 compatible DARTs have different setup.
             //
+            DEBUG((DEBUG_INFO, "%a - Setting up T8110-compatible DART\n", __FUNCTION__));
             Params4 = MmioRead32(DartInfo[DartIndex].BaseAddress + DART_T8110_PARAMS4);
             DartInfo[DartIndex].Nsid = Params4 & DART_T8110_PARAMS4_NSID_MASK;
             DartInfo[DartIndex].Nttbr = 1;
@@ -638,8 +442,7 @@ AppleDartIoMmuDxeInitialize(
             DartInfo[DartIndex].TlbFlush = AppleDartT8020TlbFlush;
         }
 
-        if((fdt_node_check_compatible((VOID*)FdtBlob, DartNode[DartIndex], "apple,t8110-dart") == 0) || 
-        (fdt_node_check_compatible((VOID*)FdtBlob, DartNode[DartIndex], "apple,t6000-dart") == 0)) {
+        if((AsciiStrCmp(CompatibleStr ,"dart,t8110") == 0) || (AsciiStrCmp(CompatibleStr ,"dart,t6000") == 0)) {
             DartInfo[DartIndex].Shift = 4;
         }
 

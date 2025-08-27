@@ -1,0 +1,46 @@
+#
+#  Copyright (c) 2023, AppleWOA authors. All rights reserved.
+#
+#  Module Name:
+#    AppleDTLib.inf
+#  
+#  Abstract:
+#     Simple ADT library based on PongoOS code.
+#
+# 
+#  Environment:
+#     UEFI DXE (Driver Execution Environment) and runtime services.
+#
+#  License:
+#    SPDX-License-Identifier: MIT
+#
+
+[Defines]
+  INF_VERSION                    = 0x0001001c
+  BASE_NAME                      = AppleDTLib
+  FILE_GUID                      = 506b71a7-222c-47c4-a652-8c1576cfa03b
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AppleDTLib
+  #CONSTRUCTOR                    = AppleDTLibInitialize
+
+
+[Sources]
+  AppleDTLib.c
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  AppleSiliconPkg/AppleSiliconPkg.dec
+
+[LibraryClasses]
+  ArmLib
+  PcdLib
+  IoLib
+  HobLib
+  CompilerIntrinsicsLib
+
+[Pcd.common]
+  gAppleSiliconPkgTokenSpaceGuid.PcdAdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdBootArgsPointer

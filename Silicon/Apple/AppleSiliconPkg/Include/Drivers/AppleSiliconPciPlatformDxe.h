@@ -30,6 +30,7 @@
 #define APPLE_SILICON_PCI_PLATFORM_DXE_H
 
 #include <Library/ConvenienceMacros.h>
+#include <Library/AppleDTLib.h>
 
 #define PCIE_LINKUP_TIMEOUT_USEC 500
 
@@ -158,7 +159,7 @@ typedef struct ApplePcieDevicePortInfo {
   UINT64 DeviceBaseAddress; // base address for the device port in the PCIe complex, pull from DT
   UINT32 DevicePortIndex;
   APPLE_PCIE_COMPLEX_INFO *Complex;
-  INT32 PortSubNode;
+  dt_node_t *PortSubNode;
   APPLE_PCIE_GPIO_DESC ResetGpioDesc;
   UINT64 DevicePhyBaseAddress; // base address for device PHY, this is calculated.
 } APPLE_PCIE_DEVICE_PORT_INFO;

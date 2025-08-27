@@ -12,7 +12,6 @@
 [Pcd]
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gArmTokenSpaceGuid.PcdSystemMemorySize
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
   gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount
   
 [Packages]
@@ -35,6 +34,7 @@
   BaseMemoryLib
   DebugLib
   CompilerIntrinsicsLib
+  AppleDTLib
 
 [Protocols]
   gEfiSmbiosProtocolGuid

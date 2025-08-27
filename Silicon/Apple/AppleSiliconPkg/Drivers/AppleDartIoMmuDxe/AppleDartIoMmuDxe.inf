@@ -49,17 +49,16 @@
   IoLib
   PcdLib
   UefiLib
-  FdtLib
+  AppleDTLib
   ArmLib
   TimerLib
 
 [Pcd]
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
   gEmbeddedTokenSpaceGuid.PcdDmaDeviceOffset
 
 [FixedPcd]
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Darts
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Controllers
 
 [Protocols]
   gEdkiiIoMmuProtocolGuid # Produces
