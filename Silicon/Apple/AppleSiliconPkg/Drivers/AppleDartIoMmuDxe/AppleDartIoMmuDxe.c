@@ -375,16 +375,12 @@ AppleDartIoMmuDxeInitialize(
     //
 
     for(INT32 DartNodeIndex = 0; DartNodeIndex < FixedPcdGet32(PcdAppleNumDwc3Controllers); DartNodeIndex++) {
-        if((DartNodeIndex == 0) || (DartNodeIndex == 2)) {
-            DEBUG((DEBUG_INFO, "Skipping DFU port DWC %d\n", DartNodeIndex));
-            continue;
-        }
-
         AsciiSPrint(DartNodeName, ARRAY_SIZE(DartNodeName), "dart-usb%d", DartNodeIndex);
         DartNode[DartNodeIndex] = dt_get(DartNodeName);
 
         if(DartNode[DartNodeIndex] == NULL) {
             DEBUG((DEBUG_INFO, "Did not find node %a\n\n", DartNodeName));
+            DartIndex += 2;
             continue;
         }
 
