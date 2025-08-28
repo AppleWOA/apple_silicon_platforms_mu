@@ -49,7 +49,7 @@
   IoLib
   PcdLib
   UefiLib
-  FdtLib
+  AppleDTLib
   ArmLib
   PciLib
   PciSegmentLib

@@ -24,7 +24,6 @@
 [LibraryClasses]
   ArmLib
   DebugLib
-  FdtLib
   IoLib
 
 [Packages]
@@ -35,6 +34,3 @@
   AppleSiliconPkg/AppleSiliconPkg.dec
 
 [Pcd.common]
-  gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer

@@ -22,7 +22,6 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x400000000 #16GB RAM space by default
   gArmTokenSpaceGuid.PcdFdBaseAddress|0x0
   gArmTokenSpaceGuid.PcdFvBaseAddress|0x0
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer|0x10220000000 # TODO: verify this hack still works on T6020
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress|0x0
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize|0x0
 
@@ -48,6 +47,8 @@
   #all Rhodes chips have three clusters, "boot", P-core/E-core clusters
   # for multi-die systems, this cluster setup is duplicated on the second die
   gAppleSiliconPkgTokenSpaceGuid.PcdClusterCount|3|UINT32|0x00004407
+  gAppleSiliconPkgTokenSpaceGuid.PcdBootArgsPointer|0x10220000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdAdtPointer|0x10220004000 # TODO: verify this hack still works on T6020
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #
@@ -56,10 +57,6 @@
   #
   gArmTokenSpaceGuid.PcdGicDistributorBase|0x5000000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x5100000000
-!else
-  #this is MMIO space where the AIC lives
-  gAppleSiliconPkgTokenSpaceGuid.PcdAicInterruptControllerBase|0x28e100000
-
 !endif
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision|0x00006020
 

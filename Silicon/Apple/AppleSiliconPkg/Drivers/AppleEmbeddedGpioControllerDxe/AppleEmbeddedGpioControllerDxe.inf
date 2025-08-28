@@ -42,18 +42,16 @@
   DebugLib
   IoLib
   PcdLib
-  FdtLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
   UefiLib
   PrintLib
   TimerLib
   UefiRuntimeServicesTableLib
+  AppleDTLib
 
 [Pcd]
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
-  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumGpios
+
 
 [Protocols]
   gEmbeddedGpioProtocolGuid # Installed

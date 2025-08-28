@@ -10,7 +10,7 @@
 
 
 [Sources.common]
-  FdtParser.c
+  AdtParser.c
   PrePi.c
 
 #Comment/uncomment either line out if you want SEC phase to be relocatable or not relocatable
@@ -32,7 +32,7 @@
   BaseLib
   DebugLib
   IoLib
-  FdtLib
+  AppleDTLib
   ExtractGuidedSectionLib
   LzmaDecompressLib
   PeCoffGetEntryPointLib
@@ -62,7 +62,6 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize
   gArmTokenSpaceGuid.PcdFvBaseAddress
   gArmTokenSpaceGuid.PcdFdBaseAddress
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize
 
@@ -79,3 +78,6 @@
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackSize
+
+  gAppleSiliconPkgTokenSpaceGuid.PcdAdtPointer
+  gAppleSiliconPkgTokenSpaceGuid.PcdBootArgsPointer

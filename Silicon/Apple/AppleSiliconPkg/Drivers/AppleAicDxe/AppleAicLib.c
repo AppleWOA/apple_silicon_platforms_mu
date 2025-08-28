@@ -12,9 +12,8 @@
 #include <Library/ArmLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
-#include <Library/PcdLib.h>
-#include <Include/libfdt.h>
 #include <Library/AppleAicLib.h>
+#include <Library/AppleDTLib.h>
 
 
 STATIC APPLE_AIC_VERSION mAicVersion;
@@ -30,15 +29,19 @@ APPLE_AIC_VERSION EFIAPI AppleArmGetAicVersion(VOID)
     UINT32 Midr = ArmReadMidr();
     if (Midr & 0x61000000)
     {
-        //HACK - use a PCD containing the chip identifier for now
-        //if we need to support platforms beyond desktop Apple silicon platforms, this behavior must change
-        //(haven't figured out if there's an MSR or MMIO address that will give us this information)
         //default to AICv1 if the platform doesn't explicitly specify it's for AICv2
 
-        //
-        // TODO: remove the HACK, instead infer this information from ADT or FDT.
-        //
-        if ((FixedPcdGet32(PcdAppleSocIdentifier) == 0x6000) || (FixedPcdGet32(PcdAppleSocIdentifier) == 0x8112) || (FixedPcdGet32(PcdAppleSocIdentifier) == 0x6020))
+        dt_node_t *InterruptControllerNode = dt_get("aic");
+        if (!InterruptControllerNode) {
+            DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "no ADT supplied, exiting\n"));
+            ASSERT(FALSE);
+        }
+
+        CHAR8 *CompatibleStr;
+        UINTN CompatibleStrLength = 0;
+        CompatibleStr = dt_node_prop(InterruptControllerNode, "compatible", &CompatibleStrLength);
+
+        if (!AsciiStrCmp(CompatibleStr ,"aic,2") || !AsciiStrCmp(CompatibleStr ,"aic,3"))
         {
             mAicVersion = APPLE_AIC_VERSION_2;
             return APPLE_AIC_VERSION_2;
@@ -117,7 +120,7 @@ UINT32 EFIAPI AppleAicGetMaxInterrupts(
     else if (mAicVersion == APPLE_AIC_VERSION_1)
     {
         //AICv1 is hard capped to 1024 IRQs
-        MaxIrqs = 0x400;
+        MaxIrqs = AIC_MAX_IRQ;
     }
     else {
         MaxIrqs = 0;

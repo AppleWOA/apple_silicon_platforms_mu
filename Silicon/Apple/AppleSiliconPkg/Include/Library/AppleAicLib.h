@@ -54,6 +54,8 @@ extern AIC_INFO_STRUCT *AicInfoStruct;
 
 //AICv1 Registers
 
+#define AIC_MAX_IRQ	0x400
+#define AIC_TARGET_CPU 0x3000
 #define AIC_V1_HW_INFO 0x0004
 //AIC_WHOAMI in m1n1/Linux sources
 //on AICv1, used in CPU affinity modifications

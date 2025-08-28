@@ -14,10 +14,10 @@
  */
 
 #include <Library/AppleAicLib.h>
-#include <Include/libfdt.h>
 #include "AppleAicDxe.h"
 #include <Library/AppleSysRegs.h>
 #include <Library/ArmGenericTimerCounterLib.h>
+#include <Library/AppleDTLib.h>
 
 #define APPLE_FAST_IPI_STATUS_PENDING BIT(0)
 
@@ -27,6 +27,7 @@ STATIC UINT64 mAicV2IrqCfgOffset, mAicV2SoftwareSetRegOffset;
 STATIC UINT64 mAicV2SoftwareClearRegOffset, mAicV2IrqMaskSetOffset;
 STATIC UINT64 mAicV2IrqMaskClearOffset, mAicV2HwStateOffset;
 STATIC UINT64 mAicV2EventReg;
+STATIC APPLE_AIC_VERSION mAicVersion;
 
 STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID);
 
@@ -143,59 +144,36 @@ STATIC EFI_STATUS EFIAPI AppleAicV2EndOfInterrupt(
  */
 STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
 {
-    //needed for devicetree calculations
-    UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
-    INT32 Length;
-    INT32 InterruptControllerNode = fdt_path_offset((VOID *)FdtBlob, "/soc/interrupt-controller");
-    CONST INT32 *InterruptControllerRegs = fdt_getprop((VOID *)FdtBlob, InterruptControllerNode, "reg", &Length);
-    //UINT64 EventRegisterValue = 0;
-    UINT64 StartOffset;
-    UINT64 CurrentOffset;
-
-    DEBUG((DEBUG_ERROR, "FDT pointer: 0x%llx\n", FdtBlob));
-
-    if (fdt_check_header ((VOID *)FdtBlob) != 0) {
-    //DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "no FDT supplied, exiting\n"));
-    ASSERT(fdt_check_header ((VOID *)FdtBlob) == 0);
-  }
-    if ( (InterruptControllerNode == (-FDT_ERR_BADPATH)) 
-    || (InterruptControllerNode == (-FDT_ERR_NOTFOUND)) 
-    || (InterruptControllerNode == (-FDT_ERR_BADMAGIC)) 
-    || (InterruptControllerNode == (-FDT_ERR_BADVERSION)) 
-    || (InterruptControllerNode == (-FDT_ERR_BADSTATE)) 
-    || (InterruptControllerNode == (-FDT_ERR_BADSTRUCTURE)) 
-    || (InterruptControllerNode == (-FDT_ERR_TRUNCATED))
-    )
-    {
-        DEBUG((DEBUG_ERROR, "FDT path offset finding failed!!\n"));
-        DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-InterruptControllerNode)));
-        ASSERT(InterruptControllerNode != (-FDT_ERR_BADPATH));
-        ASSERT(InterruptControllerNode != (-FDT_ERR_NOTFOUND));
-        ASSERT(InterruptControllerNode != (-FDT_ERR_BADMAGIC));
-        ASSERT(InterruptControllerNode != (-FDT_ERR_BADVERSION));
-        ASSERT(InterruptControllerNode != (-FDT_ERR_BADSTATE));
-        ASSERT(InterruptControllerNode != (-FDT_ERR_BADSTRUCTURE));
-        ASSERT(InterruptControllerNode != (-FDT_ERR_TRUNCATED));
-
-    }
-    if(InterruptControllerRegs == 0)
-    {
-        DEBUG((DEBUG_ERROR, "Unable to find FDT reg!!\n"));
-        INT32 ErrCode = Length;
-        DEBUG((DEBUG_ERROR, "Error code: 0x%llx\n", (-ErrCode)));
+    dt_node_t *InterruptControllerNode = dt_get("aic");
+    if (!InterruptControllerNode) {
+        DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "no ADT supplied, exiting\n"));
         ASSERT(FALSE);
     }
 
+
+
+
+    UINT64 StartOffset;
+    UINT64 CurrentOffset;
     /**
      * Start with calculations that can be done with purely MMIO reads.
      * (AIC base is static, and the other values are easily derived through MMIO reads and bitwise ANDs.)
      * 
      */
-    AicV2Base = PcdGet64(PcdAicInterruptControllerBase); //AIC MMIO base is static per SoC.
+    
+    dt_node_reg(InterruptControllerNode, 0, &AicV2Base, NULL);
     AicInfoStruct->NumIrqs = AppleAicGetNumInterrupts(AicV2Base);
     AicInfoStruct->MaxIrqs = AppleAicGetMaxInterrupts(AicV2Base);
-    AicInfoStruct->MaxCpuDies = FIELD_GET(AIC_V2_INFO_REG3_MAX_DIE_COUNT_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG3));
-    AicInfoStruct->NumCpuDies = (FIELD_GET(AIC_V2_INFO_REG1_LAST_CPU_DIE_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG1))) + 1;
+
+    if(mAicVersion == APPLE_AIC_VERSION_1){
+        AicInfoStruct->MaxCpuDies = 1;
+        AicInfoStruct->NumCpuDies = 1;
+    }
+    else if(mAicVersion == APPLE_AIC_VERSION_2){
+        AicInfoStruct->MaxCpuDies = FIELD_GET(AIC_V2_INFO_REG3_MAX_DIE_COUNT_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG3));
+        AicInfoStruct->NumCpuDies = (FIELD_GET(AIC_V2_INFO_REG1_LAST_CPU_DIE_BITFIELD, MmioRead32(AicV2Base + AIC_V2_INFO_REG1))) + 1;
+    }
+
     
     /**
      * Calculate the offsets of registers that are dependent on the maximum number of IRQs supported.
@@ -204,8 +182,6 @@ STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
      * where the value is stored, it cannot be read from MMIO.
      * 
      */
-    mAicV2EventReg = fdt32_to_cpu(InterruptControllerRegs[4]);
-    mAicV2EventReg = (mAicV2EventReg << 32) | fdt32_to_cpu (InterruptControllerRegs[5]);
 
     /**
      * From IRQ_CFG + sizeof(UINT32) * MaxIrqs, the AIC registers are separated
@@ -213,6 +189,15 @@ STATIC EFI_STATUS EFIAPI AppleAicV2CalculateRegisterOffsets(IN VOID)
      * 
      */
     StartOffset = mAicV2IrqCfgOffset = AIC_V2_IRQ_CFG_REG;
+
+    if(mAicVersion == APPLE_AIC_VERSION_1){
+        StartOffset = mAicV2IrqCfgOffset = AIC_TARGET_CPU;
+        mAicV2EventReg = AicV2Base;
+    }
+    else if(mAicVersion == APPLE_AIC_VERSION_2){
+        mAicV2EventReg = AicV2Base + dt_node_u32(InterruptControllerNode, "aic-iack-offset", 0);
+    }
+
     CurrentOffset = StartOffset + sizeof(UINT32) * AicInfoStruct->MaxIrqs;
 
     //SW_SET
@@ -398,12 +383,15 @@ STATIC EFI_STATUS EFIAPI AppleAicV2GetIrqTriggerType(
     OUT EFI_HARDWARE_INTERRUPT2_TRIGGER_TYPE *TriggerType
 )
 {
-    VOID* FdtBlob = (VOID *)(PcdGet64(PcdFdtPointer));
-    INT32 MsiRangesLength = 0;
-    UINTN PcieMsiNodeOffset = fdt_path_offset(FdtBlob, "/soc/pcie");;
-    CONST INT32* PcieMsiRangesProp = fdt_getprop(FdtBlob, PcieMsiNodeOffset, "msi-ranges", &MsiRangesLength);;
-    UINT32 EdgeTriggeredIrqNumStart = fdt32_to_cpu(PcieMsiRangesProp[2]);
-    UINT32 EdgeTriggeredIrqNums = fdt32_to_cpu(PcieMsiRangesProp[3]);
+    dt_node_t *ApcieNode = dt_get("apcie");
+    if (!ApcieNode) {
+        DEBUG((EFI_D_ERROR, "no ADT supplied, exiting\n"));
+        ASSERT(FALSE);
+    }
+
+
+    UINT32 EdgeTriggeredIrqNumStart = dt_node_u32(ApcieNode, "msi-vector-offset", 0);
+    UINT32 EdgeTriggeredIrqNums = dt_node_u32(ApcieNode, "msi-vectors", 0);
     BOOLEAN IsEdgeTriggeredIrq = FALSE;
     /**
      * AIC does not have a facility to see if a given IRQ is level or edge triggered,
@@ -499,8 +487,11 @@ VOID EFIAPI AppleAicV2ExitBootServicesEvent(
  * @return EFI_STATUS 
  */
 
-EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
+EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable, APPLE_AIC_VERSION aicVersion)
 {
+
+    mAicVersion = aicVersion;
+
     UINTN InterruptIndex;
     EFI_STATUS Status;
     UINT32 AicV2NumInterrupts;

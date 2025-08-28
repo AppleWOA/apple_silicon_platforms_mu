@@ -31,9 +31,9 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/PrintLib.h>
-#include <Include/libfdt.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/TimerLib.h>
+#include <Library/AppleDTLib.h>
 
 #include <Protocol/EmbeddedGpio.h>
 
@@ -211,17 +211,13 @@ AppleEmbeddedGpioControllerDxeInitialize(
   EFI_HANDLE GpioHandle;
   GPIO_CONTROLLER *GpioController;
   // UINTN NumberOfCpuDies;
-  UINT8 NumberOfGpioPins = PcdGet8(PcdAppleNumGpios);
-  UINT64 FdtBlob = PcdGet64(PcdFdtPointer);
+  UINT8 NumberOfGpioPins;
   // INT32 PinCtrlApNodes[2];
-  INT32 PinCtrlApNode;
-  CONST INT32 *PinCtrlApRegNode;
+  dt_node_t *PinCtrlApNode;
   UINT64 PinCtrlApReg;
   UINT32 Midr = ArmReadMidr();
   //CHAR8 PinCtrlApNodeName[13];
   // BOOLEAN BaseSocSupportsMultipleDies; // T60XX SoCs support multiple dies, indicate that boolean here
-  DEBUG((DEBUG_INFO, "%a - started, FDT pointer: 0x%llx\n", __FUNCTION__, FdtBlob));
-
   //
   // Sanity check: make sure there isn't another GPIO controller check installed
   //
@@ -238,52 +234,19 @@ AppleEmbeddedGpioControllerDxeInitialize(
       return EFI_NOT_FOUND;
     }
 
-    switch (PcdGet32(PcdAppleSocIdentifier)) {
-      case 0x8103:
-      case 0x8112:
-      case 0x8122:
-        // NumberOfCpuDies = 1;
-        // BaseSocSupportsMultipleDies = FALSE;
-        break;
-      case 0x6000:
-      case 0x6001:
-      case 0x6020:
-      case 0x6021:
-      case 0x6030:
-      case 0x6031:
-      case 0x6034:
-        // NumberOfCpuDies = 1;
-        // BaseSocSupportsMultipleDies = TRUE;
-        break;
-      case 0x6002:
-      case 0x6022:
-        // NumberOfCpuDies = 2;
-        // BaseSocSupportsMultipleDies = TRUE;
-        break;
-    }
-    DEBUG((DEBUG_INFO, "%a - soc identified\n", __FUNCTION__));
-
-    // if(BaseSocSupportsMultipleDies == TRUE) {
-    //   for(UINT32 i = 0; i < NumberOfCpuDies; i++) {
-    //     DEBUG((DEBUG_INFO, "%a - getting pinctrl_ap for die %d of 2\n", __FUNCTION__, i));
-    //     //
-    //     // HACK
-    //     //
-    //     if(i == 0) {
-    //       PinCtrlApNodes[i] = fdt_path_offset((VOID*)FdtBlob, "/soc@200000000/pinctrl");
-    //     }
-    //     else if (i == 1) {
-    //       PinCtrlApNodes[i] = fdt_path_offset((VOID*)FdtBlob, "/soc@2200000000/pinctrl");
-    //     }
-    //   }
-    // }
-    // else {
     DEBUG((DEBUG_INFO, "%a - getting pinctrl_ap for die 0\n", __FUNCTION__));
-    //
-    // TODO: change this to be SoC agnostic.
-    //
-    PinCtrlApNode = fdt_path_offset((VOID*)FdtBlob, "/soc/pinctrl@39b028000");
-    // }
+
+    //TODO: improve this
+    PinCtrlApNode = dt_get("gpio");
+    if(PinCtrlApNode == NULL)
+      PinCtrlApNode = dt_get("gpio0");
+
+    if(PinCtrlApNode == NULL){
+      DEBUG((DEBUG_INFO, "%a - GPIO controller not present, aborting\n", __FUNCTION__));
+      return EFI_NOT_FOUND;
+    }
+
+    NumberOfGpioPins = dt_node_u32(PinCtrlApNode, "#gpio-pins", 0);
   
     // 
     // Allocate the Platform GPIO controller struct
@@ -316,9 +279,7 @@ AppleEmbeddedGpioControllerDxeInitialize(
     GpioController = AppleSiliconPlatformGpioController->GpioController;
     DEBUG((DEBUG_INFO, "%a - setting GPIO controller index (local var)\n", __FUNCTION__));
     GpioController->GpioIndex = 0;
-    PinCtrlApRegNode = fdt_getprop((VOID *)FdtBlob, PinCtrlApNode, "reg", NULL);
-    PinCtrlApReg = fdt32_to_cpu(PinCtrlApRegNode[0]);
-    PinCtrlApReg = (PinCtrlApReg << 32) | fdt32_to_cpu(PinCtrlApRegNode[1]);
+    dt_node_reg(PinCtrlApNode, 0, &PinCtrlApReg, NULL);
     DEBUG((DEBUG_INFO, "%a - setting GPIO controller base reg (local var) to 0x%llx\n", __FUNCTION__, PinCtrlApReg));
     GpioController->RegisterBase = PinCtrlApReg;
     GpioController->InternalGpioCount = NumberOfGpioPins;

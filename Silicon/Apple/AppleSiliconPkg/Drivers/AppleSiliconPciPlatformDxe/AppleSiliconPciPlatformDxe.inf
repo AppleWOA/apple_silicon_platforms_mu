@@ -46,7 +46,7 @@
   IoLib
   PcdLib
   UefiLib
-  FdtLib
+  AppleDTLib
   ArmLib
   PciLib
   PciSegmentLib
@@ -55,7 +55,6 @@
 
 [Pcd]
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier
-  gAppleSiliconPkgTokenSpaceGuid.PcdFdtPointer
 
 [Protocols]
   gEmbeddedGpioProtocolGuid # used
