@@ -47,8 +47,8 @@
   #all Rhodes chips have three clusters, "boot", P-core/E-core clusters
   # for multi-die systems, this cluster setup is duplicated on the second die
   gAppleSiliconPkgTokenSpaceGuid.PcdClusterCount|3|UINT32|0x00004407
-  gAppleSiliconPkgTokenSpaceGuid.PcdBootArgsPointer|0x10A00000000
-  gAppleSiliconPkgTokenSpaceGuid.PcdAdtPointer|0x10A00004000 # TODO: verify this hack still works on T6020
+  gAppleSiliconPkgTokenSpaceGuid.PcdBootArgsPointer|0x10220000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdAdtPointer|0x10220004000 # TODO: verify this hack still works on T6020
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
   #
