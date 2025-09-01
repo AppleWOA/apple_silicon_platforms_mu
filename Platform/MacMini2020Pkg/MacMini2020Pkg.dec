@@ -1,0 +1,12 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = MacMiniFamilyPkg
+  PACKAGE_GUID                   = 814f2b89-06b0-46f4-8181-4f2d642970d7
+  PACKAGE_VERSION                = 1.0
+
+[Includes.common]
+  Include
+
+[Guids.common]
+  gMacMini2020PkgTokenSpaceGuid = { 0xc1f15f37, 0xbf43, 0x426b, { 0xbe, 0x36, 0x8c, 0xdb, 0x81, 0x12, 0x70, 0xf1 } }
+

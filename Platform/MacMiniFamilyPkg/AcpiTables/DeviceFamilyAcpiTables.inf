@@ -1,7 +1,7 @@
 ## @file
 #  Borrowed from edk2-platforms/JunoPkg and AmpereAltraPkg, original header below.
-#  Copyright (c) 2023, amarioguy (AppleWOA authors)
-#  ACPI table data and ASL sources required to boot the platform.
+#  Copyright (c) 2025, amarioguy (AppleWOA authors)
+#  ACPI table data and ASL sources required to boot the platform. (Device family specific)
 #
 #  Copyright (c) 2014-2017, ARM Ltd. All rights reserved.
 #
@@ -11,15 +11,13 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = CPUAcpiTables
-  FILE_GUID                      = d1430d86-24a4-4c2f-8f22-d24376e2e888
+  BASE_NAME                      = DeviceFamilyAcpiTables
+  FILE_GUID                      = 2f0f9a5f-f300-420a-9284-41898e9c376a
   MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
 
 [Sources]
-  GTDT.aslc
-  MADT_Static.aslc
-
+  FADT.aslc
 
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -35,10 +33,3 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId              ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId         ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision        ## CONSUMES
-  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum                    ## CONSUMES
-  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum                       ## CONSUMES
-  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum                    ## CONSUMES
-  gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum                   ## CONSUMES
-  gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount                     ## CONSUMES
-  gArmTokenSpaceGuid.PcdGicRedistributorsBase
-  gArmTokenSpaceGuid.PcdGicDistributorBase

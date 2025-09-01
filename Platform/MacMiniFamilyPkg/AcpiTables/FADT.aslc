@@ -1,0 +1,98 @@
+/**
+ * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * 
+ * Module Name:
+ *     FADT.aslc
+ * 
+ * Abstract:
+ *     Fixed ACPI Descripton Table. This source file implements the FADT table
+ *     for Mac Mini.
+ * 
+ * Environment:
+ *     UEFI firmware/runtime services.
+ * 
+ * License:
+ *     SPDX-License-Identifier: BSD-2-Clause-Patent OR MIT
+ * 
+*/
+
+#include <Library/AcpiLib.h>
+#include <IndustryStandard/Acpi64.h>
+#include <Acpi/AcpiHeader.h>
+
+
+/**
+ * Note: Most of these fields are zero, as per Arm SBBR/SBSA specs we are using "hardware-reduced" ACPI mode
+ * which removes the need for most of the FADT variables.
+ * 
+ * PSCI for now will be an SMC event despite not being implemented on Apple, as we can trap SMCs to EL2 anyways.
+ * The original intention was to use SPRR/GXF to bootstrap a custom secure monitor that can handle these calls, but with
+ * page tables having to be the same under the assumption of GXF, this is a more complicated endeavor put on hold for now.
+ * SMC PSCI calls will still be used, however we are not using Hyper-V for now so the recipient will be our custom hypervisor.
+ * 
+*/
+EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE Fadt = {
+    __ACPI_HEADER(EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE, EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE, EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE_REVISION),
+    0, //FIRMWARE_CTRL (UINT32)
+    0, //DSDT (UINT32)
+    EFI_ACPI_RESERVED_BYTE, //Reserved0
+    EFI_ACPI_6_4_PM_PROFILE_MOBILE, //preferred power management profile
+    0, //SCI interrupt num (UINT16)
+    0, //SMI Command (UINT32)
+    0, //ACPI enable (UINT8)
+    0, //ACPI disable (UINT8)
+    0, //S4 bios state (UINT8)
+    0, //PState counter (UINT8)
+    0, //PM1A_EVT_BLK port address (UINT32)
+    0, //PM1B_EVT_BLK port address (UINT32)
+    0, //PM1A_CNT_BLK port address (UINT32)
+    0, //PM1B_CNT_BLK port address (UINT32)
+    0, //PM2_CNT_BLK port address (UINT32)
+    0, //PM_TMR_BLK port address (UINT32)
+    0, //GPE0_BLK port address (UINT32)
+    0, //GPE1_BLK port address (UINT32)
+    0, //PM1_EVT_LEN (bytes decoded/supported by PM1A/B EVT BLK) (UINT8)
+    0, //PM1_CNT_LEN (bytes supported by PM1A/B_CNT_BLK) (UINT8)
+    0, //PM2_CNT_LEN (bytes supported by PM2_CNT_BLK) (UINT8)
+    0, //PM_TMR_LEN (UINT8)
+    0, //GPE0_BLK_LEN (UINT8)
+    0, //GPE1_BLK_LEN (UINT8)
+    0, //GPE1_BASE (UINT8)
+    0, //CST_CNT (UINT8)
+    0, //P_LVL2_LAT (worst case latency to exit C2 state) (UINT16)
+    0, //P_LVL3_LAT (worst case latency to exit C3 state) (UINT16)
+    0, //FLUSH_SIZE (cache size to flush if "WBINVD" flag is not available) (UINT16)
+    0, //FLUSH_STRIDE (cache line width if "WBINVD" flag not available) (UINT16)
+    0, //DUTY_OFFSET (UINT8)
+    0, //DUTY_WIDTH (UINT8)
+    0, //DAY_ALRM (day of month RTC RAM location) (UINT8)
+    0, //MON_ALRM (month of year RTC RAM location) (UINT8)
+    0, //CENTURY (UINT8)
+    0, //IAPC_BOOT_ARCH (Intel boot flags) (UINT16)
+    0, //Reserved1 (UINT8)
+    ((EFI_ACPI_6_4_HW_REDUCED_ACPI) | (EFI_ACPI_6_4_LOW_POWER_S0_IDLE_CAPABLE) | (EFI_ACPI_6_3_PWR_BUTTON)), //ACPI feature flags (currently HW reduced, S0ix capable, power button as control) (UINT32)
+    NULL_GAS, //Reset register (TODO: do we want to put the Apple watchdog timer register here?) (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    0, //Reset value (UINT8)
+    ((EFI_ACPI_6_4_ARM_PSCI_COMPLIANT)), //ARM boot flags (using PSCI, NOT using HVC conduit (we trap SMCs to EL2 since EL3 not implemented, and more useful for bare metal booting))
+    EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE_REVISION, //Minor revision of FADT (UINT8)
+    0, //extended FIRMWARE_CTRL (UINT64)
+    0, //extended DSDT address (UINT64) (probably necessary but not decided yet)
+    NULL_GAS, //extended PM1A event reg block address (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    NULL_GAS, //extended PM1B event reg block address (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    NULL_GAS, // extended PM1A count reg block address (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    NULL_GAS, // extended PM1B count reg block address (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    NULL_GAS, //extended PM2 count reg block address (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    NULL_GAS, //extended PM_TMR_BLK (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    NULL_GAS, //extended GPE0_BLK address (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    NULL_GAS, //extended GPE1_BLK address (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    ARM_GASN(0), //sleep control reg (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    ARM_GASN(0), //sleep status reg (EFI_ACPI_6_4_GENERIC_ADDRESS_STRUCTURE)
+    0 //Hypervisor vendor identity (UINT64)
+
+};
+
+//
+// Reference the table being generated to prevent the optimizer from removing the
+// data structure from the executable
+//
+VOID* CONST ReferenceAcpiTable = &Fadt;
