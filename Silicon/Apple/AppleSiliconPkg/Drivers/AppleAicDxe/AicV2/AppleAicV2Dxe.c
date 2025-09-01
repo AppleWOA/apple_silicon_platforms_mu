@@ -519,7 +519,7 @@ EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
     "\tAIC_V2_MASK_SET: 0x%llx\n"
     "\tAIC_V2_MASK_CLR: 0x%llx\n"
     "\tAIC_V2_HW_STATE: 0x%llx\n"
-    "\tAIC_V2_EVENT: 0x%llx\n\n",
+    "\tAIC_V2_EVENT: 0x%llx\n",
     AicV2Base,
     (AicV2Base + mAicV2IrqCfgOffset),
     (AicV2Base + mAicV2SoftwareSetRegOffset),

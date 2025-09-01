@@ -39,13 +39,16 @@ InterruptDxeInitialize (
   Version = AppleArmGetAicVersion();
   switch(Version) {
     case APPLE_AIC_VERSION_1:
-    case APPLE_AIC_VERSION_2:
-      Status = AppleAicV2DxeInit(ImageHandle, SystemTable, Version);
+      Status = AppleAicV1DxeInit(ImageHandle, SystemTable);
       break;
+    case APPLE_AIC_VERSION_2:
     case APPLE_AIC_VERSION_3:
       //
-      // TODO: add AICv3 support, seen in M3 and A17 based SoCs.
+      // AICv3 is a minor iteration on AICv2, the same code can handle both, as long as
+      // version specific checks are done for incompatible elements.
       //
+      Status = AppleAicV2DxeInit(ImageHandle, SystemTable, Version);
+      break;
     default:
       DEBUG((DEBUG_INFO, "Unsupported AIC revision, exiting\n"));
       Status = EFI_UNSUPPORTED;
