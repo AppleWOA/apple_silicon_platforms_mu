@@ -9,7 +9,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = ArmGicLib
+  BASE_NAME                      = AppleAicLib
   FILE_GUID                      = 94ecc3fa-8f5f-4e56-8614-0dacb2ec996a
   MODULE_TYPE                    = SEC
   VERSION_STRING                 = 1.0
@@ -19,7 +19,7 @@
   AppleAicLib.c
 
 [Sources.AARCH64]
-  AicV2/AArch64/AppleAicV2.S
+  AArch64/AppleAic.S
 
 [LibraryClasses]
   ArmLib

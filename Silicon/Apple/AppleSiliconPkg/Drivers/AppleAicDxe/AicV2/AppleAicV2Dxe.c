@@ -262,9 +262,9 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
          * (Ideally, they won't be necessary at all given the nature of the firmware)
          * 
          */
-        if (AppleAicV2ReadIpiStatusRegister() & APPLE_FAST_IPI_STATUS_PENDING) {
+        if (AppleAicReadIpiStatusRegister() & APPLE_FAST_IPI_STATUS_PENDING) {
             DEBUG((DEBUG_INFO, "Fast IPIs not supported yet, acking\n"));
-            AppleAicV2WriteIpiStatusRegister(APPLE_FAST_IPI_STATUS_PENDING);
+            AppleAicWriteIpiStatusRegister(APPLE_FAST_IPI_STATUS_PENDING);
         }
 
         /**
@@ -318,20 +318,20 @@ STATIC VOID EFIAPI AppleAicV2InterruptHandler(
          * As with those, ack the interrupts if they come but don't act on them.
          * 
          */
-        PmcStatus = AppleAicV2ReadPmcControlRegister();
-        UncorePmcStatus = AppleAicV2ReadUncorePmcControlRegister();
+        PmcStatus = AppleAicReadPmcControlRegister();
+        UncorePmcStatus = AppleAicReadUncorePmcControlRegister();
         if (PmcStatus & BIT11) {
             DEBUG((DEBUG_INFO, "PMCR0 FIQ asserted, unsupported, acking\n"));
             PmcStatus = PmcStatus & ~(BIT18 | BIT17 | BIT16);
             PmcStatus |= (BIT18 | BIT17 | BIT16 | BIT0);
-            AppleAicV2WritePmcControlRegister(PmcStatus);   
+            AppleAicWritePmcControlRegister(PmcStatus);   
         }
-        else if (FIELD_GET(APPLE_UPMCR0_IMODE, UncorePmcStatus) == APPLE_UPMCR_FIQ_IMODE && (AppleAicV2ReadUncorePmcStatusRegister() & APPLE_UPMSR_IACT))
+        else if (FIELD_GET(APPLE_UPMCR0_IMODE, UncorePmcStatus) == APPLE_UPMCR_FIQ_IMODE && (AppleAicReadUncorePmcStatusRegister() & APPLE_UPMSR_IACT))
         {
             DEBUG((DEBUG_INFO, "Uncore PMC FIQ asserted, unsupported, acking\n"));
             UncorePmcStatus = UncorePmcStatus & ~(APPLE_UPMCR0_IMODE);
             UncorePmcStatus |= APPLE_UPMCR_OFF_IMODE;
-            AppleAicV2WriteUncorePmcControlRegister(UncorePmcStatus);
+            AppleAicWriteUncorePmcControlRegister(UncorePmcStatus);
         }
     }
 

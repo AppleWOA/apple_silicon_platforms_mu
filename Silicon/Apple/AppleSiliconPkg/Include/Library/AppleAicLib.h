@@ -187,36 +187,23 @@ BOOLEAN EFIAPI AppleAicReadInterruptState(
 
 
 
+UINTN EFIAPI AppleAicReadIpiStatusRegister(VOID);
 
-//AICv1 specific
+VOID EFIAPI AppleAicWriteIpiStatusRegister(IN UINTN Value);
 
+VOID EFIAPI AppleAicWriteIpiLocalRequestRegister(IN UINTN Value);
 
+VOID EFIAPI AppleAicWriteIpiGlobalRequestRegister(IN UINTN Value);
 
-//AICv2 specific
+UINTN EFIAPI AppleAicReadPmcControlRegister(VOID);
 
-UINTN EFIAPI AppleAicV2ReadIpiStatusRegister(VOID);
+VOID EFIAPI AppleAicWritePmcControlRegister(IN UINTN Value);
 
-VOID EFIAPI AppleAicV2WriteIpiStatusRegister(IN UINTN Value);
+UINTN EFIAPI AppleAicReadUncorePmcControlRegister(VOID);
 
-VOID EFIAPI AppleAicV2WriteIpiLocalRequestRegister(IN UINTN Value);
+VOID EFIAPI AppleAicWriteUncorePmcControlRegister(IN UINTN Value);
 
-VOID EFIAPI AppleAicV2WriteIpiGlobalRequestRegister(IN UINTN Value);
-
-UINTN EFIAPI AppleAicV2ReadPmcControlRegister(VOID);
-
-VOID EFIAPI AppleAicV2WritePmcControlRegister(IN UINTN Value);
-
-UINTN EFIAPI AppleAicV2ReadUncorePmcControlRegister(VOID);
-
-VOID EFIAPI AppleAicV2WriteUncorePmcControlRegister(IN UINTN Value);
-
-UINTN EFIAPI AppleAicV2ReadUncorePmcStatusRegister(VOID);
-
-/**
- * Calculate the AIC register offsets on the platform
- * 
- * @return EFI_SUCCESS if successful, EFI_ERROR(-1) if an error occurred.
- */
+UINTN EFIAPI AppleAicReadUncorePmcStatusRegister(VOID);
 
 
 #endif //APPLEAIC_H_
