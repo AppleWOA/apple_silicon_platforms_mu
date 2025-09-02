@@ -230,12 +230,12 @@ BOOLEAN EFIAPI AppleAicReadInterruptState(
     UINT32 HwStateValue = 0;
     UINT32 AicIrqMaskBit = 0;
     UINT32 Result = 0;
+    UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
     DEBUG((DEBUG_INFO, "%a: reading interrupt state for IRQ number 0x%llx", __FUNCTION__, Source));
     if (mAicVersion == APPLE_AIC_VERSION_2)
     {
         CpuDieOffset = Source / AicInfoStruct->MaxIrqs * AicInfoStruct->DieStride;
     }
-    UINT32 IrqNum = Source % AicInfoStruct->MaxIrqs;
     HwStateValue = MmioRead32(AicBase + AicHwStateRegOffset + CpuDieOffset + AIC_MASK_REG(IrqNum));
     AicIrqMaskBit = AIC_MASK_BIT(IrqNum);
     Result = HwStateValue & AicIrqMaskBit;
