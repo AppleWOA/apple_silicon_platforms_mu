@@ -369,7 +369,7 @@ STATIC VOID EFIAPI AppleAicV1InterruptHandler(
             PmcStatus |= (BIT18 | BIT17 | BIT16 | BIT0);
             AppleAicWritePmcControlRegister(PmcStatus);   
         }
-        else if (FIELD_GET(APPLE_UPMCR0_IMODE, UncorePmcStatus) == APPLE_UPMCR_FIQ_IMODE && (AppleAicV2ReadUncorePmcStatusRegister() & APPLE_UPMSR_IACT))
+        else if (FIELD_GET(APPLE_UPMCR0_IMODE, UncorePmcStatus) == APPLE_UPMCR_FIQ_IMODE && (AppleAicReadUncorePmcStatusRegister() & APPLE_UPMSR_IACT))
         {
             DEBUG((DEBUG_INFO, "Uncore PMC FIQ asserted, unsupported, acking\n"));
             UncorePmcStatus = UncorePmcStatus & ~(APPLE_UPMCR0_IMODE);
