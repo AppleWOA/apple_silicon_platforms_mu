@@ -27,7 +27,7 @@
 ################################################################################
 
 [FD.J274MacMini2020_EFI]
-BaseAddress   = 0x10030000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired address of firmware (will always be loaded from RAM)
+BaseAddress   = 0x830000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired address of firmware (will always be loaded from RAM)
 Size          = 0x00001E00000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 ErasePolarity = 1
 
