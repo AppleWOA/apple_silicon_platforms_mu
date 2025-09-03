@@ -18,7 +18,7 @@
 
 [Sources]
   GTDT.aslc
-  #CSRT.aslc
+  MADT_Static.aslc
 
 
 [Packages]
@@ -39,3 +39,7 @@
   gArmTokenSpaceGuid.PcdArmArchTimerIntrNum                       ## CONSUMES
   gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum                    ## CONSUMES
   gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum                   ## CONSUMES
+  gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum                   ## CONSUMES
+  gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount                     ## CONSUMES
+  gArmTokenSpaceGuid.PcdGicRedistributorsBase
+  gArmTokenSpaceGuid.PcdGicDistributorBase
