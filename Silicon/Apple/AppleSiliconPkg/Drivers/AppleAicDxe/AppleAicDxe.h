@@ -55,5 +55,6 @@ EFI_STATUS AppleAicV1DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
 
 EFI_STATUS AppleAicV2DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable, APPLE_AIC_VERSION aicVersion);
 
+AIC_INFO_STRUCT *AicInfoStruct;
 
 #endif //APPLE_AIC_DXE_H

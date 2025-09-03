@@ -52,7 +52,7 @@ extern EFI_HARDWARE_INTERRUPT_PROTOCOL   gHardwareInterruptAicV1Protocol;
 extern EFI_HARDWARE_INTERRUPT2_PROTOCOL  gHardwareInterrupt2AicV1Protocol;
 
 
-AIC_INFO_STRUCT *AicInfoStruct;
+extern AIC_INFO_STRUCT *AicInfoStruct;
 
 //
 // Description:
