@@ -30,6 +30,11 @@
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSocIdentifier|0x8103
   gAppleSiliconPkgTokenSpaceGuid.PcdInitializeRamdisk|TRUE
   gAppleSiliconPkgTokenSpaceGuid.PcdSecPhaseStackBase|0x900000000
+  #number of cores (right now we are assuming the lowest common denominator - this will change later)
+  gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount|8|UINT32|0x00004406
+  #all Rhodes chips have three clusters, "boot", P-core/E-core clusters
+  # for multi-die systems, this cluster setup is duplicated on the second die
+  gAppleSiliconPkgTokenSpaceGuid.PcdClusterCount|2|UINT32|0x00004407
 
 #AIC/GIC configuration settings
 !if $(AIC_BUILD) == FALSE
@@ -63,6 +68,34 @@
   #placeholder settings
   gArmTokenSpaceGuid.PcdPciBusMin|0x0
   gArmTokenSpaceGuid.PcdPciBusMax|0xFF
+
+  #
+  # Apple chips don't seem to use "x86-style" I/O accesses, so use placeholder values here, and don't reference them in the host bridge driver.
+  #
+  gArmTokenSpaceGuid.PcdPciIoBase|0x0
+  gArmTokenSpaceGuid.PcdPciIoSize|0x00010000
+  #
+  # The 32 bit PCIe MMIO is not prefetchable.
+  #
+  gArmTokenSpaceGuid.PcdPciMmio32Base|0xc0000000
+  gArmTokenSpaceGuid.PcdPciMmio32Size|0x40000000
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio32Translation|0x500000000
+  gEfiMdePkgTokenSpaceGuid.PcdPciMmio64Translation|0x0
+  #
+  # 64 bit PCIe MMIO *is* prefetchable.
+  #
+  gArmTokenSpaceGuid.PcdPciMmio64Base|0x400000000
+  gArmTokenSpaceGuid.PcdPciMmio64Size|0x20000000
+
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0x690000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarSize|0x1000000
+  gAppleSiliconPkgTokenSpaceGuid.PcdPciExpressBarLimit|0x690FFFFFF
+
+  gEmbeddedTokenSpaceGuid.PcdDmaDeviceOffset|0xFFFFFFFB00000000
+  #
+  # This shouldn't get used.
+  #
+  gEfiMdePkgTokenSpaceGuid.PcdPciIoTranslation|0x0
 
 [LibraryClasses.common]
   MemoryInitPeiLib|T810XFamilyPkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
