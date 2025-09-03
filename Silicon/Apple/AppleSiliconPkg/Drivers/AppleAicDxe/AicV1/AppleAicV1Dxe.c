@@ -475,11 +475,17 @@ EFI_STATUS AppleAicV1DxeInit(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Sys
 
 
     //
-    // TODO: Disable all interrupts for now.
+    // Disable all interrupts for now.
     //
     // Also of note: AICv1 uses traditional MPIDR based affinity routing instead of
     // the hardware based heuristic used on AICv2 and AICv3.
     //
+
+    //start from a clean state by disabling all interrupts
+    for(InterruptIndex = 0; InterruptIndex < AicInfoStruct->NumIrqs; InterruptIndex++)
+    {
+        AppleAicV1MaskInterrupt(&gHardwareInterruptAicV1Protocol, InterruptIndex);
+    }
     
     //register the interrupt controller now that setup is done.
 
