@@ -27,6 +27,8 @@
  * @return EFI_STATUS 
  */
 
+AIC_INFO_STRUCT *AicInfoStruct;
+
 EFI_STATUS
 InterruptDxeInitialize (
   IN EFI_HANDLE        ImageHandle,

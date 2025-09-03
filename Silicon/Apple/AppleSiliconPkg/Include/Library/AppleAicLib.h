@@ -49,6 +49,7 @@ typedef struct aic_info_struct {
 
 } AIC_INFO_STRUCT;
 
+extern AIC_INFO_STRUCT *AicInfoStruct;
 
 //AICv1 Registers
 
