@@ -52,8 +52,6 @@ extern EFI_HARDWARE_INTERRUPT_PROTOCOL   gHardwareInterruptAicV1Protocol;
 extern EFI_HARDWARE_INTERRUPT2_PROTOCOL  gHardwareInterrupt2AicV1Protocol;
 
 
-extern AIC_INFO_STRUCT *AicInfoStruct;
-
 //
 // Description:
 //  Masks an interrupt on the AICv1. Note that this does not include the timer interrupt on platforms
