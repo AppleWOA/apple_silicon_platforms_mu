@@ -90,7 +90,7 @@ STATIC DBG2_TABLE Dbg2 = {
     // Kernel Debug Port
     DBG2_DEBUG_PORT_DDI (
       DBG2_NUMBER_OF_GENERIC_ADDRESS_REGISTERS,
-      0x16, /* Using a reserved port subtype for now so we can uniquely define the 8900 UART in our KDCOM transport without the SAM5250 built-in support causing issues. */
+      0xA, /* SAM5250, seems to be more or less compatible with the 8900 UART (which isn't 5250 based but is close enough for WinDbg) */
       FixedPcdGet64 (PcdAppleUartBase),
       SERIAL_PORT_8900_UART_ADDR_SIZE,
       APPLE_8900_UART_STRING
