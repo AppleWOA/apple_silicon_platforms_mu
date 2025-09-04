@@ -6,7 +6,7 @@
  * 
  * Abstract:
  *     Debug Port Table. This source file implements the DBG2 table
- *     for the Mac Studio (2022) platform.
+ *     for the Mac Mini (2020) platform.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -25,7 +25,7 @@
 
 /**
  * 
- * The Mac Studio (2022) has 4 USB-C ports in the back, two on the front.
+ * The Mac Mini (2020) has 2 USB-C ports in the back.
  * In addition, it has two USB-A ports on the back.
  * 
  * For initial bringup, we're only using KDCOM (using KDNET over USB would require UsbFunctionIo protocol working which is on delay.) over the *real* serial port.
@@ -90,7 +90,7 @@ STATIC DBG2_TABLE Dbg2 = {
     // Kernel Debug Port
     DBG2_DEBUG_PORT_DDI (
       DBG2_NUMBER_OF_GENERIC_ADDRESS_REGISTERS,
-      0x16, /* Using a reserved port subtype for now so we can uniquely define the 8900 UART in our KDCOM transport without the SAM5250 built-in support causing issues. */
+      0xA,
       FixedPcdGet64 (PcdAppleUartBase),
       SERIAL_PORT_8900_UART_ADDR_SIZE,
       APPLE_8900_UART_STRING
