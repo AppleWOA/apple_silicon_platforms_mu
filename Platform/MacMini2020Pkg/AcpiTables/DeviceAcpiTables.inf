@@ -1,6 +1,6 @@
 ## @file
 #  Borrowed from edk2-platforms/JunoPkg and AmpereAltraPkg, original header below.
-#  Copyright (c) 2023, amarioguy (AppleWOA authors)
+#  Copyright (c) 2025 AppleWOA authors
 #  ACPI table data and ASL sources required to boot the platform.
 #
 #  Copyright (c) 2014-2017, ARM Ltd. All rights reserved.

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * Copyright (c) 2025 AppleWOA authors.
  * 
  * Module Name:
  *     DSDT.asl
