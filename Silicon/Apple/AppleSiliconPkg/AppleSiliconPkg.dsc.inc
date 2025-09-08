@@ -99,6 +99,9 @@
   gArmTokenSpaceGuid.PcdVFPEnabled|1
 !endif
 
+  #Debugger control
+  DebuggerFeaturePkgTokenSpaceGuid.PcdForceEnableDebugger|TRUE
+
 
 [PcdsDynamicDefault.common]
   #color bar default settings
@@ -196,7 +199,7 @@
 !endif
   ArmSmcLib|ArmPkg/Library/ArmSmcLib/ArmSmcLib.inf
   ArmHvcLib|ArmPkg/Library/ArmHvcLib/ArmHvcLib.inf
-  ArmGenericTimerCounterLib|ArmPkg/Library/ArmGenericTimerVirtCounterLib/ArmGenericTimerVirtCounterLib.inf
+  ArmGenericTimerCounterLib|AppleSiliconPkg/Library/AppleArmGenericTimerPhyCounterLib/AppleArmGenericTimerPhyCounterLib.inf
 
   # Virtual RTC Driver
   RealTimeClockLib|EmbeddedPkg/Library/VirtualRealTimeClockLib/VirtualRealTimeClockLib.inf
@@ -222,8 +225,14 @@
   #PeCoffExtraActionLib|ArmPkg/Library/DebugPeCoffExtraActionLib/DebugPeCoffExtraActionLib.inf
   PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
 
-  DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
-  DebugAgentTimerLib|EmbeddedPkg/Library/DebugAgentTimerLibNull/DebugAgentTimerLibNull.inf
+
+  # Debugger Libraries
+  DebugTransportLib|DebuggerFeaturePkg/Library/DebugTransportSerialLib/DebugTransportSerialLib.inf
+  WatchdogTimerLib|DebuggerFeaturePkg/Library/WatchdogTimerLibNull/WatchdogTimerLibNull.inf
+  TransportLogControlLib|DebuggerFeaturePkg/Library/TransportLogControlLibNull/TransportLogControlLibNull.inf
+
+  #DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
+  #DebugAgentTimerLib|EmbeddedPkg/Library/DebugAgentTimerLibNull/DebugAgentTimerLibNull.inf
 
   # Apple Device Tree (ADT) access library
   AppleDTLib|AppleSiliconPkg/Library/AppleDTLib/AppleDTLib.inf
@@ -406,6 +415,7 @@
 
 [LibraryClasses.common.DXE_CORE]
 
+  DebugAgentLib|DebuggerFeaturePkg/Library/DebugAgent/DebugAgentDxe.inf
   HobLib|MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf
   MemoryAllocationLib|MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationLib.inf
   DxeCoreEntryPoint|MdePkg/Library/DxeCoreEntryPoint/DxeCoreEntryPoint.inf
@@ -511,6 +521,7 @@
     NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
     NULL|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
     DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
+    DebugAgentLib|DebuggerFeaturePkg/Library/DebugAgent/DebugAgentDxe.inf
   }
 
   #
