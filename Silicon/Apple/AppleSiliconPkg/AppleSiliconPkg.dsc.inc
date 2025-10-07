@@ -100,7 +100,7 @@
 !endif
 
   #Debugger control
-  DebuggerFeaturePkgTokenSpaceGuid.PcdForceEnableDebugger|TRUE
+  DebuggerFeaturePkgTokenSpaceGuid.PcdForceEnableDebugger|FALSE
 
 
 [PcdsDynamicDefault.common]
@@ -540,7 +540,10 @@
   ArmPkg/Drivers/CpuDxe/CpuDxe.inf
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !if $(AIC_BUILD) == FALSE
-  ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
+  ArmPkg/Drivers/ArmGic/ArmGicDxe.inf {
+    <LibraryClasses>
+	  ArmGicArchLib|AppleSiliconPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
+  }
 !else
   AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicDxe.inf
 !endif

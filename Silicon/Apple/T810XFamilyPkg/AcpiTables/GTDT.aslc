@@ -106,13 +106,15 @@ EFI_ACPI_6_4_GENERIC_TIMER_DESCRIPTION_TABLES Gtdt = {
     CNT_READ_BASE_ADDRESS,                                  // UINT64  CntReadBasePhysicalAddress
     1,                                                      // UINT32  PlatformTimerCount
     sizeof (EFI_ACPI_6_4_GENERIC_TIMER_DESCRIPTION_TABLE),  // UINT32  PlatformTimerOffset
+    0,                                                      // UINT32  VirtualPL2TimerGSIV
+    0                                                       // UINT32  VirtualPL2TimerFlags
   },
 #if (WATCHDOG_COUNT != 0)
   {
     {
       EFI_ACPI_6_4_GTDT_ARM_GENERIC_WATCHDOG,                      // UINT8 Type
-      sizeof(EFI_ACPI_6_4_GTDT_ARM_GENERIC_WATCHDOG),              // UINT16 Length
-      EFI_ACPI_RESERVED_BYTE,                                       // UINT8 Reserved
+      sizeof(EFI_ACPI_6_4_GTDT_ARM_GENERIC_WATCHDOG_STRUCTURE),    // UINT16 Length
+      EFI_ACPI_RESERVED_BYTE,                                      // UINT8 Reserved
       ARM_WATCHDOG_REFRESH_BASE,                                   // UINT64 RefreshFramePhysicalAddress
       ARM_WATCHDOG_CONTROL_BASE,                                   // UINT64 WatchdogControlFramePhysicalAddress
       ARM_WATCHDOG_GSIV,                                           // UINT32 WatchdogTimerGSIV
