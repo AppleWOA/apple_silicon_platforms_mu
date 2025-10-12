@@ -114,7 +114,11 @@ UINTN EFIAPI SerialPortRead(
     IN UINTN NumberOfBytes
     )
 {
-    return EFI_SUCCESS;
+    UINTN  Count;
+    for (Count = 0; (Count < NumberOfBytes) && SerialPortPoll (); Count++, Buffer++) {
+      *Buffer = MmioRead32 (UART_BASE + UART_RX_BYTE);
+    }
+    return Count;
 }
 
 /*
@@ -151,7 +155,7 @@ UINTN SerialPortFlush(VOID)
 
 BOOLEAN EFIAPI SerialPortPoll(VOID)
 {
-    return FALSE;
+    return (MmioRead32(UART_BASE + UART_TRANSFER_STATUS) & UART_TRANSFER_STATUS_RXD) ? TRUE : FALSE;
 }
 
 /**

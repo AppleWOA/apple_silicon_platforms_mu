@@ -24,24 +24,36 @@
 #include <IndustryStandard/Acpi63.h>
 #include <Acpi/AcpiHeader.h>
 
+#define ITS_COUNT 1
+
 //
 // pulled from mu_tiano_platforms, since there's no equivalent GICR initializer.
 //
 #define MADT_GICR_INIT()  {                                           \
-   EFI_ACPI_6_0_GICR,                        /* Type */                        \
-   sizeof (EFI_ACPI_6_0_GICR_STRUCTURE),     /* Length */                      \
+   EFI_ACPI_6_4_GICR,                        /* Type */                        \
+   sizeof (EFI_ACPI_6_4_GICR_STRUCTURE),     /* Length */                      \
    EFI_ACPI_RESERVED_WORD,                   /* Reserved */                    \
    FixedPcdGet32 (PcdGicRedistributorsBase), /* DiscoveryRangeBaseAddress */   \
-   0x20000 * FixedPcdGet32(PcdCoreCount)                   /* DiscoveryRangeLength */        \
-   }
+   0x20000 * FixedPcdGet32(PcdCoreCount)     /* DiscoveryRangeLength */        \
+}
+
+#define MADT_GIC_ITS_INIT(GicItsId, GicItsBase)  {                             \
+    EFI_ACPI_6_4_GIC_ITS,                 /* Type */                           \
+    sizeof (EFI_ACPI_6_4_GIC_ITS_STRUCTURE),                                   \
+    EFI_ACPI_RESERVED_WORD,               /* Reserved */                       \
+    GicItsId,                             /* GicItsId */                       \
+    GicItsBase,                           /* PhysicalBaseAddress */            \
+    EFI_ACPI_RESERVED_DWORD               /* DiscoveryRangeLength */           \
+}
 
 #pragma pack (1)
 
 typedef struct {
 EFI_ACPI_6_3_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER   Header;
 EFI_ACPI_6_3_GIC_STRUCTURE                            GicInterfaces[FixedPcdGet32 (PcdCoreCount)];
-EFI_ACPI_6_3_GIC_DISTRIBUTOR_STRUCTURE                GicDistributor;
-EFI_ACPI_6_3_GICR_STRUCTURE                           GicRedistributor;
+EFI_ACPI_6_0_GIC_DISTRIBUTOR_STRUCTURE                GicDistributor;
+EFI_ACPI_6_4_GICR_STRUCTURE                           GicRedistributor;
+EFI_ACPI_6_4_GIC_ITS_STRUCTURE                        GicIts[ITS_COUNT];
 } MULTIPLE_APIC_DESCRIPTION_TABLE;
 
 #pragma pack ()
@@ -67,36 +79,38 @@ MULTIPLE_APIC_DESCRIPTION_TABLE Madt = {
     //
     // Cores are ordered by cluster. (Bootstrap first, then successive P-core/E-core clusters.)
     //
-    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Icestorm-0 (Bootstrap)
+    EFI_ACPI_6_3_GICC_STRUCTURE_INIT( // Icestorm-0 (Bootstrap)
         0, 0, GET_MPID(0, 0), EFI_ACPI_6_3_GIC_ENABLED, 50, 0,
-        0, 0, 25, 0 /* GicRBase */),
-    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Icestorm-1 (Bootstrap)
+        0, 0, 25, 0 /* GicRBase */, 0, 0),
+    EFI_ACPI_6_3_GICC_STRUCTURE_INIT( // Icestorm-1 (Bootstrap)
         1, 1, GET_MPID(0, 1),  EFI_ACPI_6_3_GIC_ENABLED, 54, 0,
-        0, 0, 25, 0 /* GicRBase */),
-    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Icestorm-2 (Bootstrap)
+        0, 0, 25, 0 /* GicRBase */, 0, 0),
+    EFI_ACPI_6_3_GICC_STRUCTURE_INIT( // Icestorm-2 (Bootstrap)
         2, 2, GET_MPID(0, 2),  EFI_ACPI_6_3_GIC_ENABLED, 54, 0,
-        0, 0, 25, 0 /* GicRBase */),
-    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Icestorm-2 (Bootstrap)
+        0, 0, 25, 0 /* GicRBase */, 0, 0),
+    EFI_ACPI_6_3_GICC_STRUCTURE_INIT( // Icestorm-2 (Bootstrap)
         3, 3, GET_MPID(0, 3),  EFI_ACPI_6_3_GIC_ENABLED, 54, 0,
-        0, 0, 25, 0 /* GicRBase */),
-    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Firestorm-0 (P-core cluster 0)
+        0, 0, 25, 0 /* GicRBase */, 0, 0),
+    EFI_ACPI_6_3_GICC_STRUCTURE_INIT( // Firestorm-0 (P-core cluster 0)
         4, 4, GET_MPID(1, 0),  EFI_ACPI_6_3_GIC_ENABLED, 58, 0,
-        0, 0, 25, 0 /* GicRBase */),
-    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Firestorm-1 (P-core cluster 0)
+        0, 0, 25, 0 /* GicRBase */, 0, 0),
+    EFI_ACPI_6_3_GICC_STRUCTURE_INIT( // Firestorm-1 (P-core cluster 0)
         5, 5, GET_MPID(1, 1),  EFI_ACPI_6_3_GIC_ENABLED, 62, 0,
-        0, 0, 25, 0 /* GicRBase */),
-    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // Firestorm-2 (P-core cluster 0)
+        0, 0, 25, 0 /* GicRBase */, 0, 0),
+    EFI_ACPI_6_3_GICC_STRUCTURE_INIT( // Firestorm-2 (P-core cluster 0)
         6, 6, GET_MPID(1, 2),  EFI_ACPI_6_3_GIC_ENABLED, 34, 0,
-        0, 0, 25, 0 /* GicRBase */),
-    EFI_ACPI_5_1_GICC_STRUCTURE_INIT( // // Firestorm-3 (P-core cluster 0)
+        0, 0, 25, 0 /* GicRBase */, 0, 0),
+    EFI_ACPI_6_3_GICC_STRUCTURE_INIT( // // Firestorm-3 (P-core cluster 0)
         7, 7, GET_MPID(1, 3),  EFI_ACPI_6_3_GIC_ENABLED, 38, 0,
-        0, 0, 25, 0 /* GicRBase */),
+        0, 0, 25, 0 /* GicRBase */, 0, 0),
 },
 EFI_ACPI_6_0_GIC_DISTRIBUTOR_INIT(0, FixedPcdGet64 (PcdGicDistributorBase), 0, 3),
 // Format: EFI_ACPI_6_3_GIC_MSI_FRAME_INIT(GicMsiFrameId, PhysicalBaseAddress, Flags, SPICount, SPIBase)
 
 MADT_GICR_INIT(),
-
+{
+    MADT_GIC_ITS_INIT(0, 0xF20000000)
+}
 };
 
 //
