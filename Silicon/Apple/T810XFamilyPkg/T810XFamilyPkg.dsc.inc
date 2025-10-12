@@ -11,11 +11,10 @@
   # Setting timer frequency to 0 means "read from CNTFRQ_EL0"
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|0
   gArmTokenSpaceGuid.PcdCpuVectorBaseAddress|0x8FF000000 #fair warning this location is *totally random*
-  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|29|UINT32|0x00000035
-  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|30|UINT32|0x00000036
-  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|26|UINT32|0x00000040
-  gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|27|UINT32|0x00000041
-  gArmTokenSpaceGuid.PcdArmArchTimerHypVirtIntrNum|28|UINT32|0x0000004A
+  gArmTokenSpaceGuid.PcdArmArchTimerSecIntrNum|19 # placeholder 
+  gArmTokenSpaceGuid.PcdArmArchTimerIntrNum|17 # phys timer IRQ number (this is arbitrary because per-cpu fiq)
+  gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|20 #this disables the HV timer
+  gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum|18 #virt timer
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleSartVersion|2
   gAppleSiliconPkgTokenSpaceGuid.PcdBootArgsPointer|0x840000000
   gAppleSiliconPkgTokenSpaceGuid.PcdAdtPointer|0x840004000
