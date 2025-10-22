@@ -38,7 +38,7 @@
   PeCoffGetEntryPointLib
   PrePiHobListPointerLib
   CacheMaintenanceLib
-  DebugAgentLib
+  #DebugAgentLib
   SerialPortLib
   MemoryAllocationLib
   PerformanceLib
