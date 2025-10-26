@@ -6,7 +6,7 @@
  * 
  * Abstract:
  *     Differentiated System Description Table. This source file implements the DSDT table
- *     for the MacBook Air (Mid 2020) platform.
+ *     for the MacBook Pro (Late 2020) platform.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -17,7 +17,7 @@
  **/
 #include <IndustryStandard/Acpi65.h>
 
- DefinitionBlock("DSDT.aml", "DSDT", 0x02, "Apple", "J31x", 0x8103) {
+ DefinitionBlock("DSDT.aml", "DSDT", 0x02, "Apple", "J293", 0x8103) {
     Scope(\_SB) {
         //
         // Cluster low power states. On T8101/T8103, there are only 2 clusters, the P and E core clusters,

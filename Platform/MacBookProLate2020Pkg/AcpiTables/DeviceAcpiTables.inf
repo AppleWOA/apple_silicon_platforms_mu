@@ -20,7 +20,7 @@
   #Bert.asl
   DBG2.aslc
   #EINJ.asl
-  #DSDT.asl
+  DSDT.asl
 
 [Packages]
   ArmPkg/ArmPkg.dec
