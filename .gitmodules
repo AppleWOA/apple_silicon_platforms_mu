@@ -16,3 +16,6 @@
 [submodule "Common/MU_DFCI"]
 	path = Common/MU_DFCI
 	url = https://github.com/microsoft/mu_feature_dfci.git
+[submodule "mu_feature_debugger"]
+	path = mu_feature_debugger
+	url = https://github.com/microsoft/mu_feature_debugger.git
