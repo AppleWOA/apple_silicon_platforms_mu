@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * Copyright (c) 2025 AppleWOA authors.
  * 
  * Module Name:
  *     DSDT.asl
  * 
  * Abstract:
  *     Differentiated System Description Table. This source file implements the DSDT table
- *     for the MacBook Pro (Late 2020) platform.
+ *     for the Mac Mini (2020) platform.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -115,9 +115,9 @@
                 ReadWrite,            // ReadAndWrite
                 0x0000000000000000,   // AddressGranularity - GRA
                 // FixedPcdGet64(PcdAppleUartBase),   // AddressMinimum - MIN
-                // (FixedPcdGet64(PcdAppleUartBase) + 0xFFF),   // AddressMaximum - MAX
-                0x235200000,
-                0x235200fff,
+                // (FixedPcdGet64(PcdAppleUartBase) + 0xFFFF),   // AddressMaximum - MAX
+                0x235200000,   // AddressMinimum - MIN
+                0x235200fff,   // AddressMaximum - MAX
                 0x0000000000000000,   // AddressTranslation - TRA
                 0x0000000000001000    // RangeLength - LEN
                 )
@@ -126,6 +126,15 @@
             Method (_STA) {
                 Return (0xF)
             }
+        }
+
+        Device(PCI0) {
+            Name (_HID, EISAID ("PNP0A08")) // PCI Express Root Bridge
+            Name (_CID, EISAID ("PNP0A03")) // Compatible PCI Root Bridge
+            Name (_SEG, Zero) // PCI Segment Group number
+            Name (_BBN, Zero) // PCI Base Bus Number
+            Name (_ADR, Zero)
+            Name (_UID, "PCI0")
         }
 
         //
@@ -235,5 +244,6 @@
                 }
             }
         }
+        
     }
  }

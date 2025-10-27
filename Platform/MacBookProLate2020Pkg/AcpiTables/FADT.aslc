@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2023, amarioguy (AppleWOA authors).
+ * Copyright (c) 2025 AppleWOA authors.
  * 
  * Module Name:
  *     FADT.aslc
  * 
  * Abstract:
  *     Fixed ACPI Descripton Table. This source file implements the FADT table
- *     for MacBook Pros.
+ *     for Macbook Pro.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -19,6 +19,7 @@
 #include <Library/AcpiLib.h>
 #include <IndustryStandard/Acpi64.h>
 #include <Acpi/AcpiHeader.h>
+
 
 /**
  * Note: Most of these fields are zero, as per Arm SBBR/SBSA specs we are using "hardware-reduced" ACPI mode
@@ -35,7 +36,7 @@ EFI_ACPI_6_4_FIXED_ACPI_DESCRIPTION_TABLE Fadt = {
     0, //FIRMWARE_CTRL (UINT32)
     0, //DSDT (UINT32)
     EFI_ACPI_RESERVED_BYTE, //Reserved0
-    EFI_ACPI_6_4_PM_PROFILE_MOBILE, //preferred power management profile (do we want the workstation profile for MacBook Pros?)
+    EFI_ACPI_6_4_PM_PROFILE_MOBILE, //preferred power management profile
     0, //SCI interrupt num (UINT16)
     0, //SMI Command (UINT32)
     0, //ACPI enable (UINT8)
