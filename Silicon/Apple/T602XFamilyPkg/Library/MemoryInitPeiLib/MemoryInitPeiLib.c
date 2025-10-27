@@ -28,7 +28,7 @@
 //Device memory map configuration file for UEFI (this is to help with pagetable initialization)
 #include <Library/T602XFamilyVirtualMemoryMapDefines.h>
 
-#define MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS 39
+#define MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS 41
 
 #define DDR_ATTRIBUTES_CACHED           ARM_MEMORY_REGION_ATTRIBUTE_WRITE_BACK
 #define DDR_ATTRIBUTES_UNCACHED         ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED
@@ -429,6 +429,16 @@ VOID BuildVirtualMemoryMap(OUT ARM_MEMORY_REGION_DESCRIPTOR **VirtualMemoryMap)
   VirtualMemoryTable[++Index].PhysicalBase = APPLE_PCIE_MMIO_RANGE_20_BASE;
   VirtualMemoryTable[Index].VirtualBase    = APPLE_PCIE_MMIO_RANGE_20_BASE;
   VirtualMemoryTable[Index].Length         = APPLE_PCIE_MMIO_RANGE_20_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_CORE_SYSTEM_MMIO_RANGE_15_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_CORE_SYSTEM_MMIO_RANGE_15_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_CORE_SYSTEM_MMIO_RANGE_15_SIZE;
+  VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
+
+  VirtualMemoryTable[++Index].PhysicalBase = APPLE_CORE_SYSTEM_MMIO_RANGE_16_BASE;
+  VirtualMemoryTable[Index].VirtualBase    = APPLE_CORE_SYSTEM_MMIO_RANGE_16_BASE;
+  VirtualMemoryTable[Index].Length         = APPLE_CORE_SYSTEM_MMIO_RANGE_16_SIZE;
   VirtualMemoryTable[Index].Attributes     = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
 
   //System DRAM

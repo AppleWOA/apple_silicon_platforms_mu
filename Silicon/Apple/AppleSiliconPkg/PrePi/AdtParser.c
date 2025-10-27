@@ -10,6 +10,8 @@
 #include <Library/DebugLib.h>
 #include <Library/AppleDTLib.h>
 
+#define ALIGN_UP(x, a)   (((x) + ((a) - 1)) & ~((a) - 1))
+
 BOOLEAN
 EarlySetup (
   IN VOID     *BootArgsAddr,
@@ -35,7 +37,7 @@ EarlySetup (
 
 
   PatchPcdSet64(PcdFrameBufferAddress, BootArgs->video.base);
-  PatchPcdSet64(PcdFrameBufferSize, BootArgs->video.stride * BootArgs->video.height);
+  PatchPcdSet64(PcdFrameBufferSize, ALIGN_UP(BootArgs->video.stride * BootArgs->video.height, 0x4000)); // for notched/internal displays, the FB size has to be aligned up!
 
   DEBUG((EFI_D_INFO | EFI_D_LOAD | EFI_D_ERROR, "Framebuffer address loaded to PCDs: 0x%llx (size 0x%llx)\n", PcdGet64(PcdFrameBufferAddress), PcdGet64(PcdFrameBufferSize)));
 
