@@ -46,7 +46,7 @@
 
 [Components.common]
 
-  MacBookProLate2020Pkg/AcpiTables/DeviceAcpiTables.inf
+MacBookProLate2020Pkg/AcpiTables/DeviceAcpiTables.inf
 
 !include T810XFamilyPkg/T810XFamilyPkg.dsc.inc
 !include AppleSiliconPkg/AppleSiliconPkg.dsc.inc

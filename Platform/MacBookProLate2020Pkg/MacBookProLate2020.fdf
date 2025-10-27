@@ -1,4 +1,4 @@
-#UEFI Flash Description File for MacBook Air, 2020 M1 model.
+#UEFI Flash Description File for Mac Studio platforms
 #based on OnePlus6TPkg/OnePlus6TPkg.fdf
 #
 #  Copyright (c) 2018, Linaro Limited. All rights reserved.
@@ -26,13 +26,14 @@
 #
 ################################################################################
 
-
 [FD.J293MacBookProLate2020_EFI]
 BaseAddress   = 0x830000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # Desired address of firmware (will always be loaded from RAM)
-Size          = 0x001E00000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
+Size          = 0x00001E00000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes
 ErasePolarity = 1
-BlockSize     = 0x1000
-NumBlocks     = 0x1E00
+
+
+BlockSize     = 0x4000
+NumBlocks     = 0x780
 
 ################################################################################
 #
@@ -68,6 +69,7 @@ DATA = {
   0x00, 0x00, 0x00, 0x00                          # res5
 }
 
+
 0x000008000|0x001D80000
 gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
 FV = FVMAIN_COMPACT
@@ -86,7 +88,7 @@ FV = FVMAIN_COMPACT
 
 [FV.FvMain]
 BlockSize          = 0x40
-FvAlignment        = 8         # FV alignment and FV attributes setting.
+FvAlignment        = 16         # FV alignment and FV attributes setting.
 ERASE_POLARITY     = 1
 MEMORY_MAPPED      = TRUE
 STICKY_WRITE       = TRUE
@@ -102,8 +104,10 @@ READ_ENABLED_CAP   = TRUE
 READ_STATUS        = TRUE
 READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
+FvNameGuid         = 84c90f2e-22a5-4c84-a199-a17f7ea7cf6d
 
   !include AppleSiliconPkg/Include/DXEApriori.fdf.inc
+  
 
   #Main DXE core
   INF MdeModulePkg/Core/Dxe/DxeMain.inf
@@ -120,6 +124,7 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   INF EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   INF EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+  INF AppleSiliconPkg/Drivers/AppleDartIoMmuDxe/AppleDartIoMmuDxe.inf
 
   INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
 !if $(SECURE_BOOT_ENABLE) == TRUE
@@ -144,11 +149,11 @@ READ_LOCK_STATUS   = TRUE
   INF AppleSiliconPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
 
   #
-  # PCIe Support
+  # PCIe Support (required to bring up USB-A among other fun stuff)
   #
-  INF ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
-  INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
-  INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
+  #INF ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
+  #INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  #INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
   INF MdeModulePkg/Bus/Pci/NonDiscoverablePciDeviceDxe/NonDiscoverablePciDeviceDxe.inf
 
   #NVMe Support
@@ -164,6 +169,18 @@ READ_LOCK_STATUS   = TRUE
 
   # FV FileSystem
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
+
+  INF AppleSiliconPkg/Drivers/AppleEmbeddedGpioControllerDxe/AppleEmbeddedGpioControllerDxe.inf
+  #
+  # PCIe support is disabled for now.
+  #
+  INF AppleSiliconPkg/Drivers/AppleSiliconPciPlatformDxe/AppleSiliconPciPlatformDxe.inf
+  #INF AppleSiliconPkg/Drivers/AppleBootTimeEmbeddedFirmwareHelperDxe/AppleBootTimeEmbeddedFirmwareHelperDxe.inf
+
+  #
+  # DWC3 bringup module.
+  #
+  INF AppleSiliconPkg/Drivers/AppleUsbTypeCBringupDxe/AppleUsbTypeCBringupDxe.inf
 
   #
   # Usb Support
@@ -188,6 +205,7 @@ READ_LOCK_STATUS   = TRUE
   INF  MsCorePkg/Universal/StatusCodeHandler/Serial/Dxe/SerialStatusCodeHandlerDxe.inf
   INF  MsCorePkg/MuVarPolicyFoundationDxe/MuVarPolicyFoundationDxe.inf
 
+
   #
   # FAT filesystem + GPT/MBR partitioning
   #
@@ -207,7 +225,9 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
   INF AppleSiliconPkg/Drivers/AcpiPlatformDxe/AcpiPlatformDxe.inf
   INF MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
+  INF RuleOverride=ACPITABLE AppleSiliconPkg/AcpiTables/GenericAcpiTables.inf
   INF RuleOverride=ACPITABLE MacBookProLate2020Pkg/AcpiTables/DeviceAcpiTables.inf
+  INF RuleOverride=ACPITABLE MacBookProTouchBarFamilyPkg/AcpiTables/DeviceFamilyAcpiTables.inf
   INF RuleOverride=ACPITABLE T810XFamilyPkg/AcpiTables/CPUAcpiTables.inf
   #
   # SMBIOS Support
@@ -236,20 +256,32 @@ READ_LOCK_STATUS   = TRUE
 
   # DT
   #INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+
   FILE FREEFORM = PCD(gMsCorePkgTokenSpaceGuid.PcdRegulatoryGraphicFileGuid) {
     SECTION RAW = MacBookAirMid2020Pkg/Resources/RegulatoryLogos.png
   }
 
+  # Embedded RAMDisk (ISO format)
+  #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
+  #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.iso
+  #SECTION UI = "Embedded RAMDisk"  
+#}
+
   # Embedded RAMDisk (IMG format)
-#   FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
-#   SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
-#   SECTION UI = "Embedded RAMDisk"  
-# }
+  #FILE FREEFORM = 650B7CD0-94F8-46CC-88DE-8C199D41EDA3 {
+  #SECTION RAW = AppleSiliconPkg/RAMDisk/WinPE.img
+  #SECTION UI = "Embedded RAMDisk"  
+#}
+  
+  # Embedded USB firmware blob (for testing only!)
+  #FILE FREEFORM = d730ab59-670e-4a92-8475-b31939d05bb4 {
+  #SECTION RAW = AppleSiliconPkg/FirmwareBlobs/ASM2214A_PCI_XHCI_Controller.bin
+#}
   
 !include AppleSiliconPkg/FrontpageFdf.inc
 
 [FV.FVMAIN_COMPACT]
-FvAlignment        = 8
+FvAlignment        = 16
 ERASE_POLARITY     = 1
 MEMORY_MAPPED      = TRUE
 STICKY_WRITE       = TRUE
