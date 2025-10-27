@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2023, amarioguy (AppleWOA authors).
- * I have little skill, expect issues.
+ * Copyright (c) 2025 AppleWOA authors.
+ * 
  * Module Name:
  *     DBG2.aslc
  * 
  * Abstract:
  *     Debug Port Table. This source file implements the DBG2 table
- *     for the MacBook Pro (Late 2020) platform.
+ *     for the Macbook Pro (Late 2020) platform.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -24,13 +24,16 @@
 #include <Acpi/AcpiHeader.h>
 
 /**
- * The MacBook Pro (Late 2020) has two USB ports on the left side of the machine.
  * 
- * KDNET over USB is on hold for now - so just use the UART for KDCOM.
+ * The Macbook Pro (Late 2020) has 2 USB-C ports in the back.
+ * In addition, it has two USB-A ports on the back.
+ * 
+ * For initial bringup, we're only using KDCOM (using KDNET over USB would require UsbFunctionIo protocol working which is on delay.) over the *real* serial port.
  * 
  * Design here is copied from the Ampere Altra implementation.
  * 
 */
+
 
 #define DBG2_NUM_DEBUG_PORTS                       1
 #define DBG2_NUMBER_OF_GENERIC_ADDRESS_REGISTERS   1
@@ -87,7 +90,7 @@ STATIC DBG2_TABLE Dbg2 = {
     // Kernel Debug Port
     DBG2_DEBUG_PORT_DDI (
       DBG2_NUMBER_OF_GENERIC_ADDRESS_REGISTERS,
-      0xA, /* SAM5250, seems to be more or less compatible with the 8900 UART (which isn't 5250 based but is close enough for WinDbg) */
+      0xA,
       FixedPcdGet64 (PcdAppleUartBase),
       SERIAL_PORT_8900_UART_ADDR_SIZE,
       APPLE_8900_UART_STRING
@@ -96,7 +99,6 @@ STATIC DBG2_TABLE Dbg2 = {
 };
 
 #pragma pack()
-
 
 //
 // Reference the table being generated to prevent the optimizer from removing
