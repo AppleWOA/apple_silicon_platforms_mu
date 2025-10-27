@@ -117,8 +117,8 @@
                 // FixedPcdGet64(PcdAppleUartBase),   // AddressMinimum - MIN
                 // (FixedPcdGet64(PcdAppleUartBase) + 0xFFF),   // AddressMaximum - MAX
                 0x235200000,
-								0x235200fff,
-								0x0000000000000000,   // AddressTranslation - TRA
+                0x235200fff,
+                0x0000000000000000,   // AddressTranslation - TRA
                 0x0000000000001000    // RangeLength - LEN
                 )
                 Interrupt(ResourceConsumer, Level, ActiveHigh, Exclusive) { 1097 }            
