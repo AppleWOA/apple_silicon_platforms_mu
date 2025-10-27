@@ -30,10 +30,10 @@ class CommonPlatform():
     ''' Common settings for this platform.  Define static data here and use
         for the different parts of stuart
     '''
-    PackagesSupported = ("MacBookAirMid2020Pkg",)
+    PackagesSupported = ("MacBookProLate2020Pkg",)
     ArchSupported = ("AARCH64")
     TargetsSupported = ("DEBUG", "RELEASE", "NOOPT")
-    Scopes = ('MacBookAirMid2020', 'gcc_aarch64_linux', 'edk2-build', 'cibuild')
+    Scopes = ('MacBookProLate2020', 'gcc_aarch64_linux', 'edk2-build', 'cibuild')
     WorkspaceRoot = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     PackagesPath = ("Platform", "MU_BASECORE", "Common/MU", "Common/TIANO", "Common/MU_OEM_SAMPLE", "Silicon/ARM/TIANO", "Silicon/Apple", "Common/MU_DFCI", "mu_feature_debugger")
 
@@ -120,10 +120,10 @@ class SettingsManager(UpdateSettingsManager, SetupSettingsManager, PrEvalSetting
 
         The tuple should be (<workspace relative path to dsc file>, <input dictionary of dsc key value pairs>)
         '''
-        return ("MacBookAirMid2020Pkg/MacBookAirMid2020.dsc", {})
+        return ("MacBookProLate2020Pkg/MacBookProLate2020.dsc", {})
 
     def GetName(self):
-        return "MacBookAirMid2020"
+        return "MacBookProLate2020"
 
     def GetPackagesPath(self):
         ''' Return a list of paths that should be mapped as edk2 PackagesPath '''
@@ -155,7 +155,7 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
             "TARGET_ARCH", args.build_arch.upper(), "From CmdLine")
 
         shell_environment.GetBuildVars().SetValue(
-            "ACTIVE_PLATFORM", "MacBookAirMid2020Pkg/MacBookAirMid2020.dsc", "From CmdLine")
+            "ACTIVE_PLATFORM", "MacBookProLate2020Pkg/MacBookProLate2020.dsc", "From CmdLine")
 
 
     def GetWorkspaceRoot(self):
@@ -178,7 +178,7 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
     def GetName(self):
         ''' Get the name of the repo, platform, or product being build '''
         ''' Used for naming the log file, among others '''
-        return "MacBookAirMid2020Pkg"
+        return "MacBookProLate2020Pkg"
 
     def GetLoggingLevel(self, loggerType):
         ''' Get the logging level for a given type
@@ -192,8 +192,8 @@ class PlatformBuilder( UefiBuilder, BuildSettingsManager):
 
     def SetPlatformEnv(self):
         logging.debug("PlatformBuilder SetPlatformEnv")
-        self.env.SetValue("PRODUCT_NAME", "MacBookAirMid2020", "Platform Hardcoded")
-        self.env.SetValue("ACTIVE_PLATFORM", "MacBookAirMid2020Pkg/MacBookAirMid2020.dsc", "Platform Hardcoded")
+        self.env.SetValue("PRODUCT_NAME", "MacBookProLate2020", "Platform Hardcoded")
+        self.env.SetValue("ACTIVE_PLATFORM", "MacBookProLate2020Pkg/MacBookProLate2020.dsc", "Platform Hardcoded")
         self.env.SetValue("TARGET_ARCH", "AARCH64", "Platform Hardcoded")
         self.env.SetValue("TOOL_CHAIN_TAG", "CLANGPDB", "set default to clangpdb")
         # self.env.SetValue("EMPTY_DRIVE", "FALSE", "Default to false")
