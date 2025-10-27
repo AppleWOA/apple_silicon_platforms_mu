@@ -12,7 +12,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = DeviceAcpiTables
-  FILE_GUID                      = ccb167a3-3ac6-4ad9-bad5-07dde79bd707
+  FILE_GUID                      = 3ff4732c-9411-4e10-a10c-8b39df282e83
   MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
 

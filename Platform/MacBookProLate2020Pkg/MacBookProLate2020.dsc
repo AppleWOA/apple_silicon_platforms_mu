@@ -1,4 +1,4 @@
-#MacBook Air Mid 2020 UEFI DSC file
+#Mac Mini 2020 UEFI DSC file
 #some parts borrowed from WOA-Project/SurfaceDuoPkg
 #Disclaimer: probably not the best UEFI dev out there
 #
@@ -19,30 +19,49 @@
 
 #SPDX-License-Identifier: BSD 2-Clause
 
+#Basic Defines
+
 [Defines]
   PLATFORM_NAME                  = MacBookProLate2020
-  PLATFORM_GUID                  = cc97e09e-5d94-4357-892b-1c825833d928
+  PLATFORM_GUID                  = 1d0c231c-6c6f-4cbf-b147-da738f745bca
   PLATFORM_VERSION               = 1.0
   DSC_SPECIFICATION              = 0x00010005
   OUTPUT_DIRECTORY               = Build/MacBookProLate2020-$(ARCH)
   SUPPORTED_ARCHITECTURES        = AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
-  FLASH_DEFINITION               = MacBookProLate2020Pkg/MacBookProLate2020.fdf
-  SECURE_BOOT_ENABLE             = FALSE
+  FLASH_DEFINITION               = MacBookProLate2020/MacBookProLate2020.fdf
+  SECURE_BOOT_ENABLE             = FALSE #disable secure boot for now
   AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
-  USES_MAC_CPU                   = TRUE # a futureproofing switch, changes SoC identifier in SMBIOS
   NETWORK_TLS_ENABLE             = TRUE
+
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DSILICON_PLATFORM=8103
-  *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
+  #*_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES -D HAS_MEMCPY_INTRINSICS
+
 
 [PcdsFixedAtBuild.common]
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"MacBook Pro TouchBar (Late 2020)"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"MacBookPro17,1"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook Pro (MacBookPro17,1)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"MacBook Pro (late 2020)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"MacBook17,1"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook (MacBook17,1)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Controllers|2 # M1 Max case is hardcoded for now.
+  gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Darts|4 # M1 Max case is hardcoded for now.
+  #will be changed later on, default values
+  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
+  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
+  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
   
+[PcdsDynamicDefault.common]
+  # #borrowed from SurfaceDuoPkg
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution|1920
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution|1080
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoHorizontalResolution|1920
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdSetupVideoVerticalResolution|1080
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutRow|300
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdSetupConOutColumn|50
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow|300 
+  # gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn|50
 
 [Components.common]
 
