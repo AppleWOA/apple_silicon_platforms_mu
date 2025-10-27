@@ -117,7 +117,7 @@
                 // FixedPcdGet64(PcdAppleUartBase),   // AddressMinimum - MIN
                 // (FixedPcdGet64(PcdAppleUartBase) + 0xFFF),   // AddressMaximum - MAX
                 0x235200000,
-								ox235200fff,
+								0x235200fff,
 								0x0000000000000000,   // AddressTranslation - TRA
                 0x0000000000001000    // RangeLength - LEN
                 )
