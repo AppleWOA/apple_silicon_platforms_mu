@@ -33,6 +33,8 @@
   DebugLib
   HobLib
   ArmMmuLib
+  AppleDTLib
+  PrintLib
 
 [Guids]
   gEfiMemoryTypeInformationGuid
@@ -61,5 +63,6 @@
   gArmTokenSpaceGuid.PcdSystemMemoryBase
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferAddress
   gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferSize
+  gAppleSiliconPkgTokenSpaceGuid.PcdCoreCount
 [Depex]
   TRUE

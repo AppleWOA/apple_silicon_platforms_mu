@@ -43,4 +43,10 @@
     EFI_ACPI_CREATOR_REVISION /* UINT32  CreatorRevision */ \
   }
 
+#define GET_MPIDR(aff3, aff2, aff1, aff0) \
+    ((((UINT64)(aff3) & 0xff) << 32) |    \
+     (((UINT64)(aff2) & 0xff) << 16) |    \
+     (((UINT64)(aff1) & 0xff) <<  8) |    \
+     (((UINT64)(aff0) & 0xff) <<  0))
+
 #endif /* ACPI_HEADER_H_ */
