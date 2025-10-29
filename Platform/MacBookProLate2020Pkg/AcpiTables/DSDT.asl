@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2025 AppleWOA authors.
+ * Copyright (c) 2023, amarioguy (AppleWOA authors).
  * 
  * Module Name:
  *     DSDT.asl
  * 
  * Abstract:
  *     Differentiated System Description Table. This source file implements the DSDT table
- *     for the Mac Mini (2020) platform.
+ *     for the MacBook Pro (Late 2020) platform.
  * 
  * Environment:
  *     UEFI firmware/runtime services.
@@ -102,6 +102,72 @@
             },
         })
 
+        /*
+        Device (XHC0) {
+            Name (_HID, "PNP0D15")
+            Name (_UID, One)
+            Name (_CCA, One)
+
+            Method (_CRS, 0, Serialized) {
+                Name (RBUF, ResourceTemplate () {
+                    QWordMemory (
+                        ResourceConsumer,     // ResourceUsage
+                        PosDecode,            // Decode
+                        MinFixed,             // IsMinFixed
+                        MaxFixed,             // IsMaxFixed
+                        NonCacheable,         // Cacheable
+                        ReadWrite,            // ReadAndWrite
+                        0,                    // AddressGranularity - GRA
+                        0x382280000,          // AddressMinimum - MIN
+                        0x38237FFFF,          // AddressMaximum - MAX
+                        0,                    // AddressTranslation - TRA
+                        0x100000              // RangeLength - LEN
+                        )
+                    Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive) {
+                        777
+                    }
+                })
+                Return (RBUF)
+            }
+
+            Method (_STA) {
+                Return (0xF)
+            }
+        }
+        */
+
+        Device (XHC1) {
+            Name (_HID, "PNP0D15")
+            Name (_UID, One)
+            Name (_CCA, One)
+
+            Method (_CRS, 0, Serialized) {
+                Name (RBUF, ResourceTemplate () {
+                    QWordMemory (
+                        ResourceConsumer,     // ResourceUsage
+                        PosDecode,            // Decode
+                        MinFixed,             // IsMinFixed
+                        MaxFixed,             // IsMaxFixed
+                        NonCacheable,         // Cacheable
+                        ReadWrite,            // ReadAndWrite
+                        0,                    // AddressGranularity - GRA
+                        0x502280000,          // AddressMinimum - MIN
+                        0x50237FFFF,          // AddressMaximum - MAX
+                        0,                    // AddressTranslation - TRA
+                        0x100000              // RangeLength - LEN
+                        )
+                    Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive) {
+                        857
+                    }
+                })
+                Return (RBUF)
+            }
+
+            Method (_STA) {
+                Return (0xF)
+            }
+        }
+
         Device(COM0) {
             Name(_HID, "APPL8900") // naming it APPL8900 since the Samsung based UART was used since the 8900
             Name(_UID, Zero)
@@ -126,15 +192,6 @@
             Method (_STA) {
                 Return (0xF)
             }
-        }
-
-        Device(PCI0) {
-            Name (_HID, EISAID ("PNP0A08")) // PCI Express Root Bridge
-            Name (_CID, EISAID ("PNP0A03")) // Compatible PCI Root Bridge
-            Name (_SEG, Zero) // PCI Segment Group number
-            Name (_BBN, Zero) // PCI Base Bus Number
-            Name (_ADR, Zero)
-            Name (_UID, "PCI0")
         }
 
         //
@@ -244,6 +301,5 @@
                 }
             }
         }
-        
     }
  }
