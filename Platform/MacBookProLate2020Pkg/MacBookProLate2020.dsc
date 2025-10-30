@@ -42,14 +42,14 @@
 
 
 [PcdsFixedAtBuild.common]
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"MacBook Pro (late 2020)"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"MacBook17,1"
-  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook (MacBook17,1)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModel|"MacBook Pro (Late 2020)"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemModelNumber|"MacBookPro17,1"
+  gAppleSiliconPkgTokenSpaceGuid.PcdSmbiosSystemSku|"MacBook Pro (MacBookPro17,1)"
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Controllers|2 # M1 Max case is hardcoded for now.
   gAppleSiliconPkgTokenSpaceGuid.PcdAppleNumDwc3Darts|4 # M1 Max case is hardcoded for now.
   #will be changed later on, default values
-  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|1920
-  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1080
+  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferWidth|2560
+  # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferHeight|1600
   # gAppleSiliconPkgTokenSpaceGuid.PcdFrameBufferPixelBpp|30
   
 [PcdsDynamicDefault.common]
