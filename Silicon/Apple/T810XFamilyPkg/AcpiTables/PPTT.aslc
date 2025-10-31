@@ -89,12 +89,12 @@ typedef struct {
     UINT32                                 ResourceOffset[2];
     EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE      DCache;
     EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE      ICache;
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE      L2Cache;
 } PPTT_CORE;
 
 typedef struct {
     EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR  Cluster;
     PPTT_CORE                              Cores[CLUSTER_CORE_COUNT];
+    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE      L2Cache;
 } PPTT_CLUSTER;
 
 typedef struct {
@@ -126,7 +126,7 @@ typedef struct {
     EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
         PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
         OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].Cores[CpuId].L2Cache),      /* Next cache */            \
+            Dies[DieId].Clusters[ClusterId].L2Cache),                   /* Next cache */            \
         ECORE_L1D_SIZE,                                                 /* Size */                  \
         ECORE_L1D_SETS,                                                 /* Num of sets */           \
         ECORE_L1D_ASSOC,                                                /* Associativity */         \
@@ -138,24 +138,13 @@ typedef struct {
     EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
         PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
         OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].Cores[CpuId].L2Cache),      /* Next cache */            \
+            Dies[DieId].Clusters[ClusterId].L2Cache),                   /* Next cache */            \
         ECORE_L1I_SIZE,                                                 /* Size */                  \
         ECORE_L1I_SETS,                                                 /* Num of sets */           \
         ECORE_L1I_ASSOC,                                                /* Associativity */         \
         PPTT_INST_CACHE_ATTR,                                           /* Attributes */            \
         ECORE_L1I_LINE_SIZE,                                            /* Line size */             \
         RD_PPTT_CACHE_ID(DieId, ClusterId, CpuId, L1InstructionCache)   /* Cache id */              \
-    ),                                                                                              \
-    /* L2 cache parameters */                                                                       \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
-        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
-        0,                                                              /* Next cache */            \
-        ECORE_L2_SIZE,                                                  /* Size */                  \
-        ECORE_L2_SETS,                                                  /* Num of sets */           \
-        ECORE_L2_ASSOC,                                                 /* Associativity */         \
-        PPTT_UNIFIED_CACHE_ATTR,                                        /* Attributes */            \
-        ECORE_L2_LINE_SIZE,                                             /* Line size */             \
-        RD_PPTT_CACHE_ID(DieId, ClusterId, CpuId, L2Cache)              /* Cache id */              \
     ),                                                                                              \
 }
 
@@ -181,7 +170,7 @@ typedef struct {
     EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
         PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
         OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].Cores[CpuId].L2Cache),      /* Next cache */            \
+            Dies[DieId].Clusters[ClusterId].L2Cache),                   /* Next cache */            \
         PCORE_L1D_SIZE,                                                 /* Size */                  \
         PCORE_L1D_SETS,                                                 /* Num of sets */           \
         PCORE_L1D_ASSOC,                                                /* Associativity */         \
@@ -193,24 +182,13 @@ typedef struct {
     EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
         PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
         OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].Cores[CpuId].L2Cache),      /* Next cache */            \
+            Dies[DieId].Clusters[ClusterId].L2Cache),                   /* Next cache */            \
         PCORE_L1I_SIZE,                                                 /* Size */                  \
         PCORE_L1I_SETS,                                                 /* Num of sets */           \
         PCORE_L1I_ASSOC,                                                /* Associativity */         \
         PPTT_INST_CACHE_ATTR,                                           /* Attributes */            \
         PCORE_L1I_LINE_SIZE,                                            /* Line size */             \
         RD_PPTT_CACHE_ID(DieId, ClusterId, CpuId, L1InstructionCache)   /* Cache id */              \
-    ),                                                                                              \
-    /* L2 cache parameters */                                                                       \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
-        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
-        0,                                                              /* Next cache */            \
-        PCORE_L2_SIZE,                                                  /* Size */                  \
-        PCORE_L2_SETS,                                                  /* Num of sets */           \
-        PCORE_L2_ASSOC,                                                 /* Associativity */         \
-        PPTT_UNIFIED_CACHE_ATTR,                                        /* Attributes */            \
-        PCORE_L2_LINE_SIZE,                                             /* Line size */             \
-        RD_PPTT_CACHE_ID(DieId, ClusterId, CpuId, L2Cache)              /* Cache id */              \
     ),                                                                                              \
 }
 
@@ -231,7 +209,18 @@ typedef struct {
         ECORE_INIT (DieId, ClusterId, 1),                                                           \
         ECORE_INIT (DieId, ClusterId, 2),                                                           \
         ECORE_INIT (DieId, ClusterId, 3),                                                           \
-    }                                                                                               \
+    },                                                                                              \
+    /* L2 cache parameters */                                                                       \
+    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
+        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
+        0,                                                              /* Next cache */            \
+        ECORE_L2_SIZE,                                                  /* Size */                  \
+        ECORE_L2_SETS,                                                  /* Num of sets */           \
+        ECORE_L2_ASSOC,                                                 /* Associativity */         \
+        PPTT_UNIFIED_CACHE_ATTR,                                        /* Attributes */            \
+        ECORE_L2_LINE_SIZE,                                             /* Line size */             \
+        RD_PPTT_CACHE_ID(DieId, ClusterId, 0, L2Cache)                  /* Cache id */              \
+    ),                                                                                              \
 }
 
 #define P_CLUSTER_INIT(DieId, ClusterId)                                                            \
@@ -250,7 +239,18 @@ typedef struct {
         PCORE_INIT (DieId, ClusterId, 1),                                                           \
         PCORE_INIT (DieId, ClusterId, 2),                                                           \
         PCORE_INIT (DieId, ClusterId, 3),                                                           \
-    }                                                                                               \
+    },                                                                                              \
+    /* L2 cache parameters */                                                                       \
+    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
+        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
+        0,                                                              /* Next cache */            \
+        PCORE_L2_SIZE,                                                  /* Size */                  \
+        PCORE_L2_SETS,                                                  /* Num of sets */           \
+        PCORE_L2_ASSOC,                                                 /* Associativity */         \
+        PPTT_UNIFIED_CACHE_ATTR,                                        /* Attributes */            \
+        PCORE_L2_LINE_SIZE,                                             /* Line size */             \
+        RD_PPTT_CACHE_ID(DieId, ClusterId, 0, L2Cache)                  /* Cache id */              \
+    ),                                                                                              \
 }
 
 #define DIE_INIT(DieId)                                                                             \
