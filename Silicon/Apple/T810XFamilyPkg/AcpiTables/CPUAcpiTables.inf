@@ -19,6 +19,7 @@
 [Sources]
   GTDT.aslc
   MADT_Static.aslc
+  PPTT.aslc
 
 
 [Packages]
