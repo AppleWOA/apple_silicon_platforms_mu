@@ -26,75 +26,20 @@
 #include <Acpi/SgiAcpiHeader.h>
 
 
-/*
-TTY> L1 Type: Separate I&D (ctype=3)
-TTY> L1 I: size=131072 bytes, line=64, ways=8, sets=256  [WA=0 RA=1 WB=0 WT=0]
-TTY>   PPTT: Type=Instruction  LineSize=64  Associativity=8  NumberOfSets=256  Size=131072  Allocation(Read=Yes,Write=No)  WritePolicy=Unknown
-TTY> L1 D/U: size=65536 bytes, line=64, ways=8, sets=128  [WA=1 RA=1 WB=1 WT=0]
-TTY>   PPTT: Type=Data/Unified  LineSize=64  Associativity=8  NumberOfSets=128  Size=65536  Allocation(Read=Yes,Write=Yes)  WritePolicy=WriteBack
-TTY> L2 Type: Unified (ctype=4)
-TTY> L2 D/U: size=4194304 bytes, line=128, ways=16, sets=2048  [WA=1 RA=1 WB=1 WT=0]
-TTY>   PPTT: Type=Data/Unified  LineSize=128  Associativity=16  NumberOfSets=2048  Size=4194304  Allocation(Read=Yes,Write=Yes)  WritePolicy=WriteBack
-
-TTY> L1 Type: Separate I&D (ctype=3)
-TTY> L1 I: size=196608 bytes, line=64, ways=6, sets=512  [WA=0 RA=1 WB=0 WT=0]
-TTY>   PPTT: Type=Instruction  LineSize=64  Associativity=6  NumberOfSets=512  Size=196608  Allocation(Read=Yes,Write=No)  WritePolicy=Unknown
-TTY> L1 D/U: size=131072 bytes, line=64, ways=8, sets=256  [WA=1 RA=1 WB=1 WT=0]
-TTY>   PPTT: Type=Data/Unified  LineSize=64  Associativity=8  NumberOfSets=256  Size=131072  Allocation(Read=Yes,Write=Yes)  WritePolicy=WriteBack
-TTY> L2 Type: Unified (ctype=4)
-TTY> L2 D/U: size=12582912 bytes, line=128, ways=12, sets=8192  [WA=1 RA=1 WB=1 WT=0]
-TTY>   PPTT: Type=Data/Unified  LineSize=128  Associativity=12  NumberOfSets=8192  Size=12582912  Allocation(Read=Yes,Write=Yes)  WritePolicy=WriteBack
-*/
-
 #define DIE_COUNT               1
 #define CLUSTER_COUNT           2
 #define CLUSTER_CORE_COUNT      4
-#define CPU_UID(DieId, ClusterId, CpuId)   ((ClusterId) * CLUSTER_CORE_COUNT + (CpuId))
-
-
-#define ECORE_L1I_LINE_SIZE     64
-#define ECORE_L1I_ASSOC         8
-#define ECORE_L1I_SIZE          SIZE_128KB
-#define ECORE_L1I_SETS          256
-
-#define ECORE_L1D_LINE_SIZE     64
-#define ECORE_L1D_ASSOC         8
-#define ECORE_L1D_SIZE          SIZE_64KB
-#define ECORE_L1D_SETS          128
-
-#define ECORE_L2_LINE_SIZE      128
-#define ECORE_L2_ASSOC          16
-#define ECORE_L2_SIZE           SIZE_4MB
-#define ECORE_L2_SETS           2048
-
-#define PCORE_L1I_LINE_SIZE     64
-#define PCORE_L1I_ASSOC         6
-#define PCORE_L1I_SIZE          SIZE_128KB + SIZE_64KB
-#define PCORE_L1I_SETS          512
-
-#define PCORE_L1D_LINE_SIZE     64
-#define PCORE_L1D_ASSOC         8
-#define PCORE_L1D_SIZE          SIZE_128KB
-#define PCORE_L1D_SETS          256
-
-#define PCORE_L2_LINE_SIZE      128
-#define PCORE_L2_ASSOC          12
-#define PCORE_L2_SIZE           SIZE_8MB + SIZE_4MB
-#define PCORE_L2_SETS           8192
+#define PPTT_CPU_UID(DieId, ClusterId, CpuId)   ((ClusterId) * CLUSTER_CORE_COUNT + (CpuId))
 
 
 #pragma pack(1)
 typedef struct {
     EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR  Core;
-    UINT32                                 ResourceOffset[2];
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE      DCache;
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE      ICache;
 } PPTT_CORE;
 
 typedef struct {
     EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR  Cluster;
     PPTT_CORE                              Cores[CLUSTER_CORE_COUNT];
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE      L2Cache;
 } PPTT_CLUSTER;
 
 typedef struct {
@@ -104,96 +49,21 @@ typedef struct {
 #pragma pack ()
 
 
-#define ECORE_INIT(DieId, ClusterId, CpuId)                                                         \
+#define CORE_INIT(DieId, ClusterId, CpuId)                                                          \
 {                                                                                                   \
     /* Parameters for CPU Core */                                                                   \
     EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR_INIT (                                                    \
-        OFFSET_OF (PPTT_CORE, DCache),                                  /* Length */                \
+        0x14,                                                           /* Length */                \
         PPTT_PROCESSOR_CORE_FLAGS,                                      /* Flag */                  \
         OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
             Dies[DieId].Clusters[ClusterId]),                           /* Parent */                \
-        CPU_UID(DieId, ClusterId, CpuId),                               /* ACPI Id */               \
-        2                                                               /* Private resources */     \
-    ),                                                                                              \
-    /* Offsets of the private resources */                                                          \
-    {                                                                                               \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].Cores[CpuId].DCache),                                   \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].Cores[CpuId].ICache)                                    \
-    },                                                                                              \
-    /* L1 data cache parameters */                                                                  \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
-        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].L2Cache),                   /* Next cache */            \
-        ECORE_L1D_SIZE,                                                 /* Size */                  \
-        ECORE_L1D_SETS,                                                 /* Num of sets */           \
-        ECORE_L1D_ASSOC,                                                /* Associativity */         \
-        PPTT_DATA_CACHE_ATTR,                                           /* Attributes */            \
-        ECORE_L1D_LINE_SIZE,                                            /* Line size */             \
-        RD_PPTT_CACHE_ID(DieId, ClusterId, CpuId, L1DataCache)          /* Cache id */              \
-    ),                                                                                              \
-    /* L1 instruction cache parameters */                                                           \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
-        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].L2Cache),                   /* Next cache */            \
-        ECORE_L1I_SIZE,                                                 /* Size */                  \
-        ECORE_L1I_SETS,                                                 /* Num of sets */           \
-        ECORE_L1I_ASSOC,                                                /* Associativity */         \
-        PPTT_INST_CACHE_ATTR,                                           /* Attributes */            \
-        ECORE_L1I_LINE_SIZE,                                            /* Line size */             \
-        RD_PPTT_CACHE_ID(DieId, ClusterId, CpuId, L1InstructionCache)   /* Cache id */              \
-    ),                                                                                              \
-}
-
-#define PCORE_INIT(DieId, ClusterId, CpuId)                                                         \
-{                                                                                                   \
-    /* Parameters for CPU Core */                                                                   \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR_INIT (                                                    \
-        OFFSET_OF (PPTT_CORE, DCache),                                  /* Length */                \
-        PPTT_PROCESSOR_CORE_FLAGS,                                      /* Flag */                  \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId]),                           /* Parent */                \
-        CPU_UID(DieId, ClusterId, CpuId),                               /* ACPI Id */               \
-        2                                                               /* Private resources */     \
-    ),                                                                                              \
-    /* Offsets of the private resources */                                                          \
-    {                                                                                               \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].Cores[CpuId].DCache),                                   \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].Cores[CpuId].ICache)                                    \
-    },                                                                                              \
-    /* L1 data cache parameters */                                                                  \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
-        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].L2Cache),                   /* Next cache */            \
-        PCORE_L1D_SIZE,                                                 /* Size */                  \
-        PCORE_L1D_SETS,                                                 /* Num of sets */           \
-        PCORE_L1D_ASSOC,                                                /* Associativity */         \
-        PPTT_DATA_CACHE_ATTR,                                           /* Attributes */            \
-        PCORE_L1D_LINE_SIZE,                                            /* Line size */             \
-        RD_PPTT_CACHE_ID(DieId, ClusterId, CpuId, L1DataCache)          /* Cache id */              \
-    ),                                                                                              \
-    /* L1 instruction cache parameters */                                                           \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
-        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Clusters[ClusterId].L2Cache),                   /* Next cache */            \
-        PCORE_L1I_SIZE,                                                 /* Size */                  \
-        PCORE_L1I_SETS,                                                 /* Num of sets */           \
-        PCORE_L1I_ASSOC,                                                /* Associativity */         \
-        PPTT_INST_CACHE_ATTR,                                           /* Attributes */            \
-        PCORE_L1I_LINE_SIZE,                                            /* Line size */             \
-        RD_PPTT_CACHE_ID(DieId, ClusterId, CpuId, L1InstructionCache)   /* Cache id */              \
+        PPTT_CPU_UID(DieId, ClusterId, CpuId),                          /* ACPI Id */               \
+        0                                                               /* Private resources */     \
     ),                                                                                              \
 }
 
 
-#define E_CLUSTER_INIT(DieId, ClusterId)                                                            \
+#define CLUSTER_INIT(DieId, ClusterId)                                                              \
 {                                                                                                   \
     /* Parameters for Cluster */                                                                    \
     EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR_INIT (                                                    \
@@ -205,67 +75,26 @@ typedef struct {
         0                                                               /* Private resources */     \
     ),                                                                                              \
     {                                                                                               \
-        ECORE_INIT (DieId, ClusterId, 0),                                                           \
-        ECORE_INIT (DieId, ClusterId, 1),                                                           \
-        ECORE_INIT (DieId, ClusterId, 2),                                                           \
-        ECORE_INIT (DieId, ClusterId, 3),                                                           \
+        CORE_INIT (DieId, ClusterId, 0),                                                            \
+        CORE_INIT (DieId, ClusterId, 1),                                                            \
+        CORE_INIT (DieId, ClusterId, 2),                                                            \
+        CORE_INIT (DieId, ClusterId, 3),                                                            \
     },                                                                                              \
-    /* L2 cache parameters */                                                                       \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
-        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
-        0,                                                              /* Next cache */            \
-        ECORE_L2_SIZE,                                                  /* Size */                  \
-        ECORE_L2_SETS,                                                  /* Num of sets */           \
-        ECORE_L2_ASSOC,                                                 /* Associativity */         \
-        PPTT_UNIFIED_CACHE_ATTR,                                        /* Attributes */            \
-        ECORE_L2_LINE_SIZE,                                             /* Line size */             \
-        RD_PPTT_CACHE_ID(DieId, ClusterId, 0, L2Cache)                  /* Cache id */              \
-    ),                                                                                              \
-}
-
-#define P_CLUSTER_INIT(DieId, ClusterId)                                                            \
-{                                                                                                   \
-    /* Parameters for Cluster */                                                                    \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR_INIT (                                                    \
-        OFFSET_OF (PPTT_CLUSTER, Cores),                                /* Length */                \
-        PPTT_PROCESSOR_CLUSTER_FLAGS,                                   /* Flag */                  \
-        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
-            Dies[DieId].Die),                                           /* Parent */                \
-        ((DieId << 4) | ClusterId),                                     /* ACPI Id */               \
-        0                                                               /* Private resources */     \
-    ),                                                                                              \
-    {                                                                                               \
-        PCORE_INIT (DieId, ClusterId, 0),                                                           \
-        PCORE_INIT (DieId, ClusterId, 1),                                                           \
-        PCORE_INIT (DieId, ClusterId, 2),                                                           \
-        PCORE_INIT (DieId, ClusterId, 3),                                                           \
-    },                                                                                              \
-    /* L2 cache parameters */                                                                       \
-    EFI_ACPI_6_4_PPTT_STRUCTURE_CACHE_INIT (                                                        \
-        PPTT_CACHE_STRUCTURE_FLAGS,                                     /* Flag */                  \
-        0,                                                              /* Next cache */            \
-        PCORE_L2_SIZE,                                                  /* Size */                  \
-        PCORE_L2_SETS,                                                  /* Num of sets */           \
-        PCORE_L2_ASSOC,                                                 /* Associativity */         \
-        PPTT_UNIFIED_CACHE_ATTR,                                        /* Attributes */            \
-        PCORE_L2_LINE_SIZE,                                             /* Line size */             \
-        RD_PPTT_CACHE_ID(DieId, ClusterId, 0, L2Cache)                  /* Cache id */              \
-    ),                                                                                              \
 }
 
 #define DIE_INIT(DieId)                                                                             \
 {                                                                                                   \
-    /* DIE processor node (length up to Clusters[0]) */                                             \
+    /* Parameters for DIE (Package) */                                                              \
     EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR_INIT(                                                     \
-        OFFSET_OF(PPTT_DIE, Clusters[0]),                                                           \
-        PPTT_PROCESSOR_PACKAGE_FLAGS,                                                               \
-        0, /* parent = none */                                                                      \
-        DieId,                                                                                      \
-        0                                                                                           \
+        OFFSET_OF(PPTT_DIE, Clusters[0]),                               /* Length */                \
+        PPTT_PROCESSOR_PACKAGE_FLAGS,                                   /* Flag */                  \
+        0,                                                              /* Parent */                \
+        DieId,                                                          /* ACPI Id */               \
+        0                                                               /* Private resources */     \
     ),                                                                                              \
     {                                                                                               \
-        E_CLUSTER_INIT(DieId, 0),                                                                   \
-        P_CLUSTER_INIT(DieId, 1),                                                                   \
+        CLUSTER_INIT(DieId, 0),                                                                     \
+        CLUSTER_INIT(DieId, 1),                                                                     \
     }                                                                                               \
 }
 
