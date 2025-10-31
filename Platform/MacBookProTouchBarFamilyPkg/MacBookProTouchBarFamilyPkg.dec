@@ -1,0 +1,12 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = MacBookProTouchBarFamilyPkg
+  PACKAGE_GUID                   = 9577ce38-d7f9-4ebb-b293-e858dc51a064
+  PACKAGE_VERSION                = 1.0
+
+[Includes.common]
+  Include
+
+[Guids.common]
+  gMacBookProTouchBarFamilyPkgTokenSpaceGuid = {0x47bb1722,0x5cbe,0x47c3,{0x84,0x2b,0x23,0x54,0xc3,0x3e,0xa7,0xd3}}
+
