@@ -24,6 +24,8 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/IoLib.h>
+#include <Library/PrintLib.h>
+#include <Library/AppleDTLib.h>
 
 //Device memory map configuration file for UEFI (this is to help with pagetable initialization)
 #include <Library/T602XFamilyVirtualMemoryMapDefines.h>
@@ -57,6 +59,84 @@ STATIC VOID InitMmu(IN ARM_MEMORY_REGION_DESCRIPTOR *MemoryTable)
     }
 }
 
+
+//borrowed from edk2-platforms:Armada7k8kMemoryInitPeiLib
+STATIC VOID ReserveMemoryRegion ( IN EFI_PHYSICAL_ADDRESS ReservedRegionBase, IN UINT32 ReservedRegionSize)
+{
+  EFI_RESOURCE_ATTRIBUTE_TYPE  ResourceAttributes;
+  EFI_PHYSICAL_ADDRESS         ReservedRegionTop;
+  EFI_PHYSICAL_ADDRESS         ResourceTop;
+  EFI_PEI_HOB_POINTERS         NextHob;
+  UINT64                       ResourceLength;
+
+  ReservedRegionTop = ReservedRegionBase + ReservedRegionSize;
+
+  //
+  // Search for System Memory Hob that covers the reserved region,
+  // and punch a hole in it
+  //
+  for (NextHob.Raw = GetHobList ();
+       NextHob.Raw != NULL;
+       NextHob.Raw = GetNextHob (EFI_HOB_TYPE_RESOURCE_DESCRIPTOR,
+                                 NextHob.Raw)) {
+
+    if ((NextHob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) &&
+        (ReservedRegionBase >= NextHob.ResourceDescriptor->PhysicalStart) &&
+        (ReservedRegionTop <= NextHob.ResourceDescriptor->PhysicalStart +
+                      NextHob.ResourceDescriptor->ResourceLength))
+    {
+      ResourceAttributes = NextHob.ResourceDescriptor->ResourceAttribute;
+      ResourceLength = NextHob.ResourceDescriptor->ResourceLength;
+      ResourceTop = NextHob.ResourceDescriptor->PhysicalStart + ResourceLength;
+
+      if (ReservedRegionBase == NextHob.ResourceDescriptor->PhysicalStart) {
+        //
+        // This region starts right at the start of the reserved region, so we
+        // can simply move its start pointer and reduce its length by the same
+        // value
+        //
+        NextHob.ResourceDescriptor->PhysicalStart += ReservedRegionSize;
+        NextHob.ResourceDescriptor->ResourceLength -= ReservedRegionSize;
+
+      } else if ((NextHob.ResourceDescriptor->PhysicalStart +
+                  NextHob.ResourceDescriptor->ResourceLength) ==
+                  ReservedRegionTop) {
+
+        //
+        // This region ends right at the end of the reserved region, so we
+        // can simply reduce its length by the size of the region.
+        //
+        NextHob.ResourceDescriptor->ResourceLength -= ReservedRegionSize;
+
+      } else {
+        //
+        // This region covers the reserved region. So split it into two regions,
+        // each one touching the reserved region at either end, but not covering
+        // it.
+        //
+        NextHob.ResourceDescriptor->ResourceLength =
+                 ReservedRegionBase - NextHob.ResourceDescriptor->PhysicalStart;
+
+        // Create the System Memory HOB for the remaining region (top of the FD)
+        BuildResourceDescriptorHob (EFI_RESOURCE_SYSTEM_MEMORY,
+                                    ResourceAttributes,
+                                    ReservedRegionTop,
+                                    ResourceTop - ReservedRegionTop);
+      }
+
+      //
+      // Reserve the memory space.
+      //
+      BuildResourceDescriptorHob (EFI_RESOURCE_MEMORY_RESERVED,
+        0,
+        ReservedRegionBase,
+        ReservedRegionSize);
+
+      break;
+    }
+    NextHob.Raw = GET_NEXT_HOB (NextHob);
+  }
+}
 
 //Borrowed from ArmPlatformPkg
 EFI_STATUS EFIAPI MemoryPeim(IN EFI_PHYSICAL_ADDRESS UefiMemoryBase, IN UINT64 UefiMemorySize)
@@ -196,6 +276,21 @@ EFI_STATUS EFIAPI MemoryPeim(IN EFI_PHYSICAL_ADDRESS UefiMemoryBase, IN UINT64 U
     }
 
     ASSERT (Found);
+  }
+
+  //reserve secondary stacks carveouts passed into cpm-impl-reg 
+  for(int i = 0; i < PcdGet32(PcdCoreCount); i++){
+    CHAR8 CpuNodeName[14];
+    UINTN CarveoutLength = 0;
+
+    AsciiSPrint(CpuNodeName, ARRAY_SIZE(CpuNodeName), "/cpus/cpu%d", i);
+    dt_node_t *CpuNode = dt_get(CpuNodeName);
+    UINT32 *Carveout = (UINT32 *)dt_node_prop(CpuNode, "cpm-impl-reg", &CarveoutLength);
+
+    ReserveMemoryRegion (
+      ((UINT64)Carveout[1] << 32) | Carveout[0],
+      ((UINT64)Carveout[3] << 32) | Carveout[2]
+    );
   }
 
   // Build Memory Allocation Hob
