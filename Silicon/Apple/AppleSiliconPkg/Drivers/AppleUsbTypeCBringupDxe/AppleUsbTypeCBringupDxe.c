@@ -213,7 +213,7 @@ AppleUsbTypeCBringupDxeBringupCallback(IN EFI_EVENT Event, IN VOID *Context)
   NumDwc3Controllers = PcdGet32(PcdAppleNumDwc3Controllers);
 
   for(UINT32 Dwc3Index = 0; Dwc3Index < NumDwc3Controllers; Dwc3Index++) {
-    if((Dwc3Index == 0) || (Dwc3Index == 2)) {
+    if((Dwc3Index == 0)) {
       //
       // skip DWC3 0, it seems to be in charge of the DFU port.
       //

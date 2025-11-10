@@ -395,7 +395,7 @@ AppleDartIoMmuDxeInitialize(
         //
         // to avoid killing the serial console from UART proxy - leave darts for DFU ports alone.
         //
-        if(DartIndex == 0 || DartIndex == 1 || DartIndex == 4 || DartIndex == 5) {
+        if(DartIndex == 0 || DartIndex == 1) {
             DEBUG((DEBUG_INFO, "Skipping DFU port DART %d\n", DartIndex));
             continue;
         }
