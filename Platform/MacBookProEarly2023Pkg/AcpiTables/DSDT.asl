@@ -117,6 +117,38 @@
         //     Name (_UID, "PCI0")
         // }
 
+        Device (XHC1) {
+            Name (_HID, "PNP0D15")
+            Name (_UID, One)
+            Name (_CCA, One)
+
+            Method (_CRS, 0, Serialized) {
+                Name (RBUF, ResourceTemplate () {
+                    QWordMemory (
+                        ResourceConsumer,     // ResourceUsage
+                        PosDecode,            // Decode
+                        MinFixed,             // IsMinFixed
+                        MaxFixed,             // IsMaxFixed
+                        NonCacheable,         // Cacheable
+                        ReadWrite,            // ReadAndWrite
+                        0,                    // AddressGranularity - GRA
+                        0xB02280000,          // AddressMinimum - MIN
+                        0xB0237FFFF,          // AddressMaximum - MAX
+                        0,                    // AddressTranslation - TRA
+                        0x100000              // RangeLength - LEN
+                        )
+                    Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive) {
+                        1274
+                    }
+                })
+                Return (RBUF)
+            }
+
+            Method (_STA) {
+                Return (0xF)
+            }
+        }
+
         //
         // All known Apple devices to date have used the Samsung based UART that debuted on the 8900 (or a compatible implementation).
         //
