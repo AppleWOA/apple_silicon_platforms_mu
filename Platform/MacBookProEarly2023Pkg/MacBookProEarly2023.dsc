@@ -26,7 +26,7 @@
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = MacBookProEarly2023Pkg/MacBookProEarly2023.fdf
   SECURE_BOOT_ENABLE             = FALSE #disable secure boot for now
-  AIC_BUILD                      = TRUE #AIC build enabled by default, change to false if you want to use a vGIC
+  AIC_BUILD                      = FALSE #AIC build enabled by default, change to false if you want to use a vGIC
   NETWORK_TLS_ENABLE             = TRUE
 
 [BuildOptions.common]
