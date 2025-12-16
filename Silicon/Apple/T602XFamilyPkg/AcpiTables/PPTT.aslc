@@ -1,0 +1,123 @@
+/**
+ * Copyright (c) 2025 AppleWOA authors.
+ * 
+ * Module Name:
+ *     PPTT.aslc
+ * 
+ * Abstract:
+ *     Processor Properties Topology Table. Implements the
+ *     PPTT table for the T602x family -
+ *     This is only a temporary implementation 
+ *     until dynamic allocations in AcpiPlatformDxe are implemented.
+ * 
+ * Environment:
+ *     UEFI firmware/runtime services.
+ * 
+ * License:
+ *     SPDX-License-Identifier: BSD-2-Clause-Patent OR MIT
+ * 
+*/
+
+#include <Library/AcpiLib.h>
+#include <Library/ArmLib.h>
+#include <Library/PcdLib.h>
+#include <IndustryStandard/Acpi64.h>
+#include <Acpi/AcpiHeader.h>
+#include <Acpi/SgiAcpiHeader.h>
+
+
+#define DIE_COUNT               1 // this is *ignoring* the second die for now
+#define CLUSTER_COUNT           3 // bootstrap/E-core cluster, P-core cluster
+#define CLUSTER_CORE_COUNT      4 // 4 cores/cluster, note that for T600x
+#define PPTT_CPU_UID(DieId, ClusterId, CpuId)   ((ClusterId) * CLUSTER_CORE_COUNT + (CpuId))
+
+
+#pragma pack(1)
+typedef struct {
+    EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR  Core;
+} PPTT_CORE;
+
+typedef struct {
+    EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR  Cluster;
+    PPTT_CORE                              Cores[CLUSTER_CORE_COUNT];
+} PPTT_CLUSTER;
+
+typedef struct {
+    EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR  Die;
+    PPTT_CLUSTER                           Clusters[CLUSTER_COUNT];
+} PPTT_DIE;
+#pragma pack ()
+
+
+#define CORE_INIT(DieId, ClusterId, CpuId)                                                          \
+{                                                                                                   \
+    /* Parameters for CPU Core */                                                                   \
+    EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR_INIT (                                                    \
+        0x14,                                                           /* Length */                \
+        PPTT_PROCESSOR_CORE_FLAGS,                                      /* Flag */                  \
+        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
+            Dies[DieId].Clusters[ClusterId]),                           /* Parent */                \
+        PPTT_CPU_UID(DieId, ClusterId, CpuId),                          /* ACPI Id */               \
+        0                                                               /* Private resources */     \
+    ),                                                                                              \
+}
+
+
+#define CLUSTER_INIT(DieId, ClusterId)                                                              \
+{                                                                                                   \
+    /* Parameters for Cluster */                                                                    \
+    EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR_INIT (                                                    \
+        OFFSET_OF (PPTT_CLUSTER, Cores),                                /* Length */                \
+        PPTT_PROCESSOR_CLUSTER_FLAGS,                                   /* Flag */                  \
+        OFFSET_OF (EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,                                \
+            Dies[DieId].Die),                                           /* Parent */                \
+        ((DieId << 4) | ClusterId),                                     /* ACPI Id */               \
+        0                                                               /* Private resources */     \
+    ),                                                                                              \
+    {                                                                                               \
+        CORE_INIT (DieId, ClusterId, 0),                                                            \
+        CORE_INIT (DieId, ClusterId, 1),                                                            \
+        CORE_INIT (DieId, ClusterId, 2),                                                            \
+        CORE_INIT (DieId, ClusterId, 3),                                                            \
+    },                                                                                              \
+}
+
+#define DIE_INIT(DieId)                                                                             \
+{                                                                                                   \
+    /* Parameters for DIE (Package) */                                                              \
+    EFI_ACPI_6_4_PPTT_STRUCTURE_PROCESSOR_INIT(                                                     \
+        OFFSET_OF(PPTT_DIE, Clusters[0]),                               /* Length */                \
+        PPTT_PROCESSOR_PACKAGE_FLAGS,                                   /* Flag */                  \
+        0,                                                              /* Parent */                \
+        DieId,                                                          /* ACPI Id */               \
+        0                                                               /* Private resources */     \
+    ),                                                                                              \
+    {                                                                                               \
+        CLUSTER_INIT(DieId, 0),                                                                     \
+        CLUSTER_INIT(DieId, 1),                                                                     \
+        CLUSTER_INIT(DieId, 2),                                                                     \
+    }                                                                                               \
+}
+
+
+#pragma pack(1)
+typedef struct {
+    EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE_HEADER  Header;
+    PPTT_DIE                                                 Dies[DIE_COUNT];
+} EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE;
+#pragma pack ()
+
+EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE Pptt = {
+{
+    __ACPI_HEADER (
+        EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE_STRUCTURE_SIGNATURE,
+        EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE,
+        EFI_ACPI_6_4_PROCESSOR_PROPERTIES_TOPOLOGY_TABLE_REVISION
+    )
+    },
+    {
+        DIE_INIT(0),
+    }
+};
+
+VOID * CONST ReferenceAcpiTable = &Pptt;

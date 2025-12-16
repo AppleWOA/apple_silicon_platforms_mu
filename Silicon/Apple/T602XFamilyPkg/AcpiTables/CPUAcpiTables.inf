@@ -20,6 +20,7 @@
   GTDT.aslc
   #CSRT.aslc
   MADT_Static.aslc
+  PPTT.aslc
 
 
 [Packages]
