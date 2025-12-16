@@ -38,9 +38,146 @@ typedef enum
 }
 CSRT_RESOURCE_TYPE;
 
+typedef enum
+{
+  EFI_ACPI_CSRT_RESOURCE_SUBTYPE_INTERRUPT_LINE,     // 0
+  EFI_ACPI_CSRT_RESOURCE_SUBTYPE_INTERRUPT_CONTROLLER   // 1
+}
+CSRT_INTERRUPT_SUBTYPE;
+
+typedef struct
+{
+  UINT32 Length;                  // Length
+  UINT32 VendorID;                // 4 bytes
+  UINT32 SubVendorId;             // 4 bytes
+  UINT16 DeviceId;                // 2 bytes
+  UINT16 SubdeviceId;             // 2 bytes
+  UINT16 Revision;                // 2 bytes
+  UINT16 Reserved;                // 2 bytes
+  UINT32 SharedInfoLength;        // 4 bytes
+} EFI_ACPI_6_3_CSRT_RESOURCE_GROUP_HEADER;
+
+typedef struct
+{
+  UINT32 Length;                  // 4 bytes
+  UINT16 ResourceType;            // 2 bytes
+  UINT16 ResourceSubType;         // 2 bytes
+  UINT32 UID;                     // 4 bytes
+} EFI_ACPI_6_3_CSRT_RESOURCE_DESCRIPTOR_HEADER;
+
+typedef struct
+{
+  UINT32 Length;
+  UINT32 Type; // for now "1" will be AICv1, "2" will be AICv2 and "3" will be AICv3
+  UINT64 ControllerBaseAddress;
+  UINT32 ControllerBaseSize;
+  UINT32 NumIrqs;
+  UINT32 MaxIrqs;
+} INTERRUPT_CONTROLLER_VENDOR_DATA;
+
+typedef struct
+{
+  EFI_ACPI_6_3_CSRT_RESOURCE_DESCRIPTOR_HEADER InterruptControllerHeader;
+  INTERRUPT_CONTROLLER_VENDOR_DATA ControllerVendorData;
+} RD_INTERRUPT_CONTROLLER;
+
+//
+// An interrupt "line" in this case means an IRQ.
+//
+typedef struct
+{
+  UINT32 IrqNum;
+  UINT32 IrqTriggerType;
+} INTERRUPT_LINE_VENDOR_DATA;
+
+typedef struct
+{
+  EFI_ACPI_6_3_CSRT_RESOURCE_DESCRIPTOR_HEADER InterruptLineHeader;
+  INTERRUPT_LINE_VENDOR_DATA InterruptLineVendorData;
+} RD_INTERRUPT_LINE;
+
+typedef struct
+{
+  EFI_ACPI_6_3_CSRT_RESOURCE_GROUP_HEADER ResGroupHeader;
+  RD_INTERRUPT_CONTROLLER InterruptController;
+  RD_INTERRUPT_LINE InterruptLine[2]; // right now we only accomodate the timer IRQ and the USB IRQ. we might use this for the FIQs only?
+} RG_INTERRUPT;
+
+typedef struct
+{
+// Standard ACPI Header
+  EFI_ACPI_DESCRIPTION_HEADER CsrtHeader;
+
+// DMA Resource Group
+  RG_INTERRUPT InterruptResourceGroup;
+
+} EFI_ACPI_6_3_CSRT_TABLE;
+
+#define EFI_ACPI_VENDOR_ID                    SIGNATURE_32 ('A','P','P','L')
+#define EFI_ACPI_CSRT_REVISION                0x00000005
+#define EFI_ACPI_CSRT_DEVICE_ID_INTERRUPT           0x00000008 // Fixed id (is this defined by the ACPI spec itself?)
 
 //
 // The non-standard system resources we need to support here are mainly the IOMMU and
 // the AIC
 // TODO: implement this
 //
+
+EFI_ACPI_6_3_CSRT_TABLE Csrt =
+{
+  //------------------------------------------------------------------------
+  // ACPI Table Header
+  //------------------------------------------------------------------------
+  {
+    EFI_ACPI_6_3_CORE_SYSTEM_RESOURCE_TABLE_SIGNATURE,       // Signature "CSRT"
+    sizeof (EFI_ACPI_DESCRIPTION_HEADER) + sizeof (RG_INTERRUPT),  // Length
+    EFI_ACPI_6_3_CSRT_REVISION,     // Revision
+    0x00,                           // Checksum calculated at runtime.
+    "Apple",                // OEMID is a 6 bytes long field
+    0x494645454C505041,          // OEM table identification (8 bytes long)
+    0x00000200,          // OEM revision number.
+    0x4C505041,            // ASL compiler vendor ID.
+    0x00000300       // ASL compiler revision number.
+  },
+  //------------------------------------------------------------------------
+  // Interrupt Controller Resource Group
+  //------------------------------------------------------------------------
+  {
+    //
+    // Interrupt Controller Resource Group Header
+    //
+    {
+      sizeof (RG_INTERRUPT),                // Resource Group Length
+      EFI_ACPI_VENDOR_ID,             // VendorId
+      0,                              // SubvendorId
+      EFI_ACPI_CSRT_DEVICE_ID_INTERRUPT,    // DeviceId 8
+      0,                              // SubdeviceId
+      0,                              // Revision
+      0,                              // Reserved
+      0                               // SharedInfoLength
+    },
+
+    //
+    // Interrupt Controller Resource Descriptor
+    //
+    {
+      {
+        sizeof(RD_INTERRUPT_CONTROLLER), // size of the resource descriptor struct
+        EFI_ACPI_CSRT_RESOURCE_TYPE_INTERRUPT, // Type 1 here indicates an interrupt controller.
+        EFI_ACPI_CSRT_RESOURCE_SUBTYPE_INTERRUPT_CONTROLLER, // Subtype 1 indicates an interrupt *controller* (the AIC device itself)
+        0, // the first and only interrupt controller on the platform.
+      },
+      {
+        sizeof(INTERRUPT_CONTROLLER_VENDOR_DATA),
+        2, //AICv2
+        0x28e100000, // AIC base address (this is hardcoded for now)
+        0xC000, // AIC region size
+        4000, // PLACEHOLDER num irq value
+        4000 // PLACEHOLDER max irq value
+      },
+    },
+    //
+    // TODO: should we actually define IRQs/interrupt "lines" here? does the Windows HAL use this at all?
+    //
+  }
+};

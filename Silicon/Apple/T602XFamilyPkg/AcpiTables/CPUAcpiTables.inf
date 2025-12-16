@@ -18,7 +18,7 @@
 
 [Sources]
   GTDT.aslc
-  #CSRT.aslc
+  CSRT.aslc
   MADT_Static.aslc
   PPTT.aslc
 
