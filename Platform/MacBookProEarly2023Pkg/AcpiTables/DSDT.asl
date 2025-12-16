@@ -137,7 +137,7 @@
                 0x0000000000000000,   // AddressTranslation - TRA
                 0x0000000000001000    // RangeLength - LEN
                 )
-                Interrupt(ResourceConsumer, Level, ActiveHigh, Exclusive) { 1097 }            
+                Interrupt(ResourceConsumer, Level, ActiveHigh, Exclusive) { 1198 }            
             })
             Method (_STA) {
                 Return (0xF)

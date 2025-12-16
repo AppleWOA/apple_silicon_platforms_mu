@@ -17,9 +17,10 @@
   VERSION_STRING                 = 1.0
 
 [Sources]
-  #GTDT.aslc
+  GTDT.aslc
   #CSRT.aslc
   MADT_Static.aslc
+  PPTT.aslc
 
 
 [Packages]
