@@ -586,10 +586,7 @@
   ArmPkg/Drivers/CpuDxe/CpuDxe.inf
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !if $(AIC_BUILD) == FALSE
-  ArmPkg/Drivers/ArmGicDxe/ArmGicDxe.inf {
-    <LibraryClasses>
-	  ArmGicArchLib|AppleSiliconPkg/Library/ArmGicArchLib/ArmGicArchLib.inf
-  }
+  ArmPkg/Drivers/ArmGicDxe/ArmGicDxe.inf
 !else
   AppleSiliconPkg/Drivers/AppleAicDxe/AppleAicDxe.inf
 !endif
