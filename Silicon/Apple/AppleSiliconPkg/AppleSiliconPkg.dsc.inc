@@ -61,6 +61,8 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorId|0x4C505041 #APPL
 
   gAppleSiliconPkgTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x8000000
+  # required on Mu 202502, seems like some variable emulation stuff changed...
+  gEfiMdeModulePkgTokenSpaceGuid.PcdResetOnMemoryTypeInformationChange|FALSE
 
   #MdePkg fixed build-time settings
   gEfiMdePkgTokenSpaceGuid.PcdMaximumUnicodeStringLength|1000000
